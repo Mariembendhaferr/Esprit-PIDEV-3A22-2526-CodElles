@@ -1,0 +1,18 @@
+
+/* style.css — toutes les règles navbar supprimées, gérées par doura-mondo.css */
+
+.text-primary { color: var(--bordeaux) !important; }
+.bg-primary { background-color: var(--bordeaux) !important; }
+.btn-primary {
+    background-color: var(--bordeaux) !important;
+    border-color: var(--bordeaux) !important;
+}
+.btn-primary:hover {
+    background-color: var(--bordeaux-fonce) !important;
+    border-color: var(--bordeaux-fonce) !important;
+}
+.section-title::before,
+.section-title::after { background: var(--bordeaux) !important; }
+.fa-star, .fa-star-half-alt { color: var(--bordeaux) !important; }
+.btn-dark { background-color: var(--bordeaux); border-color: var(--bordeaux); }
+.btn-dark:hover { background-color: var(--bordeaux-fonce); }

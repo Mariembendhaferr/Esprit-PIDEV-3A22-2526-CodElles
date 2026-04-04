@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Doura Mondo - Voyages d'Exception{% endblock %}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=Heebo:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ asset('lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+    <link href="{{ asset('css/doura-mondo.css') }}" rel="stylesheet">
+
+    {% block stylesheets %}{% endblock %}
+
+</head>
+
+<body>
+    <div class="container-xxl  p-0">
+
+      
+
+        <!-- NAVIGATION -->
+        <nav class="navbar navbar-expand navbar-premium">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
+                <a class="navbar-brand p-0 m-0" href="{{ path('app_reservation') }}">
+                    <div class="logo-luxe-wrapper">
+                        <h1 class="logo-script">Doura Mondo</h1>
+                        <div class="logo-subtitle">Voyages d'Exception</div>
+                    </div>
+                </a>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Destinations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Inspirations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Activités</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ app.request.attributes.get('_route') == 'app_reservation' ? 'active' : '' }}"
+                               href="{{ path('app_reservation') }}">Réservations</a>
+                            
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Réclamations</a>
+                    
+                        </li>
+                        {# Admin dropdown – visible only if logged in as admin #}
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Administration
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" href="{{ path('app_admin_clients') }}">Clients</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_admin_reservations') }}">Réservations</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_admin_paiements') }}">Paiements</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ========== CONTENU PRINCIPAL ========== -->
+        {% block body %}{% endblock %}
+
+        <!-- ========== FOOTER ========== -->
+        <div class="footer-luxe">
+            <div class="container" style="position:relative;z-index:2;">
+                <div class="row g-3 flex-row flex-nowrap">
+
+                    <!-- Colonne 1 : Logo + tagline + socials -->
+                    <div class="col-lg-4 col-md-12">
+                        <a href="{{ path('app_reservation') }}" class="footer-logo-script">Doura Mondo</a>
+                        <div class="footer-or-line"></div>
+                        <p class="footer-tagline">Spécialistes du voyage sur mesure. Chaque séjour est une signature unique, façonnée selon vos désirs.</p>
+                        <div class="footer-socials">
+                            <a class="footer-social-btn" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="footer-social-btn" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="footer-social-btn" href=""><i class="fab fa-youtube"></i></a>
+                            <a class="footer-social-btn" href=""><i class="fab fa-linkedin-in"></i></a>
+                            <a class="footer-social-btn" href=""><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Colonne 2 : Contact + Liens -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-col-title">Contact</div>
+                        <div class="footer-contact-item"><i class="fa fa-map-marker-alt"></i><span>Tunis, Tunisie</span></div>
+                        <div class="footer-contact-item"><i class="fa fa-phone-alt"></i><span>+216 29 327 092</span></div>
+                        <div class="footer-contact-item"><i class="fa fa-envelope"></i><span>contact@douramondo.tn</span></div>
+                        <div class="footer-contact-item"><i class="fa fa-clock"></i><span>Lun – Sam : 9h00 – 19h00</span></div>
+                    </div>
+
+                    <!-- Colonne 3 : Liens + Services -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-col-title">Liens & Services</div>
+                        <div class="row">
+                            <div class="col-6">
+                                <a class="footer-link" href="#">À Propos</a>
+                                <a class="footer-link" href="#">Destinations</a>
+                                <a class="footer-link" href="#">Inspirations</a>
+                                <a class="footer-link" href="#">Conditions</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="footer-link" href="#">Sur Mesure</a>
+                                <a class="footer-link" href="#">Conciergerie</a>
+                                <a class="footer-link" href="#">Assistance 24/7</a>
+                                <a class="footer-link" href="#">Voyages de Noces</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Copyright -->
+                <div class="footer-copyright">
+                    <p>&copy; 2025 <a href="{{ path('app_reservation') }}">Doura Mondo</a> — Tous droits réservés. &nbsp;|&nbsp; Fait avec ♥ pour les voyageurs d'exception</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    </div>

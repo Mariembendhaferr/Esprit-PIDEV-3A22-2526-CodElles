@@ -1,0 +1,244 @@
+{% extends 'base.html.twig' %}
+{% block title %}Détail réservation #{{ reservation.id }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+.admin-wrapper {
+    background: #FAF6EE;
+    min-height: 100vh;
+    position: relative;
+}
+.admin-wrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('https://images.pexels.com/photos/358319/pexels-photo-358319.jpeg?w=1600&auto=compress');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+}
+.admin-hero, .admin-body {
+    position: relative;
+    z-index: 1;
+}
+.admin-hero {
+    background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%);
+    padding: 28px 40px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin: 0;
+    letter-spacing: 2px;
+}
+.admin-hero p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin: 6px 0 0;
+    opacity: 0.75;
+    text-transform: uppercase;
+}
+.admin-body {
+    padding: 30px 40px;
+}
+.section-card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(212,184,150,0.3);
+    box-shadow: 0 2px 12px rgba(139,44,44,0.06);
+    margin-bottom: 24px;
+}
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #FAF6EE;
+}
+.info-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9B7240;
+    margin-bottom: 3px;
+}
+.info-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    color: #3f2c24;
+    margin-bottom: 14px;
+}
+.badge-paye    { background: rgba(34,197,94,0.12); color: #16a34a; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-attente { background: rgba(234,179,8,0.12);  color: #ca8a04; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-annule  { background: rgba(239,68,68,0.12);  color: #dc2626; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.admin-table thead tr {
+    background: linear-gradient(135deg, #6B1E1E, #8B2C2C);
+}
+.admin-table thead th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(232,221,201,0.9);
+    padding: 12px 14px;
+    text-align: left;
+}
+.admin-table tbody tr {
+    border-bottom: 1px solid #FAF6EE;
+}
+.admin-table tbody td {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #3f2c24;
+    padding: 12px 14px;
+}
+.btn-bordeaux {
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-or {
+    background: #F0E8D8;
+    border: none;
+    color: #9B7240;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-wrapper">
+    <div class="admin-hero">
+        <div>
+            <h1>Détail de la réservation #DMT{{ reservation.id }}</h1>
+            <p>Informations complètes de la réservation</p>
+        </div>
+        <a href="{{ path('admin_reservations') }}" style="color:rgba(232,221,201,0.8); font-family:'Montserrat',sans-serif; font-size:11px; text-decoration:none; letter-spacing:1px;">
+            ← Retour à la liste
+        </a>
+    </div>
+
+    <div class="admin-body">
+        <div class="row g-4">
+            <!-- Client -->
+            <div class="col-md-6">
+                <div class="section-card">
+                    <div class="section-title"><i class="fas fa-user"></i> Informations client</div>
+                    <div class="info-label">Nom complet</div>
+                    <div class="info-value">{{ reservation.client.prenom }} {{ reservation.client.nom }}</div>
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ reservation.client.email }}</div>
+                    <div class="info-label">Téléphone</div>
+                    <div class="info-value">{{ reservation.client.telephone }}</div>
+                </div>
+            </div>
+            <!-- Voyage -->
+            <div class="col-md-6">
+                <div class="section-card">
+                    <div class="section-title"><i class="fas fa-plane"></i> Informations voyage</div>
+                    <div class="info-label">Destination</div>
+                    <div class="info-value" style="font-family:'Playfair Display',serif; font-size:1rem; font-style:italic; color:#8B2C2C;">{{ reservation.voyage.destination }}</div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="info-label">Date départ</div>
+                            <div class="info-value">{{ reservation.dateDepart|date('d/m/Y') }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Date retour</div>
+                            <div class="info-value">{{ reservation.dateRetour|date('d/m/Y') }}</div>
+                        </div>
+                    </div>
+                    <div class="info-label">Nombre de personnes</div>
+                    <div class="info-value">{{ reservation.nombrePersonnes }}</div>
+                    <div class="info-label">Montant total</div>
+                    <div class="info-value" style="font-size:1.3rem; font-family:'Playfair Display',serif; color:#8B2C2C;">{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</div>
+                    <div class="info-label">Statut</div>
+                    <div>
+                        {% if reservation.statut == 'payé' %}
+                            <span class="badge-paye">✓ PAYÉE</span>
+                        {% elseif reservation.statut == 'annulé' %}
+                            <span class="badge-annule">✕ ANNULÉE</span>
+                        {% else %}
+                            <span class="badge-attente">⏳ EN ATTENTE</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- Paiements -->
+            {% if paiements|length > 0 %}
+            <div class="col-12">
+                <div class="section-card">
+                    <div class="section-title"><i class="fas fa-credit-card"></i> Historique des paiements</div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Montant</th>
+                                <th>Mode</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paiement in paiements %}
+                            <tr>
+                                <td><strong style="color:#8B2C2C;">{{ paiement.referencePaiement }}</strong></td>
+                                <td><strong>{{ paiement.montant }} €</strong></td>
+                                <td>{{ paiement.modePaiement }}</td>
+                                <td>{{ paiement.datePaiement|date('d/m/Y H:i') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <!-- Actions -->
+        <div class="d-flex gap-2 mt-2">
+            <a href="{{ path('admin_reservations') }}" class="btn-or">← Retour</a>
+            <a href="{{ path('admin_reservation_edit', {'id': reservation.id}) }}" class="btn-bordeaux"><i class="fas fa-edit me-1"></i> Modifier</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

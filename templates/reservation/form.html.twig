@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réserver un voyage{% endblock %}
+
+{% block body %}
+
+<!-- Hero Banner -->
+<div style="background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%); padding: 40px 20px; text-align: center; color: white;">
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin: 0; letter-spacing: 2px;">✨ Réservez votre voyage ✨</h2>
+    <p style="font-family: 'Montserrat', sans-serif; font-size: 13px; letter-spacing: 3px; margin: 10px 0 0; opacity: 0.85; text-transform: uppercase;">Votre aventure commence ici</p>
+</div>
+
+<!-- Formulaire -->
+<div style="background: linear-gradient(rgba(254,246,232,0.72), rgba(250,240,220,0.92)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; padding: 50px 20px; min-height: 60vh;">
+    <div class="container">
+<div style="max-width: 960px; margin: 0 auto; background: rgba(255,255,255,0.15); border-radius: 16px; box-shadow: 0 8px 40px rgba(139,44,44,0.10); overflow: hidden; border: 1px solid rgba(212,184,150,0.4);">
+            {% for message in app.flashes('error') %}
+                <div style="background: #fdf0f0; border-left: 4px solid #8B2C2C; padding: 14px 24px; font-family: 'Montserrat', sans-serif; font-size: 13px; color: #8B2C2C;">{{ message }}</div>
+            {% endfor %}
+
+            <form method="post">
+                <div class="row g-0">
+
+                    <!-- Colonne gauche : Informations personnelles -->
+                    <div class="col-md-6" style="padding: 20px; border-right: 1px solid #F0E8D8;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F0E8D8;">
+                            <div style="width:36px; height:36px; background:#8B2C2C; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-person-fill" style="color:white; font-size:16px;"></i>
+                            </div>
+                            <h3 style="font-family:'Playfair Display',serif; color:#8B2C2C; font-size:1.1rem; margin:0;">Informations personnelles</h3>
+                        </div>
+
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(client_form.nom, 'Nom', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(client_form.nom, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(client_form.prenom, 'Prénom', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(client_form.prenom, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(client_form.dateNaissance, 'Date de naissance', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(client_form.dateNaissance, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(client_form.email, 'Email', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(client_form.email, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            {{ form_label(client_form.telephone, 'Téléphone', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(client_form.telephone, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        {{ form_rest(client_form) }}
+                    </div>
+
+                    <!-- Colonne droite : Détails du voyage -->
+                    <div class="col-md-6" style="padding: 20px;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F0E8D8;">
+                            <div style="width:36px; height:36px; background:#8B2C2C; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-geo-alt-fill" style="color:white; font-size:16px;"></i>
+                            </div>
+                            <h3 style="font-family:'Playfair Display',serif; color:#8B2C2C; font-size:1.1rem; margin:0;">Détails du voyage</h3>
+                        </div>
+
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(reservation_form.voyage, 'Destination', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(reservation_form.voyage, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(reservation_form.dateDepart, 'Date de départ', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(reservation_form.dateDepart, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(reservation_form.dateRetour, 'Date de retour', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(reservation_form.dateRetour, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            {{ form_label(reservation_form.nombrePersonnes, 'Nombre de personnes', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                            {{ form_widget(reservation_form.nombrePersonnes, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                        </div>
+                        {{ form_rest(reservation_form) }}
+
+                        <!-- Bouton -->
+                        <div style="margin-top: 32px;">
+                            <button type="submit" style="width:100%; background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 40px; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:6px; color:white; cursor:pointer; transition:0.3s; box-shadow: 0 4px 15px rgba(139,44,44,0.3);">
+                                ✈ Confirmer la réservation
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

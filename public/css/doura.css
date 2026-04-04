@@ -1,0 +1,123 @@
+/* ===== Couleurs principales ===== */
+:root {
+    --bordeaux: #800000;
+    --creme: #FEF1D5;
+    --beige: #D4B896;
+    --bordeaux-fonce: #5a0000;
+    --beige-clair: #e8d5bc;
+}
+
+/* ===== Style général ===== */
+body {
+    background: var(--creme);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2c2c2c;
+}
+
+/* ===== Navbar ===== */
+.navbar-dark.bg-dark {
+    background-color: var(--bordeaux) !important;
+}
+.navbar-brand, .navbar-nav .nav-link {
+    color: var(--creme) !important;
+    transition: color 0.2s;
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: var(--beige) !important;
+}
+
+/* ===== Cartes / Cadres ===== */
+.card-custom {
+    border: 2px solid var(--beige);
+    border-radius: 1.5rem;
+    background: white;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+.card-header-custom {
+    background: linear-gradient(135deg, var(--bordeaux), var(--bordeaux-fonce));
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+.card-header-custom h2 {
+    margin: 0;
+    font-weight: bold;
+}
+.card-header-custom p {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+}
+.card-body-custom {
+    padding: 2rem;
+    background: var(--creme);
+}
+.card-footer-custom {
+    background: var(--beige);
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #2c2c2c;
+}
+
+/* Colonnes de formulaire */
+.form-column {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    height: 100%;
+}
+.form-column h3 {
+    color: var(--bordeaux);
+    border-bottom: 2px solid var(--beige);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+.form-label {
+    font-weight: 500;
+    color: var(--bordeaux);
+}
+.form-control:focus {
+    border-color: var(--beige);
+    box-shadow: 0 0 0 0.2rem rgba(212, 184, 150, 0.25);
+}
+
+/* Bouton principal */
+.btn-primary-custom {
+    background: var(--bordeaux);
+    border: none;
+    padding: 0.75rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 2rem;
+    color: white;
+    transition: all 0.3s;
+}
+.btn-primary-custom:hover {
+    background: var(--bordeaux-fonce);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(128,0,0,0.3);
+}
+
+/* Alertes */
+.alert-custom {
+    border-left: 4px solid var(--bordeaux);
+    background: white;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Tableaux admin */
+.table thead {
+    background: var(--beige);
+    color: #2c2c2c;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(212, 184, 150, 0.1);
+}
+.table-hover tbody tr:hover {
+    background: rgba(212, 184, 150, 0.2);
+}
