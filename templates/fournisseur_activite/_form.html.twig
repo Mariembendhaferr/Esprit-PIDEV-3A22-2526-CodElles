@@ -4,7 +4,11 @@
         {{ button_label is defined and button_label == 'Update' ? 'Modifier le fournisseur' : 'Nouveau fournisseur' }}
     </div>
 
-    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'fournisseurForm'}}) }}
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'fournisseurForm', 'data-id': app.request.attributes.get('id')}}) }}
+    <div id="validationAlert" style="display:none; background:#FFEBEE; color:#C62828; border-left:3px solid #EF5350; padding:14px 18px; margin-bottom:18px; margin-top:18px; margin-left:10px; margin-right:10px; border-radius:10px; font-weight:600; align-items:center; gap:10px;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>⚠️ Veuillez remplir tous les champs obligatoires avant de continuer</span>
+    </div>
     <div class="form-body">
         <div class="form-grid">
 
@@ -13,14 +17,15 @@
             <div class="form-group">
                 {{ form_label(form.nomFournisseur, 'Nom du fournisseur') }}
                 {{ form_widget(form.nomFournisseur, {'attr': {'placeholder': 'Ex: NourAgency', 'id': 'nomFournisseur'}}) }}
-                <span class="field-error" id="err-nom">Le nom doit contenir au moins 3 caractères</span>
-                <span class="field-ok"  id="ok-nom">Nom valide</span>
+                <span class="field-error" id="err-nom"></span>
+                <span class="field-ok"    id="ok-nom">Nom valide ✓</span>
                 {{ form_errors(form.nomFournisseur) }}
             </div>
 
             <div class="form-group">
                 {{ form_label(form.specialiteFournisseur, 'Spécialité') }}
-                {{ form_widget(form.specialiteFournisseur) }}
+                {{ form_widget(form.specialiteFournisseur, {'attr': {'id': 'specialite'}}) }}
+                <span class="field-error" id="err-spec"></span>
                 {{ form_errors(form.specialiteFournisseur) }}
             </div>
 
@@ -29,22 +34,24 @@
             <div class="form-group">
                 {{ form_label(form.emailFournisseur, 'Email') }}
                 {{ form_widget(form.emailFournisseur, {'attr': {'placeholder': 'Ex: contact@agence.com', 'id': 'emailFournisseur'}}) }}
-                <span class="field-error" id="err-email">L'email n'est pas valide</span>
-                <span class="field-ok"  id="ok-email">Email valide</span>
+                <span class="field-error" id="err-email"></span>
+                <span class="field-ok"    id="ok-email">Email valide ✓</span>
                 {{ form_errors(form.emailFournisseur) }}
             </div>
 
             <div class="form-group">
                 {{ form_label(form.telephoneFournisseur, 'Téléphone') }}
                 {{ form_widget(form.telephoneFournisseur, {'attr': {'placeholder': 'Ex: 71234567', 'id': 'telFournisseur', 'maxlength': '15'}}) }}
-                <span class="field-error" id="err-tel">8 à 15 chiffres uniquement</span>
-                <span class="field-ok"  id="ok-tel">Téléphone valide</span>
+                <span class="field-error" id="err-tel"></span>
+                <span class="field-ok"    id="ok-tel">Téléphone valide ✓</span>
                 {{ form_errors(form.telephoneFournisseur) }}
             </div>
 
             <div class="form-group col-span-2">
                 {{ form_label(form.adresseFournisseur, 'Adresse') }}
-                {{ form_widget(form.adresseFournisseur, {'attr': {'placeholder': 'Ex: 12 Rue de la Paix, Tunis'}}) }}
+                {{ form_widget(form.adresseFournisseur, {'attr': {'placeholder': 'Ex: 12 Rue de la Paix, Tunis', 'id': 'adresse'}}) }}
+                <span class="field-error" id="err-adr"></span>
+                <span class="field-ok"    id="ok-adr">Adresse valide ✓</span>
                 {{ form_errors(form.adresseFournisseur) }}
             </div>
 
@@ -52,9 +59,9 @@
 
             <div class="form-group col-span-2">
                 {{ form_label(form.websiteFournisseur, 'Site Web') }}
-                {{ form_widget(form.websiteFournisseur, {'attr': {'placeholder': 'https://www.monagence.com', 'id': 'website'}}) }}
-                <span class="field-error" id="err-web">L'URL doit commencer par http:// ou https://</span>
-                <span class="field-ok"  id="ok-web">URL valide</span>
+                {{ form_widget(form.websiteFournisseur, {'attr': {'placeholder': 'www.monagence.com', 'id': 'website'}}) }}
+                <span class="field-error" id="err-web"></span>
+                <span class="field-ok"    id="ok-web">URL valide ✓</span>
                 {{ form_errors(form.websiteFournisseur) }}
             </div>
 
@@ -86,46 +93,133 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('fournisseurForm');
-    function showErr(id, show) { document.getElementById('err-'+id)?.classList.toggle('show', show); }
-    function showOk(id, show)  { document.getElementById('ok-'+id)?.classList.toggle('show', show); }
-    function setInputState(el, ok) { el.classList.toggle('input-valid', ok); el.classList.toggle('input-invalid', !ok); }
+    const form      = document.getElementById('fournisseurForm');
+    const currentId = form ? form.dataset.id : null;
+    
+    // Find form fields using querySelector with name attributes (Symfony renders them this way)
+    const nom       = form?.elements['fournisseur_activite[nomFournisseur]'] || document.getElementById('nomFournisseur');
+    const specialite= form?.elements['fournisseur_activite[specialiteFournisseur]'] || document.getElementById('specialite');
+    const email     = form?.elements['fournisseur_activite[emailFournisseur]'] || document.getElementById('emailFournisseur');
+    const tel       = form?.elements['fournisseur_activite[telephoneFournisseur]'] || document.getElementById('telFournisseur');
+    const adresse   = form?.elements['fournisseur_activite[adresseFournisseur]'] || document.getElementById('adresse');
+    const website   = form?.elements['fournisseur_activite[websiteFournisseur]'] || document.getElementById('website');
 
-    const nom   = document.getElementById('nomFournisseur');
-    const email = document.getElementById('emailFournisseur');
-    const tel   = document.getElementById('telFournisseur');
-    const web   = document.getElementById('website');
+    // ── Regexes ───────────────────────────────────────────────
+    const emailRegex   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;      // smt@smt.smt
+    const websiteRegex = /^(www\.)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?/; // www.smt.smt
 
-    if (nom) nom.addEventListener('input', () => {
-        const ok = nom.value.trim().length >= 3;
-        showErr('nom', nom.value.trim().length > 0 && !ok);
-        showOk('nom', ok); if(nom.value.trim().length > 0) setInputState(nom, ok);
-    });
-    if (email) email.addEventListener('blur', () => {
-        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
-        const has = email.value.trim().length > 0;
-        showErr('email', has && !ok); showOk('email', has && ok); if(has) setInputState(email, ok);
-    });
-    if (tel) tel.addEventListener('input', () => {
-        tel.value = tel.value.replace(/[^0-9]/g, '');
-        const ok = /^[0-9]{8,15}$/.test(tel.value);
-        const has = tel.value.length > 0;
-        showErr('tel', has && !ok); showOk('tel', has && ok); if(has) setInputState(tel, ok);
-    });
-    if (web) web.addEventListener('blur', () => {
-        const v = web.value.trim();
-        if (!v) { showErr('web',false); showOk('web',false); return; }
-        const ok = v.startsWith('http://') || v.startsWith('https://');
-        showErr('web', !ok); showOk('web', ok); setInputState(web, ok);
-    });
+    // ── Helpers ───────────────────────────────────────────────
+    function showErr(id, msg) {
+        const el = document.getElementById('err-' + id);
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.toggle('show', !!msg);
+    }
+    function showOk(id, show) {
+        const el = document.getElementById('ok-' + id);
+        if (el) el.classList.toggle('show', show);
+    }
+    function mark(el, ok, errId, msg) {
+        el.classList.toggle('input-valid',   ok);
+        el.classList.toggle('input-invalid', !ok);
+        showErr(errId, ok ? '' : msg);
+        showOk(errId,  ok);
+        return ok;
+    }
 
-    form.addEventListener('submit', function(e) {
-        let ok = true;
-        if (nom && nom.value.trim().length < 3) { showErr('nom',true); ok=false; }
-        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { showErr('email',true); ok=false; }
-        if (tel && !/^[0-9]{8,15}$/.test(tel.value)) { showErr('tel',true); ok=false; }
-        if (web && web.value.trim() && !web.value.trim().startsWith('http')) { showErr('web',true); ok=false; }
-        if (!ok) { e.preventDefault(); form.querySelector('.field-error.show')?.scrollIntoView({behavior:'smooth',block:'center'}); }
-    });
+    // ── Validators ────────────────────────────────────────────
+    function validateNom() {
+        if (!nom) return true;
+        const v = nom.value.trim();
+        if (!v)                   return mark(nom, false, 'nom', 'Le nom est obligatoire');
+        if (v.length < 3)         return mark(nom, false, 'nom', 'Minimum 3 caractères');
+        if (/[0-9]/.test(v))      return mark(nom, false, 'nom', 'Le nom ne doit pas contenir de chiffres');
+        return mark(nom, true, 'nom', '');
+    }
+
+    function validateSpec() {
+        if (!specialite) return true;
+        const v = specialite.value;
+        if (!v) { showErr('spec', 'La spécialité est obligatoire'); return false; }
+        showErr('spec', ''); return true;
+    }
+
+    function validateEmail() {
+        if (!email) return true;
+        const v = email.value.trim();
+        if (!v)                    return mark(email, false, 'email', "L'email est obligatoire");
+        if (!emailRegex.test(v))   return mark(email, false, 'email', 'Format requis : quelquechose@domaine.ext');
+        return mark(email, true, 'email', '');
+    }
+
+    async function validateEmailUnique() {
+        if (!email) return true;
+        if (!validateEmail()) return false;
+        try {
+            const url = `/fournisseur/activite/check-email?email=${encodeURIComponent(email.value.trim())}${currentId ? '&id=' + currentId : ''}`;
+            const res  = await fetch(url);
+            const data = await res.json();
+            if (data.exists) return mark(email, false, 'email', 'Cet email est déjà utilisé');
+        } catch(e) { /* silent */ }
+        return mark(email, true, 'email', '');
+    }
+
+    function validateTel() {
+        if (!tel) return true;
+        const v = tel.value.trim();
+        if (!v)                         return mark(tel, false, 'tel', 'Le téléphone est obligatoire');
+        if (!/^\d{8,15}$/.test(v))      return mark(tel, false, 'tel', '8 à 15 chiffres uniquement');
+        return mark(tel, true, 'tel', '');
+    }
+
+    function validateAdresse() {
+        if (!adresse) return true;
+        const v = adresse.value.trim();
+        if (!v) { showErr('adr', "L'adresse est obligatoire"); adresse.classList.add('input-invalid'); return false; }
+        showErr('adr', ''); showOk('adr', true); adresse.classList.remove('input-invalid'); adresse.classList.add('input-valid'); return true;
+    }
+
+    function validateWebsite() {
+        if (!website) return true;
+        const v = website.value.trim();
+        if (!v)                       return mark(website, false, 'web', 'Le site web est obligatoire');
+        if (!websiteRegex.test(v))    return mark(website, false, 'web', 'Format requis : www.domaine.ext');
+        return mark(website, true, 'web', '');
+    }
+
+    // ── Real-time listeners ───────────────────────────────────
+    if (nom)       nom.addEventListener('input',  validateNom);
+    if (specialite)specialite.addEventListener('change', validateSpec);
+    if (email)     email.addEventListener('input', validateEmail);
+    if (email)     email.addEventListener('blur',  validateEmailUnique);
+    if (tel)       tel.addEventListener('input',   validateTel);
+    if (adresse)   adresse.addEventListener('input', validateAdresse);
+    if (website)   website.addEventListener('input', validateWebsite);
+
+    // ── Submit ────────────────────────────────────────────────
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault(); // always prevent first, then submit if ok
+
+            const results = await Promise.all([
+                Promise.resolve(validateNom()),
+                Promise.resolve(validateSpec()),
+                validateEmailUnique(),
+                Promise.resolve(validateTel()),
+                Promise.resolve(validateAdresse()),
+                Promise.resolve(validateWebsite()),
+            ]);
+
+            const alertBox = document.getElementById('validationAlert');
+            if (results.every(Boolean)) {
+                alertBox.style.display = 'none';
+                form.submit();
+            } else {
+                alertBox.style.display = 'flex';
+                form.querySelector('.field-error.show')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
 });
 </script>

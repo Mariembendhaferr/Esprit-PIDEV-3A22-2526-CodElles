@@ -65,6 +65,14 @@ class Activite
     #[ORM\Column(name: 'longitudeActivite', type: Types::FLOAT, nullable: true)]
     private ?float $longitudeActivite = null;
 
+    #[ORM\Column(name: 'statutActivite', length: 50)]
+    private string $statutActivite = 'en_attente';
+
+    #[ORM\Column(name: 'assignationToken', length: 100, nullable: true)]
+    private ?string $assignationToken = null;
+
+
+
     #[ORM\ManyToMany(targetEntity: FournisseurActivite::class, inversedBy: 'activites')]
     #[ORM\JoinTable(
         name: 'activite_fournisseur',
@@ -112,6 +120,12 @@ class Activite
 
     public function getLongitudeActivite(): ?float { return $this->longitudeActivite; }
     public function setLongitudeActivite(?float $v): static { $this->longitudeActivite = $v; return $this; }
+
+    public function getStatutActivite(): string { return $this->statutActivite; }
+    public function setStatutActivite(string $v): static { $this->statutActivite = $v; return $this; }
+
+    public function getAssignationToken(): ?string { return $this->assignationToken; }
+    public function setAssignationToken(?string $v): static { $this->assignationToken = $v; return $this; }
 
     /** @return Collection<int, FournisseurActivite> */
     public function getFournisseurs(): Collection { return $this->fournisseurs; }

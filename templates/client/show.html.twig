@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ activite.nomActivite }} - Activités{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body { background: linear-gradient(135deg, #f5f1ed 0%, #faf9f7 100%); margin: 0; padding: 0; }
+        .client-container-detail { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+    </style>
+    <link rel="stylesheet" href="{{ asset('css/clientActivite.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="client-container-detail">
+    <!-- Back Button -->
+    <a href="{{ path('app_client_activities') }}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Retour aux activités
+    </a>
+
+    <div class="detail-wrapper">
+        <!-- Image Section -->
+        <div class="detail-image">
+            {% if activite.imageActivite %}
+                <img src="{{ activite.imageActivite }}" alt="{{ activite.nomActivite }}" onerror="this.src='https://via.placeholder.com/800x500?text=Activité'">
+            {% else %}
+                <div class="placeholder-image-large">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+            {% endif %}
+            <span class="badge-category">{{ activite.categorieActivite }}</span>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="detail-grid">
+            <!-- Main Content -->
+            <div class="detail-main">
+                <h1>{{ activite.nomActivite }}</h1>
+
+                <!-- Price & Meta -->
+                <div class="detail-header-meta">
+                    <div class="price-section">
+                        <div class="price-label">À partir de</div>
+                        <div class="price-amount">{{ activite.coutActivite|number_format(2, ',', ' ') }} DT</div>
+                    </div>
+                    <div class="availability">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Disponible</span>
+                    </div>
+                </div>
+
+                <!-- Quick Info -->
+                <div class="quick-info">
+                    <div class="info-item">
+                        <i class="fa-solid fa-clock"></i>
+                        <div>
+                            <strong>Durée</strong>
+                            <p>{{ activite.dureeActivite }} minutes</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <strong>Capacité</strong>
+                            <p>{{ activite.capaciteMaxActivite }} personnes</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div>
+                            <strong>Lieu</strong>
+                            <p>{{ activite.localisationActivite }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="detail-section">
+                    <h2>À propos de cette activité</h2>
+                    <p class="description-text">{{ activite.descriptionActivite }}</p>
+                </div>
+
+                <!-- Suppliers Section -->
+                {% if activite.fournisseurs|length > 0 %}
+                    <div class="detail-section">
+                        <h2>Partenaires & Fournisseurs</h2>
+                        <div class="suppliers-grid">
+                            {% for fournisseur in activite.fournisseurs %}
+                                <div class="supplier-card">
+                                    <div class="supplier-header">
+                                        <i class="fa-solid fa-building"></i>
+                                        <h3>{{ fournisseur.nomFournisseur }}</h3>
+                                    </div>
+
+                                    {% if fournisseur.specialiteFournisseur %}
+                                        <p class="supplier-specialty">{{ fournisseur.specialiteFournisseur }}</p>
+                                    {% endif %}
+
+                                    <div class="supplier-info">
+                                        {% if fournisseur.emailFournisseur %}
+                                            <div class="supplier-contact">
+                                                <i class="fa-solid fa-envelope"></i>
+                                                <a href="mailto:{{ fournisseur.emailFournisseur }}">{{ fournisseur.emailFournisseur }}</a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if fournisseur.telephoneFournisseur %}
+                                            <div class="supplier-contact">
+                                                <i class="fa-solid fa-phone"></i>
+                                                <a href="tel:{{ fournisseur.telephoneFournisseur }}">{{ fournisseur.telephoneFournisseur }}</a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if fournisseur.adresseFournisseur %}
+                                            <div class="supplier-contact">
+                                                <i class="fa-solid fa-map-location-dot"></i>
+                                                <span>{{ fournisseur.adresseFournisseur }}</span>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if fournisseur.websiteFournisseur %}
+                                            <div class="supplier-contact">
+                                                <i class="fa-solid fa-globe"></i>
+                                                <a href="{{ fournisseur.websiteFournisseur }}" target="_blank">Visiter le site</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="detail-sidebar">
+                <div class="booking-card">
+                    <h3>Réserver cette activité</h3>
+                    
+                    <div class="booking-info">
+                        <div class="info-row">
+                            <span>Prix par personne</span>
+                            <strong>{{ activite.coutActivite|number_format(2, ',', ' ') }} DT</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Durée</span>
+                            <strong>{{ activite.dureeActivite }} min</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Capacité</span>
+                            <strong>{{ activite.capaciteMaxActivite }} pers.</strong>
+                        </div>
+                    </div>
+
+                    <button class="btn-booking">
+                        <i class="fa-solid fa-calendar"></i>
+                        Demander une réservation
+                    </button>
+
+                    <p class="booking-note">Contactez directement nos partenaires pour organiser votre expérience.</p>
+                </div>
+
+                <!-- Share Section -->
+                <div class="share-section">
+                    <p>Partager</p>
+                    <div class="share-buttons">
+                        <button class="share-btn" title="Partager sur Facebook">
+                            <i class="fa-brands fa-facebook"></i>
+                        </button>
+                        <button class="share-btn" title="Partager sur Twitter">
+                            <i class="fa-brands fa-twitter"></i>
+                        </button>
+                        <button class="share-btn" title="Copier le lien">
+                            <i class="fa-solid fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

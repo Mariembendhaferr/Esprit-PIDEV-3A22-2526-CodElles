@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+{% block title %}Réponse – Doura Mondo{% endblock %}
+
+{% block body %}
+<div style="min-height:100vh; background:#F2E8D9; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; padding:20px;">
+    <div style="background:white; border-radius:20px; box-shadow:0 8px 40px rgba(139,0,0,0.12); max-width:480px; width:100%; overflow:hidden; text-align:center;">
+
+        {# Header #}
+        <div style="background:linear-gradient(135deg,#3D0000,#8B0000); padding:28px; text-align:center;">
+            <h1 style="color:#C9A84C; font-size:22px; margin:0; letter-spacing:2px;">🌍 DOURA MONDO</h1>
+        </div>
+        <div style="height:3px; background:linear-gradient(90deg,transparent,#C9A84C,#E8C070,#C9A84C,transparent);"></div>
+
+        <div style="padding:40px 36px;">
+            {% if statut == 'acceptee' %}
+                <div style="font-size:60px; margin-bottom:16px;">✅</div>
+                <h2 style="color:#2E7D32; font-size:22px; margin:0 0 12px;">Activité acceptée !</h2>
+                <p style="color:#555; font-size:14px; line-height:1.7; margin:0 0 24px;">
+                    {{ message }}
+                </p>
+                <div style="background:#E8F5E9; border-radius:12px; padding:16px; border-left:4px solid #43A047;">
+                    <p style="color:#2E7D32; font-size:13px; font-weight:600; margin:0;">
+                        Merci ! L'équipe Doura Mondo a été notifiée de votre acceptation.
+                    </p>
+                </div>
+
+            {% elseif statut == 'refusee' %}
+                <div style="font-size:60px; margin-bottom:16px;">❌</div>
+                <h2 style="color:#8B0000; font-size:22px; margin:0 0 12px;">Activité refusée</h2>
+                <p style="color:#555; font-size:14px; line-height:1.7; margin:0 0 24px;">
+                    {{ message }}
+                </p>
+                <div style="background:#FFEBEE; border-radius:12px; padding:16px; border-left:4px solid #EF5350;">
+                    <p style="color:#C62828; font-size:13px; font-weight:600; margin:0;">
+                        Votre refus a été enregistré. L'équipe Doura Mondo en sera informée.
+                    </p>
+                </div>
+
+            {% else %}
+                <div style="font-size:60px; margin-bottom:16px;">⚠️</div>
+                <h2 style="color:#8B0000; font-size:22px; margin:0 0 12px;">Lien invalide</h2>
+                <p style="color:#555; font-size:14px; line-height:1.7; margin:0;">
+                    {{ message }}
+                </p>
+            {% endif %}
+
+            <p style="color:#C0A898; font-size:12px; margin:24px 0 0;">
+                © 2025-2026 Doura Mondo · Esprit School of Engineering
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

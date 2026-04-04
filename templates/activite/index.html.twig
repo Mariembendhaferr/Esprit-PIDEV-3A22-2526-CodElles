@@ -9,6 +9,13 @@
         <p>{{ total }} activités enregistrées</p>
     </div>
     <div class="page-header-right">
+        <a href="{{ path('app_activite_export_pdf', {
+            'search': search|default(''),
+            'categorie': categorie|default(''),
+            'sortPrix': sortPrix|default('')
+        }) }}" class="btn-outline" style="margin-right: 10px;">
+            <i class="fa-solid fa-file-pdf"></i> Exporter PDF
+        </a>
 
         <a href="{{ path('app_activite_new') }}" class="btn-primary">
             <i class="fa-solid fa-plus"></i> Nouvelle activité
@@ -92,6 +99,7 @@
                 <th>Destination</th>
                 <th>Fournisseurs</th>
                 <th>Statut</th>
+                <th>disponibilité</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -123,6 +131,17 @@
                         <span class="pill pill-indispo"><span class="dot dot-red"></span> Indisponible</span>
                     {% endif %}
                 </td>
+
+                <td>
+                    {% if activite.statutActivite == 'acceptee' %}
+                        <span class="pill pill-dispo"><span class="dot dot-green"></span> Acceptée</span>
+                    {% elseif activite.statutActivite == 'refusee' %}
+                        <span class="pill pill-indispo"><span class="dot dot-red"></span> Refusée</span>
+                    {% else %}
+                        <span class="pill" style="background:#FFF8E1; color:#F57F17; border:1px solid #FFE082;"><span class="dot" style="background:#FFA000;"></span> En attente</span>
+                    {% endif %}
+                </td>
+
                 <td>
                     <div class="actions">
                         <a href="{{ path('app_activite_edit', {'id': activite.id}) }}" class="act-btn act-edit" title="Modifier">
@@ -185,5 +204,23 @@
     </div>
 </div>
 {% endif %}
+{% block javascripts %}
+<script>
+// Auto-refresh every 10 seconds to update statuses
+setTimeout(function() {
+    window.location.reload();
+}, 10000);
 
+// Show countdown
+let seconds = 10;
+const indicator = document.getElementById('refresh-indicator');
+if (indicator) {
+    setInterval(() => {
+        seconds--;
+        indicator.textContent = 'Actualisation dans ' + seconds + 's';
+        if (seconds <= 0) seconds = 10;
+    }, 1000);
+}
+</script>
+{% endblock %}
 {% endblock %}

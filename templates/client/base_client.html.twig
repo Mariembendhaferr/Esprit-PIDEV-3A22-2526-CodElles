@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Doura Mondo - Voyages d'Exception{% endblock %}</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=Heebo:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+
+    <!-- Libraries Stylesheet -->
+    <link href="{{ asset('lib/animate/animate.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css') }}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+
+    <link href="{{ asset('css/doura-mondo-base.css') }}" rel="stylesheet">
+
+    {% block stylesheets %}{% endblock %}
+
+</head>
+
+<body>
+    <div class="container-xxl bg-white p-0">
+
+        <!-- Spinner Start -->
+        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <!-- Spinner End -->
+
+        <!-- NAVIGATION -->
+        <nav class="navbar navbar-expand-lg navbar-premium">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
+                <a class="navbar-brand p-0 m-0" href="{{ path('app_client_activities') }}">
+                    <div class="logo-luxe-wrapper">
+                        <h1 class="logo-script">Doura Mondo</h1>
+                        <div class="logo-subtitle">Voyages d'Exception</div>
+                    </div>
+                </a>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                                >Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                              >Destinations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"
+                               >Inspirations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Activités</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Réservations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Réclamations</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                À propos
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-person me-2"></i>Mon profil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-heart me-2"></i>Mes favoris
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Se déconnecter
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ========== CONTENU PRINCIPAL ========== -->
+        {% block body %}{% endblock %}
+
+<!-- ========== HTML FOOTER ========== -->
+<div class="footer-luxe">
+
+    <!-- Avion décoratif SVG -->
+    <svg class="footer-plane-svg" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10,40 L140,15 L160,40 L140,45 Z" fill="#8B2C2C" opacity="0.6"/>
+        <path d="M80,40 L110,25 L115,40 L110,48 Z" fill="#8B2C2C" opacity="0.5"/>
+        <path d="M130,40 L155,35 L158,40 L155,45 Z" fill="#8B2C2C" opacity="0.4"/>
+        <path d="M10,40 L0,38 L8,36 Z" fill="#8B2C2C" opacity="0.3"/>
+        <!-- Traîné pointillée -->
+        <line x1="0" y1="42" x2="10" y2="40" stroke="#9B7240" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.5"/>
+    </svg>
+
+    <!-- Deuxième avion en haut à droite -->
+    <svg style="position:absolute;top:60px;right:6%;width:100px;opacity:0.07;pointer-events:none;transform:scaleX(-1)rotate(-15deg);" viewBox="0 0 200 80">
+        <path d="M10,40 L140,15 L160,40 L140,45 Z" fill="#8B2C2C"/>
+        <path d="M80,40 L110,25 L115,40 L110,48 Z" fill="#8B2C2C"/>
+        <path d="M130,40 L155,35 L158,40 L155,45 Z" fill="#8B2C2C"/>
+    </svg>
+
+    <!-- Deco map légère -->
+    <svg class="footer-map-svg" viewBox="0 0 1400 500" preserveAspectRatio="xMidYMid slice">
+        <!-- Grille cartographique -->
+        <line x1="0" y1="125" x2="1400" y2="125" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <line x1="0" y1="250" x2="1400" y2="250" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <line x1="0" y1="375" x2="1400" y2="375" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <line x1="350" y1="0" x2="350" y2="500" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <line x1="700" y1="0" x2="700" y2="500" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <line x1="1050" y1="0" x2="1050" y2="500" stroke="#9B7240" stroke-width="0.5" opacity="0.1"/>
+        <!-- Ellipses méridiens -->
+        <ellipse cx="700" cy="250" rx="580" ry="220" stroke="#8B2C2C" stroke-width="0.6" fill="none" opacity="0.07"/>
+        <ellipse cx="700" cy="250" rx="350" ry="220" stroke="#8B2C2C" stroke-width="0.5" fill="none" opacity="0.06"/>
+        <ellipse cx="700" cy="250" rx="150" ry="220" stroke="#8B2C2C" stroke-width="0.4" fill="none" opacity="0.05"/>
+        <!-- Rose des vents coin droit -->
+        <g transform="translate(1310,90)" opacity="0.13" stroke="#9B7240" fill="none">
+            <circle cx="0" cy="0" r="55" stroke-width="0.7"/>
+            <circle cx="0" cy="0" r="34" stroke-width="0.5"/>
+            <circle cx="0" cy="0" r="14" stroke-width="0.4"/>
+            <line x1="0" y1="-55" x2="0" y2="55" stroke-width="0.6"/>
+            <line x1="-55" y1="0" x2="55" y2="0" stroke-width="0.6"/>
+            <line x1="-39" y1="-39" x2="39" y2="39" stroke-width="0.4"/>
+            <line x1="39" y1="-39" x2="-39" y2="39" stroke-width="0.4"/>
+            <polygon points="0,-55 3,-38 0,-42 -3,-38" fill="#9B7240" opacity="0.7"/>
+        </g>
+        <!-- Pins de localisation -->
+        <g opacity="0.18" stroke="#8B2C2C">
+            <circle cx="180" cy="320" r="5" fill="none" stroke-width="1.2"/>
+            <circle cx="180" cy="320" r="2" fill="#8B2C2C"/>
+            <line x1="180" y1="325" x2="180" y2="338" stroke-width="0.9"/>
+            <circle cx="720" cy="160" r="5" fill="none" stroke-width="1.2"/>
+            <circle cx="720" cy="160" r="2" fill="#8B2C2C"/>
+            <line x1="720" y1="165" x2="720" y2="178" stroke-width="0.9"/>
+            <circle cx="1050" cy="280" r="4" fill="none" stroke-width="1"/>
+            <circle cx="1050" cy="280" r="1.5" fill="#8B2C2C"/>
+            <line x1="1050" y1="284" x2="1050" y2="295" stroke-width="0.8"/>
+        </g>
+        <!-- Ligne de vol pointillée entre pins -->
+        <path d="M180,320 Q450,120 720,160 Q900,190 1050,280" stroke="#9B7240" stroke-width="0.9" fill="none" stroke-dasharray="5,4" opacity="0.15"/>
+        <!-- Petit avion sur la ligne -->
+        <g transform="translate(490,128) rotate(-12)" opacity="0.18">
+            <path d="M0,0 L18,0 L22,3 L18,6 L0,6 Z" fill="#8B2C2C"/>
+            <path d="M6,0 L10,-5 L12,0 Z" fill="#8B2C2C"/>
+            <path d="M6,6 L10,11 L12,6 Z" fill="#8B2C2C"/>
+        </g>
+    </svg>
+
+    <!-- Silhouette ville en fond -->
+    <svg class="footer-city-svg" viewBox="0 0 1400 280" preserveAspectRatio="xMidYMid slice">
+        <!-- Skyline gauche -->
+        <rect x="0" y="180" width="30" height="100" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="15" y="155" width="20" height="125" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="35" y="170" width="25" height="110" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="60" y="140" width="18" height="140" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Fenêtres immeuble gauche -->
+        <rect x="62" y="150" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="70" y="150" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="62" y="162" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="70" y="162" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="62" y="174" width="4" height="4" fill="#9B7240" opacity="0.10"/>
+        <rect x="70" y="174" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+
+        <rect x="78" y="160" width="22" height="120" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="100" y="130" width="16" height="150" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Antenne -->
+        <line x1="108" y1="80" x2="108" y2="130" stroke="#8B2C2C" stroke-width="1.5" opacity="0.06"/>
+        <rect x="104" y="80" width="8" height="4" fill="#8B2C2C" opacity="0.06"/>
+
+        <rect x="116" y="175" width="28" height="105" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="144" y="145" width="20" height="135" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="164" y="165" width="35" height="115" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="180" y="120" width="22" height="160" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Fenêtres -->
+        <rect x="182" y="130" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="192" y="130" width="4" height="4" fill="#9B7240" opacity="0.12"/>
+        <rect x="182" y="142" width="4" height="4" fill="#9B7240" opacity="0.10"/>
+        <rect x="192" y="142" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+
+        <rect x="202" y="155" width="30" height="125" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="232" y="170" width="25" height="110" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="257" y="135" width="18" height="145" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="275" y="160" width="40" height="120" fill="#8B2C2C" opacity="0.045"/>
+
+        <!-- Skyline milieu -->
+        <rect x="400" y="150" width="20" height="130" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="420" y="110" width="28" height="170" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Tour haute -->
+        <rect x="430" y="60" width="8" height="50" fill="#8B2C2C" opacity="0.045"/>
+        <polygon points="434,50 438,60 430,60" fill="#8B2C2C" opacity="0.045"/>
+        <rect x="448" y="140" width="22" height="140" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="470" y="125" width="18" height="155" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="488" y="145" width="30" height="135" fill="#8B2C2C" opacity="0.045"/>
+        <rect x="518" y="155" width="25" height="125" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="543" y="130" width="20" height="150" fill="#8B2C2C" opacity="0.055"/>
+
+        <!-- Skyline droite -->
+        <rect x="1050" y="155" width="22" height="125" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="1072" y="120" width="30" height="160" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Antenne droite -->
+        <line x1="1087" y1="80" x2="1087" y2="120" stroke="#8B2C2C" stroke-width="1.5" opacity="0.055"/>
+        <rect x="1083" y="80" width="8" height="3" fill="#8B2C2C" opacity="0.055"/>
+
+        <rect x="1102" y="145" width="25" height="135" fill="#8B2C2C" opacity="0.045"/>
+        <rect x="1127" y="135" width="18" height="145" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="1145" y="160" width="28" height="120" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="1173" y="140" width="20" height="140" fill="#8B2C2C" opacity="0.055"/>
+        <!-- Fenêtres droite -->
+        <rect x="1175" y="150" width="4" height="4" fill="#9B7240" opacity="0.14"/>
+        <rect x="1185" y="150" width="4" height="4" fill="#9B7240" opacity="0.11"/>
+        <rect x="1175" y="162" width="4" height="4" fill="#9B7240" opacity="0.15"/>
+        <rect x="1185" y="162" width="4" height="4" fill="#9B7240" opacity="0.10"/>
+
+        <rect x="1193" y="175" width="30" height="105" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="1223" y="150" width="22" height="130" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="1245" y="165" width="18" height="115" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="1263" y="130" width="25" height="150" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="1288" y="155" width="30" height="125" fill="#8B2C2C" opacity="0.05"/>
+        <rect x="1318" y="170" width="22" height="110" fill="#8B2C2C" opacity="0.045"/>
+        <rect x="1340" y="145" width="18" height="135" fill="#8B2C2C" opacity="0.055"/>
+        <rect x="1358" y="160" width="42" height="120" fill="#8B2C2C" opacity="0.05"/>
+
+        <!-- Sol continu -->
+        <rect x="0" y="278" width="1400" height="2" fill="#8B2C2C" opacity="0.06"/>
+    </svg>
+
+    <div class="container" style="position:relative;z-index:2;">
+        <div class="row g-5">
+
+            <!-- Logo + tagline -->
+            <div class="col-lg-4 col-md-12">
+                <div class="footer-logo-block">
+                    <a href="{{ path('app_client_activities') }}" class="footer-logo-script">Doura Mondo</a>
+                    <div class="footer-or-line"></div>
+                    <p class="footer-tagline">
+                        Spécialistes du voyage sur mesure depuis plus d'une décennie. Chaque séjour est une signature unique, façonnée selon vos désirs les plus secrets.
+                    </p>
+                    <div class="footer-socials">
+                        <a class="footer-social-btn" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="footer-social-btn" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="footer-social-btn" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="footer-social-btn" href=""><i class="fab fa-linkedin-in"></i></a>
+                        <a class="footer-social-btn" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-lg-3 col-md-6">
+                <div class="footer-col-title">Contact</div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-map-marker-alt"></i>
+                    <span>Tunis, Tunisie</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-phone-alt"></i>
+                    <span>+216 29 327 092</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-envelope"></i>
+                    <span>douramondo@gmail.com</a></span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa fa-clock"></i>
+                    <span>Lun – Sam : 9h00 – 19h00</span>
+                </div>
+            </div>
+
+            <!-- Liens -->
+            <div class="col-lg-2 col-md-3 col-6">
+                <div class="footer-col-title">Liens</div>
+                <a class="footer-link" href="">À Propos</a>
+                <a class="footer-link" href="">Contact</a>
+                <a class="footer-link" href="">Nos Destinations</a>
+                <a class="footer-link" href="">Inspirations</a>
+                <a class="footer-link" href="">Conditions Générales</a>
+            </div>
+
+            <!-- Services -->
+            <div class="col-lg-3 col-md-3 col-6">
+                <div class="footer-col-title">Services</div>
+                <a class="footer-link" href="">Sur Mesure</a>
+                <a class="footer-link" href="">Conciergerie</a>
+                <a class="footer-link" href="">Assistance 24/7</a>
+                <a class="footer-link" href="">Voyages de Noces</a>
+                <a class="footer-link" href="">Séminaires Luxe</a>
+            </div>
+
+        </div>
+
+        <!-- Copyright -->
+        <div class="footer-copyright">
+            <p>&copy; 2025 <a href="{{ path('app_client_activities') }}">Doura Mondo</a> — Tous droits réservés.</p>
+            <p>Fait avec <span style="color:#8B2C2C;">♥</span> pour les voyageurs d'exception</p>
+        </div>
+    </div>
+</div>
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('lib/wow/wow.min.js') }}"></script>
+    <script src="{{ asset('lib/easing/easing.min.js') }}"></script>
+    <script src="{{ asset('lib/waypoints/waypoints.min.js') }}"></script>
+    <script src="{{ asset('lib/counterup/counterup.min.js') }}"></script>
+    <script src="{{ asset('lib/owlcarousel/owl.carousel.min.js') }}"></script>
+    <script src="{{ asset('lib/tempusdominus/js/moment.min.js') }}"></script>
+    <script src="{{ asset('lib/tempusdominus/js/moment-timezone.min.js') }}"></script>
+    <script src="{{ asset('lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    <script src="{{ asset('js/main.js') }}"></script>
+
+    <script>
+        $(window).on('load', function () {
+            if ($('#spinner').length) {
+                $('#spinner').removeClass('show');
+            }
+        });
+    </script>
+
+    {% block javascripts %}{% endblock %}
+
+</body>
+</html>
