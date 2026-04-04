@@ -1,0 +1,131 @@
+<div class="form-card">
+    <div class="form-card-header">
+        <i class="fa-solid fa-building"></i>
+        {{ button_label is defined and button_label == 'Update' ? 'Modifier le fournisseur' : 'Nouveau fournisseur' }}
+    </div>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'fournisseurForm'}}) }}
+    <div class="form-body">
+        <div class="form-grid">
+
+            <div class="section-title"><i class="fa-solid fa-circle-info" style="color:#C9A84C;"></i> Informations principales</div>
+
+            <div class="form-group">
+                {{ form_label(form.nomFournisseur, 'Nom du fournisseur') }}
+                {{ form_widget(form.nomFournisseur, {'attr': {'placeholder': 'Ex: NourAgency', 'id': 'nomFournisseur'}}) }}
+                <span class="field-error" id="err-nom">Le nom doit contenir au moins 3 caractères</span>
+                <span class="field-ok"  id="ok-nom">Nom valide</span>
+                {{ form_errors(form.nomFournisseur) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.specialiteFournisseur, 'Spécialité') }}
+                {{ form_widget(form.specialiteFournisseur) }}
+                {{ form_errors(form.specialiteFournisseur) }}
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-address-card" style="color:#C9A84C;"></i> Contact</div>
+
+            <div class="form-group">
+                {{ form_label(form.emailFournisseur, 'Email') }}
+                {{ form_widget(form.emailFournisseur, {'attr': {'placeholder': 'Ex: contact@agence.com', 'id': 'emailFournisseur'}}) }}
+                <span class="field-error" id="err-email">L'email n'est pas valide</span>
+                <span class="field-ok"  id="ok-email">Email valide</span>
+                {{ form_errors(form.emailFournisseur) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.telephoneFournisseur, 'Téléphone') }}
+                {{ form_widget(form.telephoneFournisseur, {'attr': {'placeholder': 'Ex: 71234567', 'id': 'telFournisseur', 'maxlength': '15'}}) }}
+                <span class="field-error" id="err-tel">8 à 15 chiffres uniquement</span>
+                <span class="field-ok"  id="ok-tel">Téléphone valide</span>
+                {{ form_errors(form.telephoneFournisseur) }}
+            </div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.adresseFournisseur, 'Adresse') }}
+                {{ form_widget(form.adresseFournisseur, {'attr': {'placeholder': 'Ex: 12 Rue de la Paix, Tunis'}}) }}
+                {{ form_errors(form.adresseFournisseur) }}
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-globe" style="color:#C9A84C;"></i> Présence en ligne</div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.websiteFournisseur, 'Site Web') }}
+                {{ form_widget(form.websiteFournisseur, {'attr': {'placeholder': 'https://www.monagence.com', 'id': 'website'}}) }}
+                <span class="field-error" id="err-web">L'URL doit commencer par http:// ou https://</span>
+                <span class="field-ok"  id="ok-web">URL valide</span>
+                {{ form_errors(form.websiteFournisseur) }}
+            </div>
+
+            <div class="form-group col-span-2">
+                <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8B0000;">
+                    Activités associées
+                </label>
+                {{ form_widget(form.activites) }}
+                <small style="color:#A08070; font-size:11px; margin-top:4px;">
+                    <i class="fa-solid fa-info-circle"></i> Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs activités
+                </small>
+                {{ form_errors(form.activites) }}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <a href="{{ path('app_fournisseur_activite_index') }}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+        <button type="submit" class="btn-save">
+            <i class="fa-solid fa-{{ button_label is defined and button_label == 'Update' ? 'floppy-disk' : 'plus' }}"></i>
+            {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+    {{ form_end(form) }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('fournisseurForm');
+    function showErr(id, show) { document.getElementById('err-'+id)?.classList.toggle('show', show); }
+    function showOk(id, show)  { document.getElementById('ok-'+id)?.classList.toggle('show', show); }
+    function setInputState(el, ok) { el.classList.toggle('input-valid', ok); el.classList.toggle('input-invalid', !ok); }
+
+    const nom   = document.getElementById('nomFournisseur');
+    const email = document.getElementById('emailFournisseur');
+    const tel   = document.getElementById('telFournisseur');
+    const web   = document.getElementById('website');
+
+    if (nom) nom.addEventListener('input', () => {
+        const ok = nom.value.trim().length >= 3;
+        showErr('nom', nom.value.trim().length > 0 && !ok);
+        showOk('nom', ok); if(nom.value.trim().length > 0) setInputState(nom, ok);
+    });
+    if (email) email.addEventListener('blur', () => {
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+        const has = email.value.trim().length > 0;
+        showErr('email', has && !ok); showOk('email', has && ok); if(has) setInputState(email, ok);
+    });
+    if (tel) tel.addEventListener('input', () => {
+        tel.value = tel.value.replace(/[^0-9]/g, '');
+        const ok = /^[0-9]{8,15}$/.test(tel.value);
+        const has = tel.value.length > 0;
+        showErr('tel', has && !ok); showOk('tel', has && ok); if(has) setInputState(tel, ok);
+    });
+    if (web) web.addEventListener('blur', () => {
+        const v = web.value.trim();
+        if (!v) { showErr('web',false); showOk('web',false); return; }
+        const ok = v.startsWith('http://') || v.startsWith('https://');
+        showErr('web', !ok); showOk('web', ok); setInputState(web, ok);
+    });
+
+    form.addEventListener('submit', function(e) {
+        let ok = true;
+        if (nom && nom.value.trim().length < 3) { showErr('nom',true); ok=false; }
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { showErr('email',true); ok=false; }
+        if (tel && !/^[0-9]{8,15}$/.test(tel.value)) { showErr('tel',true); ok=false; }
+        if (web && web.value.trim() && !web.value.trim().startsWith('http')) { showErr('web',true); ok=false; }
+        if (!ok) { e.preventDefault(); form.querySelector('.field-error.show')?.scrollIntoView({behavior:'smooth',block:'center'}); }
+    });
+});
+</script>

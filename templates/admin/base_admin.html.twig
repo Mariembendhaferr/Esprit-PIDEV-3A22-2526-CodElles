@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div >
+
+    {# ══ SIDEBAR ══ #}
+    {% include 'admin/partials/sidebar.html.twig' %}
+
+    {# ══ MAIN WRAPPER ══ #}
+    <div class="page-wrapper">
+
+        {# ══ NAVBAR ══ #}
+        {% include 'admin/partials/navbar.html.twig' %}
+
+        {# ══ CONTENT ══ #}
+        <div class="page-content">
+            {% for msg in app.flashes('success') %}
+                <div class="flash-ok"><i class="fa-solid fa-circle-check"></i> {{ msg }}</div>
+            {% endfor %}
+            {% for msg in app.flashes('error') %}
+                <div class="flash-error"><i class="fa-solid fa-circle-xmark"></i> {{ msg }}</div>
+            {% endfor %}
+
+            {% block admin_content %}{% endblock %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

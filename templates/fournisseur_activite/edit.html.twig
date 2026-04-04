@@ -1,0 +1,12 @@
+{% extends 'admin/base_admin.html.twig' %}
+{% block title %}Modifier Fournisseur – Doura Mondo{% endblock %}
+{% block admin_content %}
+<div class="page-header">
+    <div>
+        <h1>Modifier le Fournisseur</h1>
+        <p>{{ fournisseur_activite.nomFournisseur }}</p>
+    </div>
+</div>
+<div class="gold-line"></div>
+{{ include('fournisseur_activite/_form.html.twig', {'button_label': 'Update'}) }}
+{% endblock %}

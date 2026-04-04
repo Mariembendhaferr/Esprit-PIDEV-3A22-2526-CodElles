@@ -1,0 +1,135 @@
+<div class="form-card">
+    <div class="form-card-header">
+        <i class="fa-solid fa-map-location-dot"></i>
+        {{ button_label is defined and button_label == 'Update' ? 'Modifier l\'activité' : 'Nouvelle activité' }}
+    </div>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'activiteForm'}}) }}
+    <div class="form-body">
+        <div class="form-grid">
+
+            <div class="section-title"><i class="fa-solid fa-circle-info" style="color:#C9A84C;"></i> Informations principales</div>
+
+            <div class="form-group">
+                {{ form_label(form.nomActivite, 'Nom de l\'activité') }}
+                {{ form_widget(form.nomActivite, {'attr': {'placeholder': 'Ex: Snorkeling à Hawaii', 'id': 'nomActivite'}}) }}
+                <span class="field-error" id="err-nom">Le nom doit contenir au moins 3 caractères</span>
+                {{ form_errors(form.nomActivite) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.categorieActivite, 'Catégorie') }}
+                {{ form_widget(form.categorieActivite) }}
+                {{ form_errors(form.categorieActivite) }}
+            </div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.descriptionActivite, 'Description') }}
+                {{ form_widget(form.descriptionActivite, {'attr': {'placeholder': 'Décrivez l\'activité...', 'rows': 3, 'id': 'descActivite'}}) }}
+                <span class="char-hint" id="desc-count" style="font-size:11px; color:#C0A898; text-align:right; margin-top:2px;">0 / 500 caractères</span>
+                {{ form_errors(form.descriptionActivite) }}
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-tag" style="color:#C9A84C;"></i> Tarif & Durée</div>
+
+            <div class="form-group">
+                {{ form_label(form.coutActivite, 'Prix (DT)') }}
+                {{ form_widget(form.coutActivite, {'attr': {'placeholder': 'Ex: 50.00', 'id': 'coutActivite'}}) }}
+                <span class="field-error" id="err-cout">Le prix doit être un nombre positif</span>
+                {{ form_errors(form.coutActivite) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.dureeActivite, 'Durée (minutes)') }}
+                {{ form_widget(form.dureeActivite, {'attr': {'placeholder': 'Ex: 90', 'min': '1'}}) }}
+                {{ form_errors(form.dureeActivite) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.capaciteMaxActivite, 'Capacité max (personnes)') }}
+                {{ form_widget(form.capaciteMaxActivite, {'attr': {'placeholder': 'Ex: 20', 'min': '1'}}) }}
+                {{ form_errors(form.capaciteMaxActivite) }}
+            </div>
+
+            <div class="form-group" style="justify-content:flex-end; ">
+                <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8B0000; margin-bottom:6px;">Disponibilité</label>
+                <label class="toggle-wrap">
+                    <input type="checkbox"
+                           id="{{ form.disponibiliteActivite.vars.id }}"
+                           name="{{ form.disponibiliteActivite.vars.full_name }}"
+                           {% if form.disponibiliteActivite.vars.checked %}checked{% endif %}
+                           value="1"
+                           class="toggle-input">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Activité disponible</span>
+                </label>
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-location-dot" style="color:#C9A84C;"></i> Localisation</div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.localisationActivite, 'Destination') }}
+                {{ form_widget(form.localisationActivite, {'attr': {'placeholder': 'Ex: Paris, France'}}) }}
+                {{ form_errors(form.localisationActivite) }}
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-image" style="color:#C9A84C;"></i> Média & Fournisseurs</div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.imageActivite, 'URL de l\'image') }}
+                {{ form_widget(form.imageActivite, {'attr': {'placeholder': 'https://...'}}) }}
+                {{ form_errors(form.imageActivite) }}
+            </div>
+
+            <div class="form-group col-span-2">
+                {{ form_label(form.fournisseurs, 'Fournisseurs (sélection multiple)') }}
+                {{ form_widget(form.fournisseurs, {'attr': {'class': 'form-group-multi', 'style': 'height:120px; background:#FDF8F2; border:1.5px solid #E8D8C8; border-radius:10px; padding:8px; font-size:13px;'}}) }}
+                <small style="color:#A08070; font-size:11px; margin-top:4px;"><i class="fa-solid fa-info-circle"></i> Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs fournisseurs</small>
+                {{ form_errors(form.fournisseurs) }}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <a href="{{ path('app_activite_index') }}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+        <button type="submit" class="btn-save">
+            <i class="fa-solid fa-{{ button_label is defined and button_label == 'Update' ? 'floppy-disk' : 'plus' }}"></i>
+            {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+    {{ form_end(form, {'render_rest': false}) }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const nom  = document.getElementById('nomActivite');
+    const desc = document.getElementById('descActivite');
+    const cout = document.getElementById('coutActivite');
+
+    if (desc) {
+        const counter = document.getElementById('desc-count');
+        desc.addEventListener('input', () => {
+            counter.textContent = desc.value.length + ' / 500 caractères';
+            counter.style.color = desc.value.length > 480 ? '#E53935' : '#C0A898';
+        });
+    }
+
+    function showErr(id, show) {
+        const el = document.getElementById('err-' + id);
+        if (el) el.classList.toggle('show', show);
+    }
+
+    if (nom) nom.addEventListener('input', () => showErr('nom', nom.value.trim().length > 0 && nom.value.trim().length < 3));
+    if (cout) cout.addEventListener('input', () => showErr('cout', cout.value !== '' && (isNaN(cout.value) || parseFloat(cout.value) <= 0)));
+
+    document.getElementById('activiteForm').addEventListener('submit', function(e) {
+        let ok = true;
+        if (nom && nom.value.trim().length < 3) { showErr('nom', true); ok = false; }
+        if (cout && (isNaN(cout.value) || parseFloat(cout.value) <= 0)) { showErr('cout', true); ok = false; }
+        if (!ok) { e.preventDefault(); form.querySelector('.field-error.show')?.scrollIntoView({behavior:'smooth',block:'center'}); }
+    });
+});
+</script>
