@@ -1,0 +1,32 @@
+{{ form_start(form, { attr: { class: 'admin-crud-form', novalidate: 'novalidate' } }) }}
+    {{ form_errors(form) }}
+    <div class="admin-form-group">
+        {{ form_label(form.user) }}
+        {{ form_widget(form.user) }}
+        {{ form_errors(form.user) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.titre) }}
+        {{ form_widget(form.titre) }}
+        {{ form_errors(form.titre) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description) }}
+        {{ form_errors(form.description) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.statut) }}
+        {{ form_widget(form.statut) }}
+        {{ form_errors(form.statut) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.priorite) }}
+        {{ form_widget(form.priorite) }}
+        {{ form_errors(form.priorite) }}
+    </div>
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn-primary" style="border:none;cursor:pointer;">Enregistrer</button>
+        <a href="{{ path('app_admin_reclamations') }}" class="admin-btn-ghost">Annuler</a>
+    </div>
+{{ form_end(form) }}

@@ -1,0 +1,13 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Modifier la réclamation{% endblock %}
+{% block admin_heading %}Modifier la réclamation{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Réclamation #{{ reclamation.id }} · {{ reclamation.dateCreation ? reclamation.dateCreation|date('d/m/Y H:i') : '' }}</p>
+</div>
+<div class="admin-table-wrap" style="padding: 28px 32px;">
+    {% include 'admin/reclamation/_form.html.twig' %}
+</div>
+{% endblock %}

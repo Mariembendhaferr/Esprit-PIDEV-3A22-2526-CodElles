@@ -1,0 +1,113 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Avis{% endblock %}
+{% block admin_heading %}Avis clients{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Liste des avis laissés sur les activités</p>
+    <a href="{{ path('app_admin_avis_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvel avis</a>
+</div>
+
+<form method="get" id="admin-avis-filters" class="admin-filter-bar" action="{{ path('app_admin_avis') }}">
+    <div class="admin-filter-bar-inner">
+        <div class="admin-filter-field admin-filter-field--grow">
+            <label class="admin-filter-label" for="filter-q-avis">Recherche</label>
+            <input type="search" name="q" id="filter-q-avis" class="form-control admin-filter-input" value="{{ filter_q }}" placeholder="Commentaire, voyageur, activité…" autocomplete="off">
+        </div>
+        <div class="admin-filter-field">
+            <label class="admin-filter-label" for="filter-note-avis">Note</label>
+            <select name="note" id="filter-note-avis" class="form-select admin-filter-select">
+                <option value="">Toutes</option>
+                <option value="none" {{ filter_note == 'none' ? 'selected' }}>Sans note</option>
+                <option value="1" {{ filter_note == '1' ? 'selected' }}>1 étoile</option>
+                <option value="2" {{ filter_note == '2' ? 'selected' }}>2 étoiles</option>
+                <option value="3" {{ filter_note == '3' ? 'selected' }}>3 étoiles</option>
+                <option value="4" {{ filter_note == '4' ? 'selected' }}>4 étoiles</option>
+                <option value="5" {{ filter_note == '5' ? 'selected' }}>5 étoiles</option>
+            </select>
+        </div>
+        <div class="admin-filter-field admin-filter-field--activity">
+            <label class="admin-filter-label" for="filter-act-avis">Activité</label>
+            <select name="activite" id="filter-act-avis" class="form-select admin-filter-select">
+                <option value="">Toutes</option>
+                {% for a in activites %}
+                    <option value="{{ a.id }}" {{ filter_activite == a.id ? 'selected' }}>{{ a.nomActivite }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="admin-filter-field admin-filter-field--action">
+            <span class="admin-filter-label admin-filter-label--spacer" aria-hidden="true">&nbsp;</span>
+            <a href="{{ path('app_admin_avis') }}" class="admin-filter-reset">Réinitialiser</a>
+        </div>
+    </div>
+    <p class="admin-filter-hint mb-0"><i class="fas fa-info-circle"></i> Recherche sur le texte du commentaire, le nom du voyageur et le nom de l’activité. Mise à jour dynamique de la liste.</p>
+</form>
+
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Voyageur</th>
+                <th>Activité</th>
+                <th>Note</th>
+                <th>Commentaire</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="admin-avis-tbody">
+            {% include 'admin/avis/_table_rows.html.twig' %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var form = document.getElementById('admin-avis-filters');
+    var tbody = document.getElementById('admin-avis-tbody');
+    if (!form || !tbody) return;
+
+    function debounce(fn, ms) {
+        var t;
+        return function () {
+            clearTimeout(t);
+            var args = arguments;
+            t = setTimeout(function () { fn.apply(null, args); }, ms);
+        };
+    }
+
+    function syncUrl() {
+        var fd = new FormData(form);
+        var params = new URLSearchParams();
+        fd.forEach(function (v, k) { if (v !== '') params.set(k, v); });
+        var qs = params.toString();
+        history.replaceState(null, '', qs ? '?' + qs : window.location.pathname);
+    }
+
+    function fetchRows() {
+        var fd = new FormData(form);
+        var params = new URLSearchParams();
+        fd.forEach(function (v, k) { if (v !== '') params.set(k, v); });
+        params.set('partial', '1');
+        fetch(form.getAttribute('action') + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                tbody.innerHTML = html;
+                syncUrl();
+            })
+            .catch(function () {});
+    }
+
+    var debouncedFetch = debounce(fetchRows, 320);
+    form.querySelectorAll('input[name="q"]').forEach(function (el) {
+        el.addEventListener('input', debouncedFetch);
+    });
+    form.querySelectorAll('select').forEach(function (el) {
+        el.addEventListener('change', fetchRows);
+    });
+})();
+</script>
+{% endblock %}

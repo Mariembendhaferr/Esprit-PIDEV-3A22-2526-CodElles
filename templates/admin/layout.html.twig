@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Administration{% endblock %} — Doura Mondo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=Cinzel:wght@400;500&family=Montserrat:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/admin-backoffice.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/admin-crud.css') }}" rel="stylesheet">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+{% set route = app.request.attributes.get('_route') %}
+{% set avis_section = route in ['app_admin_avis', 'app_admin_avis_new', 'app_admin_avis_edit'] %}
+{% set reclamation_section = route in ['app_admin_reclamations', 'app_admin_reclamations_new', 'app_admin_reclamations_edit'] %}
+<div class="admin-shell" id="adminShell">
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-inner">
+            <div class="admin-sidebar-brand">
+                <a href="{{ path('app_admin_dashboard') }}" class="admin-sidebar-brand-link">
+                    <div class="admin-sidebar-logo-wrap">
+                        <img src="{{ asset('images/doura-mondo-logo.png') }}" alt="Doura Mondo — Tour du monde" class="admin-sidebar-logo-img" width="220" loading="lazy" decoding="async">
+                    </div>
+                    <div class="admin-sidebar-tagline">Un voyage idéal, juste pour vous!</div>
+                </a>
+            </div>
+            <ul class="admin-nav">
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ route == 'app_admin_dashboard' ? 'active' }}" href="{{ path('app_admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ route == 'app_admin_utilisateurs' ? 'active' }}" href="{{ path('app_admin_utilisateurs') }}">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>Utilisateurs</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ route == 'app_admin_voyages' ? 'active' }}" href="{{ path('app_admin_voyages') }}">
+                        <i class="fas fa-globe-americas" aria-hidden="true"></i>
+                        <span>Voyage</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ route == 'app_admin_activites' ? 'active' }}" href="{{ path('app_admin_activites') }}">
+                        <i class="fas fa-hiking" aria-hidden="true"></i>
+                        <span>Activités</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ route == 'app_admin_reservations' ? 'active' }}" href="{{ path('app_admin_reservations') }}">
+                        <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                        <span>Réservations</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ reclamation_section ? 'active' }}" href="{{ path('app_admin_reclamations') }}">
+                        <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                        <span>Réclamations</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a class="admin-nav-link {{ avis_section ? 'active' }}" href="{{ path('app_admin_avis') }}">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <span>Avis</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="admin-sidebar-footer">
+                <a href="{{ path('app_accueil') }}"><i class="fas fa-arrow-left"></i> Retour au site</a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <h1 class="admin-topbar-title mb-0">{% block admin_heading %}Tableau de bord{% endblock %}</h1>
+            <div class="admin-topbar-actions">
+                <a class="btn-admin-site" href="{{ path('app_accueil') }}"><i class="fas fa-external-link-alt"></i> Voir le site</a>
+            </div>
+        </header>
+        <main class="admin-content">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="admin-flash-wrap">
+                        <div class="admin-flash admin-flash--{{ label == 'error' ? 'error' : 'success' }}" role="alert">{{ message }}</div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% block admin_body %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<button type="button" class="admin-sidebar-toggle d-lg-none" id="adminSidebarToggle" aria-label="Ouvrir le menu">
+    <i class="fas fa-bars"></i>
+</button>
+
+<script>
+(function () {
+    var shell = document.getElementById('adminShell');
+    var btn = document.getElementById('adminSidebarToggle');
+    if (btn && shell) {
+        btn.addEventListener('click', function () { shell.classList.toggle('sidebar-open'); });
+        shell.addEventListener('click', function (e) {
+            if (shell.classList.contains('sidebar-open') && e.target === shell) {
+                shell.classList.remove('sidebar-open');
+            }
+        });
+    }
+})();
+</script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

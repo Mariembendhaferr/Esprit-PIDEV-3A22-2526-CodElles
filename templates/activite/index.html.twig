@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activités — Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/activites-public.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<main class="activite-page activite-page--list">
+    <div class="container py-5">
+        <header class="activite-hero text-center mb-5">
+            <h1 class="activite-title">Activités</h1>
+            <p class="activite-lead text-muted mb-0">
+                Découvrez nos expériences et accédez au détail pour consulter les avis ou en laisser un.
+            </p>
+        </header>
+
+        {% if activites is empty %}
+            <p class="text-muted text-center">Aucune activité n’est disponible pour le moment.</p>
+        {% else %}
+            <div class="row g-4">
+                {% for a in activites %}
+                    <div class="col-md-6 col-xl-4">
+                        <a href="{{ path('app_activite_show', { id: a.id }) }}" class="activite-card-link">
+                            <article class="activite-card">
+                                <div class="activite-card-visual">
+                                    {% if a.imageActivite %}
+                                        <img src="{{ asset(a.imageActivite) }}" alt="" class="activite-card-img" loading="lazy" width="400" height="240">
+                                    {% else %}
+                                        <div class="activite-card-placeholder" aria-hidden="true">
+                                            <i class="bi bi-compass"></i>
+                                        </div>
+                                    {% endif %}
+                                    {% if not a.disponibiliteActivite %}
+                                        <span class="activite-card-badge activite-card-badge--off">Indisponible</span>
+                                    {% endif %}
+                                </div>
+                                <div class="activite-card-body">
+                                    <p class="activite-card-cat">{{ a.categorieActivite }}</p>
+                                    <h2 class="activite-card-name">{{ a.nomActivite }}</h2>
+                                    {% if a.descriptionActivite %}
+                                        <p class="activite-card-excerpt mb-0">{{ a.descriptionActivite|length > 120 ? a.descriptionActivite|slice(0, 120) ~ '…' : a.descriptionActivite }}</p>
+                                    {% endif %}
+                                    <p class="activite-card-meta mt-3 mb-0">
+                                        <span class="activite-card-price">{{ a.coutActivite|number_format(2, ',', ' ') }} €</span>
+                                        {% if a.dureeActivite %}
+                                            <span class="activite-card-dur">· {{ a.dureeActivite }} min</span>
+                                        {% endif %}
+                                    </p>
+                                    <span class="activite-card-cta">Voir l’activité</span>
+                                </div>
+                            </article>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

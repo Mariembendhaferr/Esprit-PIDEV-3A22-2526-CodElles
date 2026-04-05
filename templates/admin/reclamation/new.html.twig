@@ -1,0 +1,13 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Nouvelle réclamation{% endblock %}
+{% block admin_heading %}Nouvelle réclamation{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Associer la demande à un voyageur et définir le suivi.</p>
+</div>
+<div class="admin-table-wrap" style="padding: 28px 32px;">
+    {% include 'admin/reclamation/_form.html.twig' %}
+</div>
+{% endblock %}

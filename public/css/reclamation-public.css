@@ -1,0 +1,241 @@
+/* Page publique Réclamations (base.html.twig) */
+.reclamation-page {
+    background: linear-gradient(180deg, #fffef9 0%, #ffffff 35%);
+    min-height: 48vh;
+}
+
+.reclamation-title {
+    font-family: 'Cinzel', 'Cormorant Garamond', serif;
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 500;
+    color: var(--bordeaux, #6b2c2c);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+}
+
+.reclamation-lead {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reclamation-note {
+    max-width: 36rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reclamation-btn-add {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.35rem;
+    border-radius: 8px;
+}
+
+.reclamation-alert {
+    border-radius: 10px;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reclamation-section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #6b4f3e;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(139, 44, 44, 0.12);
+}
+
+/* Cartes liste */
+.reclamation-card {
+    height: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(139, 44, 44, 0.14);
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(62, 42, 32, 0.07);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    outline: none;
+}
+
+.reclamation-card:hover,
+.reclamation-card:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(62, 42, 32, 0.12);
+    border-color: rgba(139, 44, 44, 0.28);
+}
+
+.reclamation-card:focus-visible {
+    box-shadow: 0 0 0 3px rgba(139, 44, 44, 0.2);
+}
+
+.reclamation-card-inner {
+    padding: 1.25rem 1.35rem 1.1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.reclamation-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.reclamation-card-date {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    color: #7a6a5e;
+    letter-spacing: 0.04em;
+}
+
+.reclamation-card-title {
+    font-family: 'Cormorant Garamond', 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #3f2c24;
+    line-height: 1.35;
+    margin: 0 0 0.5rem;
+}
+
+.reclamation-card-demandeur {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    color: #6b4f3e;
+    margin-bottom: 0.65rem;
+}
+
+.reclamation-card-excerpt {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    color: #5c534c;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.reclamation-card-cta {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bordeaux, #8b2c2c);
+}
+
+.reclamation-badge {
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    padding: 0.35em 0.6em;
+    border-radius: 6px;
+}
+
+.reclamation-badge--wait {
+    background: rgba(155, 114, 64, 0.18);
+    color: #5c4330;
+}
+
+.reclamation-badge--progress {
+    background: rgba(139, 44, 44, 0.12);
+    color: #7a2a2a;
+}
+
+.reclamation-badge--done {
+    background: rgba(76, 140, 90, 0.18);
+    color: #2d5a36;
+}
+
+.reclamation-badge--prio {
+    background: rgba(100, 100, 100, 0.1);
+    color: #444;
+}
+
+/* Modales */
+.reclamation-modal-content {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 48px rgba(40, 28, 22, 0.15);
+}
+
+.reclamation-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    color: #3f2c24;
+}
+
+.reclamation-modal-meta {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.reclamation-detail-badges .badge + .badge {
+    margin-left: 0.35rem;
+}
+
+.reclamation-detail-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6b4f3e;
+    margin-bottom: 0.5rem;
+}
+
+.reclamation-detail-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: #3a332e;
+}
+
+.reclamation-form .form-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b4f3e;
+}
+
+.reclamation-form-control {
+    border-radius: 10px;
+    border: 1px solid rgba(139, 44, 44, 0.18);
+    background: #fffef9;
+    font-size: 0.9rem;
+}
+
+.reclamation-form-control:focus {
+    border-color: rgba(139, 44, 44, 0.45);
+    box-shadow: 0 0 0 3px rgba(139, 44, 44, 0.08);
+}
+
+.reclamation-form ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.82rem;
+    color: #8b2c2c;
+}
+
+.reclamation-submit {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.15rem;
+    border-radius: 8px;
+}

@@ -1,0 +1,65 @@
+{{ form_start(form, { attr: { class: 'admin-crud-form', novalidate: 'novalidate' } }) }}
+    {{ form_errors(form) }}
+    <div class="admin-form-group">
+        {{ form_label(form.user) }}
+        {{ form_widget(form.user) }}
+        {{ form_errors(form.user) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.activite) }}
+        {{ form_widget(form.activite) }}
+        {{ form_errors(form.activite) }}
+    </div>
+    <div class="admin-form-group admin-star-field">
+        {{ form_label(form.note) }}
+        <div class="admin-star-rating" id="avis-star-rating" data-star-rating>
+            {% for child in form.note %}
+                {{ form_widget(child, { attr: { class: 'admin-star-input', 'data-index': loop.index0 } }) }}
+                <label for="{{ child.vars.id }}" class="admin-star-face {% if child.vars.value is empty %}admin-star-face--empty{% endif %}" title="{{ child.vars.label|e('html_attr') }}">
+                    {% if child.vars.value is empty %}
+                        <span class="admin-star-no">Sans note</span>
+                    {% else %}
+                        <i class="fas fa-star" aria-hidden="true" data-star-n="{{ child.vars.value }}"></i>
+                    {% endif %}
+                </label>
+            {% endfor %}
+        </div>
+        <p class="admin-star-hint mb-0">Choisissez une note en étoiles ou « Sans note ».</p>
+        {{ form_errors(form.note) }}
+    </div>
+    <div class="admin-form-group">
+        {{ form_label(form.commentaire) }}
+        {{ form_widget(form.commentaire) }}
+        {{ form_errors(form.commentaire) }}
+    </div>
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn-primary" style="border:none;cursor:pointer;">Enregistrer</button>
+        <a href="{{ path('app_admin_avis') }}" class="admin-btn-ghost">Annuler</a>
+    </div>
+{{ form_end(form) }}
+
+<script>
+(function () {
+    var root = document.getElementById('avis-star-rating');
+    if (!root) return;
+    function paint() {
+        var checked = root.querySelector('input[type="radio"]:checked');
+        var val = 0;
+        if (checked) {
+            var v = checked.value;
+            val = v === '' ? 0 : parseInt(v, 10);
+            if (isNaN(val)) val = 0;
+        }
+        root.querySelectorAll('.admin-star-face i.fa-star').forEach(function (icon) {
+            var n = parseInt(icon.getAttribute('data-star-n'), 10);
+            var on = val > 0 && n <= val;
+            icon.style.opacity = on ? '1' : '0.3';
+            icon.style.color = on ? '#c4a574' : '#a89888';
+        });
+    }
+    root.querySelectorAll('input[type="radio"]').forEach(function (inp) {
+        inp.addEventListener('change', paint);
+    });
+    paint();
+})();
+</script>

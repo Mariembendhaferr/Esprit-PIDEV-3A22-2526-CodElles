@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réclamations — Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/reclamation-public.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<main class="reclamation-page">
+    <div class="container py-5">
+        <header class="reclamation-hero text-center mb-4">
+            <h1 class="reclamation-title">Réclamations</h1>
+            <p class="reclamation-lead text-muted mb-2">
+                Consultez les demandes en cours ou déposez une nouvelle réclamation.
+            </p>
+            <button type="button" class="btn btn-primary reclamation-btn-add" data-bs-toggle="modal" data-bs-target="#modalNouvelleReclamation">
+                <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Ajouter une réclamation
+            </button>
+        </header>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success reclamation-alert" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        {% set statut_badge = {
+            'En attente': 'wait',
+            'En cours': 'progress',
+            'Traité': 'done'
+        } %}
+
+        <section class="reclamation-section" aria-labelledby="liste-reclamations">
+            <h2 id="liste-reclamations" class="reclamation-section-title mb-4">Réclamations enregistrées</h2>
+            {% if reclamations is empty %}
+                <p class="text-muted mb-0">Aucune réclamation pour le moment. Utilisez le bouton ci-dessus pour en créer une.</p>
+            {% else %}
+                <div class="row g-4">
+                    {% for r in reclamations %}
+                        <div class="col-md-6 col-xl-4">
+                            <div
+                                class="reclamation-card"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalDetail{{ r.id }}"
+                                role="button"
+                                tabindex="0"
+                                aria-label="Voir le détail : {{ r.titre|e('html_attr') }}"
+                            >
+                                <div class="reclamation-card-inner">
+                                    <div class="reclamation-card-meta">
+                                        <span class="reclamation-card-date">
+                                            <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+                                            {{ r.dateCreation ? r.dateCreation|date('d/m/Y H:i') : '—' }}
+                                        </span>
+                                        <span class="badge reclamation-badge reclamation-badge--{{ statut_badge[r.statut]|default('wait') }}">{{ r.statut }}</span>
+                                    </div>
+                                    <h3 class="reclamation-card-title">{{ r.titre }}</h3>
+                                    <p class="reclamation-card-demandeur">
+                                        <i class="bi bi-person me-1" aria-hidden="true"></i>
+                                        {{ r.user.prenom }} {{ r.user.nom }}
+                                    </p>
+                                    <p class="reclamation-card-excerpt mb-0">
+                                        {{ r.description|length > 140 ? r.description|slice(0, 140) ~ '…' : r.description }}
+                                    </p>
+                                    <span class="reclamation-card-cta">Voir le détail</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Modale détail pour cette réclamation #}
+                        <div class="modal fade" id="modalDetail{{ r.id }}" tabindex="-1" aria-labelledby="modalDetailLabel{{ r.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                <div class="modal-content reclamation-modal-content">
+                                    <div class="modal-header border-0 pb-0">
+                                        <div>
+                                            <p class="reclamation-modal-meta text-muted small mb-1">
+                                                {{ r.dateCreation ? r.dateCreation|date('d/m/Y à H:i') : '—' }}
+                                                · {{ r.user.prenom }} {{ r.user.nom }}
+                                            </p>
+                                            <h2 class="modal-title h5 reclamation-modal-title" id="modalDetailLabel{{ r.id }}">{{ r.titre }}</h2>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body pt-2">
+                                        <div class="reclamation-detail-badges mb-3">
+                                            <span class="badge reclamation-badge reclamation-badge--{{ statut_badge[r.statut]|default('wait') }}">{{ r.statut }}</span>
+                                            <span class="badge reclamation-badge reclamation-badge--prio">{{ r.priorite }}</span>
+                                        </div>
+                                        <h3 class="reclamation-detail-heading">Description</h3>
+                                        <div class="reclamation-detail-text">{{ r.description|nl2br }}</div>
+                                    </div>
+                                    <div class="modal-footer border-0 pt-0">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</main>
+
+{# Modale : nouveau formulaire #}
+<div class="modal fade" id="modalNouvelleReclamation" tabindex="-1" aria-labelledby="modalNouvelleReclamationLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content reclamation-modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="modalNouvelleReclamationLabel">Nouvelle réclamation</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            {{ form_start(form, { attr: { class: 'reclamation-form', novalidate: 'novalidate' } }) }}
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">
+                        Le statut sera « En attente » et la priorité « Moyenne » par défaut (modifiable par l’administration).
+                    </p>
+                    {{ form_errors(form) }}
+                    <div class="mb-3">
+                        {{ form_label(form.user) }}
+                        {{ form_widget(form.user) }}
+                        {{ form_errors(form.user) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.titre) }}
+                        {{ form_widget(form.titre) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+                    <div class="mb-0">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary reclamation-submit">Envoyer la réclamation</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% if open_form_modal %}
+            var formModal = document.getElementById('modalNouvelleReclamation');
+            if (formModal && typeof bootstrap !== 'undefined') {
+                new bootstrap.Modal(formModal).show();
+            }
+            {% endif %}
+
+            document.querySelectorAll('.reclamation-card[tabindex="0"]').forEach(function (card) {
+                card.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        card.click();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

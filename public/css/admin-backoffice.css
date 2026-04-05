@@ -1,0 +1,337 @@
+/* Back-office — Doura Mondo (aligné sur le thème front: bordeaux #8B2C2C, or #9B7240, crème #FCF8F0) */
+
+:root {
+    --admin-bordeaux: #8b2c2c;
+    --admin-bordeaux-fonce: #6b1e1e;
+    --admin-bordeaux-mid: #7a2525;
+    --admin-or: #9b7240;
+    --admin-or-clair: #c4a574;
+    --admin-creme: #fcf8f0;
+    --admin-papier: #faf7f2;
+    --admin-texte: #3f2c24;
+    --admin-sidebar-w: 278px;
+}
+
+/* --- Shell --- */
+.admin-shell {
+    min-height: 100vh;
+    display: flex;
+    background: var(--admin-papier);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--admin-texte);
+}
+
+/* --- Sidebar --- */
+.admin-sidebar {
+    width: var(--admin-sidebar-w);
+    flex-shrink: 0;
+    background: linear-gradient(175deg, var(--admin-bordeaux-fonce) 0%, var(--admin-bordeaux) 42%, #5c1818 100%);
+    color: rgba(255, 255, 255, 0.92);
+    position: relative;
+    z-index: 100;
+    box-shadow: 8px 0 32px rgba(44, 12, 12, 0.18);
+    border-right: 1px solid rgba(155, 114, 64, 0.35);
+}
+
+.admin-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M0 60 Q30 20 60 60 T120 60' fill='none' stroke='%23ffffff' stroke-width='0.35' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+.admin-sidebar-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 28px 0 32px;
+}
+
+.admin-sidebar-brand {
+    padding: 0 22px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+}
+
+.admin-sidebar-brand-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.admin-sidebar-logo-wrap {
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.admin-sidebar-logo-img {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    margin: 0 auto;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.35));
+}
+
+.admin-sidebar-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.88);
+    margin-top: 16px;
+    padding: 0 8px;
+    text-align: center;
+}
+
+.admin-nav {
+    list-style: none;
+    margin: 0;
+    padding: 8px 12px 0;
+}
+
+.admin-nav-item {
+    margin-bottom: 4px;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: none;
+    transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+    border: 1px solid transparent;
+    -webkit-font-smoothing: antialiased;
+}
+
+.admin-nav-link span {
+    font-weight: 300;
+    letter-spacing: 0.08em;
+}
+
+/* FA5 .fas glyphs need font-weight 900 — never use 300 here or icons disappear */
+.admin-nav-link i.fas {
+    width: 20px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 0.88rem;
+    font-family: 'Font Awesome 5 Free' !important;
+    font-weight: 900 !important;
+    font-style: normal;
+    color: var(--admin-or-clair);
+    opacity: 0.82;
+    transition: color 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+}
+
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.admin-nav-link:hover i.fas {
+    color: rgba(255, 255, 255, 0.95);
+    opacity: 1;
+    transform: translateX(1px);
+}
+
+.admin-nav-link.active {
+    background: linear-gradient(90deg, rgba(155, 114, 64, 0.28), rgba(255, 255, 255, 0.1));
+    border-color: rgba(196, 165, 116, 0.38);
+    color: #fff;
+    font-weight: 400;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.admin-nav-link.active span {
+    font-weight: 400;
+    letter-spacing: 0.09em;
+}
+
+.admin-nav-link.active i.fas {
+    color: rgba(255, 255, 255, 0.95);
+    opacity: 1;
+}
+
+.admin-sidebar-footer {
+    margin-top: auto;
+    padding: 24px 22px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    transition: color 0.2s;
+    -webkit-font-smoothing: antialiased;
+}
+
+.admin-sidebar-footer a:hover {
+    color: var(--admin-or-clair);
+}
+
+.admin-sidebar-footer a i.fas,
+.admin-topbar .btn-admin-site i.fas,
+.admin-sidebar-toggle i.fas {
+    font-family: 'Font Awesome 5 Free' !important;
+    font-weight: 900 !important;
+    font-style: normal;
+}
+
+/* --- Main column --- */
+.admin-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-topbar {
+    height: 64px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    background: var(--admin-creme);
+    border-bottom: 1px solid rgba(139, 44, 44, 0.12);
+    box-shadow: 0 4px 20px rgba(63, 44, 36, 0.06);
+}
+
+.admin-topbar-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--admin-bordeaux);
+    font-style: italic;
+    letter-spacing: 0.02em;
+}
+
+.admin-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-topbar .btn-admin-site {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--admin-bordeaux);
+    background: #fff;
+    border: 1px solid rgba(139, 44, 44, 0.25);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-topbar .btn-admin-site:hover {
+    background: var(--admin-bordeaux);
+    color: #fff;
+    border-color: var(--admin-bordeaux);
+    box-shadow: 0 6px 18px rgba(139, 44, 44, 0.25);
+}
+
+.admin-content {
+    flex: 1;
+    padding: 32px 36px 48px;
+}
+
+.admin-page-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--admin-or);
+    margin-bottom: 8px;
+}
+
+.admin-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid rgba(139, 44, 44, 0.1);
+    box-shadow: 0 12px 40px rgba(63, 44, 36, 0.07);
+    padding: 28px 32px;
+    max-width: 920px;
+}
+
+.admin-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #5c4a42;
+}
+
+/* Mobile sidebar toggle */
+.admin-sidebar-toggle {
+    display: none;
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    z-index: 200;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: var(--admin-bordeaux);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(107, 30, 30, 0.45);
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .admin-sidebar-toggle {
+        display: flex;
+    }
+
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-shell.sidebar-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    .admin-main {
+        width: 100%;
+    }
+
+    .admin-content {
+        padding: 24px 18px 80px;
+    }
+}

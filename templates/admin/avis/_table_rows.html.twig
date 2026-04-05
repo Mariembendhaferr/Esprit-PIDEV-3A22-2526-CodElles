@@ -1,0 +1,30 @@
+{% for avis in avis_list %}
+    <tr>
+        <td data-label="Date">{{ avis.dateAvis ? avis.dateAvis|date('d/m/Y H:i') : '—' }}</td>
+        <td data-label="Voyageur">{{ avis.user.prenom }} {{ avis.user.nom }}</td>
+        <td data-label="Activité">{{ avis.activite.nomActivite }}</td>
+        <td data-label="Note">
+            {% if avis.note %}
+                <span class="admin-stars" aria-label="Note {{ avis.note }} sur 5">
+                    {% for i in 1..5 %}
+                        <i class="fas fa-star" style="opacity: {{ i <= avis.note ? 1 : 0.22 }}"></i>
+                    {% endfor %}
+                </span>
+            {% else %}
+                <span class="text-muted">—</span>
+            {% endif %}
+        </td>
+        <td data-label="Commentaire">{{ avis.commentaire|length > 100 ? avis.commentaire|slice(0, 100) ~ '…' : avis.commentaire }}</td>
+        <td data-label="Actions" class="admin-table-actions">
+            <a href="{{ path('app_admin_avis_edit', {id: avis.id}) }}" class="admin-btn-ghost"><i class="fas fa-pen"></i> Modifier</a>
+            <form method="post" action="{{ path('app_admin_avis_delete', {id: avis.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cet avis ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avis.id) }}">
+                <button type="submit" class="admin-btn-danger">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="6" class="admin-table-empty-cell">Aucun résultat ne correspond aux critères.</td>
+    </tr>
+{% endfor %}

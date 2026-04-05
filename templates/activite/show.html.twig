@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ activite.nomActivite }} — Activités{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/activites-public.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<main class="activite-page activite-page--detail">
+    <div class="container py-5">
+        <nav class="activite-breadcrumb mb-4" aria-label="Fil d’Ariane">
+            <a href="{{ path('app_activites') }}" class="activite-back-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Toutes les activités
+            </a>
+        </nav>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success activite-alert mb-4" role="alert">{{ message }}</div>
+        {% endfor %}
+
+        <header class="activite-detail-header mb-5">
+            <div class="row g-4 align-items-start">
+                <div class="col-lg-5">
+                    {% if activite.imageActivite %}
+                        <figure class="activite-detail-figure mb-0">
+                            <img src="{{ asset(activite.imageActivite) }}" alt="" class="activite-detail-img" loading="eager" width="600" height="400">
+                        </figure>
+                    {% else %}
+                        <div class="activite-detail-placeholder">
+                            <i class="bi bi-compass" aria-hidden="true"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-lg-7">
+                    <p class="activite-detail-cat text-muted small mb-2">{{ activite.categorieActivite }}</p>
+                    <h1 class="activite-detail-title">{{ activite.nomActivite }}</h1>
+                    <div class="activite-detail-chips mb-3">
+                        {% if not activite.disponibiliteActivite %}
+                            <span class="badge activite-chip activite-chip--off">Indisponible</span>
+                        {% else %}
+                            <span class="badge activite-chip activite-chip--ok">Disponible</span>
+                        {% endif %}
+                        <span class="activite-detail-price">{{ activite.coutActivite|number_format(2, ',', ' ') }} €</span>
+                        {% if activite.dureeActivite %}
+                            <span class="text-muted">· Durée : {{ activite.dureeActivite }} min</span>
+                        {% endif %}
+                    </div>
+                    {% if activite.localisationActivite %}
+                        <p class="activite-detail-loc mb-2">
+                            <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ activite.localisationActivite }}
+                        </p>
+                    {% endif %}
+                    {% if activite.capaciteMaxActivite %}
+                        <p class="activite-detail-cap text-muted small mb-0">
+                            Capacité maximale : {{ activite.capaciteMaxActivite }} personnes
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <section class="activite-section mb-5" aria-labelledby="desc-activite">
+            <h2 id="desc-activite" class="activite-section-title">Présentation</h2>
+            {% if activite.descriptionActivite %}
+                <div class="activite-detail-desc">{{ activite.descriptionActivite|nl2br }}</div>
+            {% else %}
+                <p class="text-muted mb-0">Aucune description détaillée pour cette activité.</p>
+            {% endif %}
+        </section>
+
+        {# Bloc unifié : liste + formulaire #}
+        <section class="activite-avis-hub" aria-labelledby="avis-hub-title">
+            <div class="activite-avis-hub-head">
+                <div class="activite-avis-hub-head-main">
+                    <h2 id="avis-hub-title" class="activite-avis-hub-title">
+                        <i class="bi bi-chat-heart me-2" aria-hidden="true"></i>Avis & expériences
+                    </h2>
+                    <p class="activite-avis-hub-intro text-muted mb-0">
+                        Lisez les retours des voyageurs et partagez le vôtre. Après envoi, vous pourrez <strong>modifier ou supprimer</strong> votre avis depuis cet appareil (identité du voyageur choisie dans la liste).
+                    </p>
+                </div>
+                <div class="activite-avis-hub-head-art" aria-hidden="true">
+                    <img src="{{ asset('images/avis-envelopes.png') }}" alt="" class="activite-avis-hub-img" width="400" height="280" loading="lazy" decoding="async">
+                </div>
+            </div>
+
+            <div class="activite-avis-hub-panel">
+                <div class="row g-0">
+                    <div class="col-lg-7 activite-avis-hub-col activite-avis-hub-col--list">
+                        <div class="activite-avis-hub-col-inner">
+                            <h3 class="activite-avis-subtitle">Ce qu’en disent les voyageurs</h3>
+                            {% if avis_list is empty %}
+                                <p class="text-muted activite-avis-empty mb-0">Soyez le premier à partager votre expérience sur cette activité.</p>
+                            {% else %}
+                                <ul class="list-unstyled activite-avis-list mb-0">
+                                    {% for av in avis_list %}
+                                        <li class="activite-avis-item">
+                                            <div class="activite-avis-head">
+                                                <span class="activite-avis-author">{{ av.user.prenom }} {{ av.user.nom }}</span>
+                                                {% if av.dateAvis %}
+                                                    <span class="activite-avis-date">{{ av.dateAvis|date('d/m/Y') }}</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if av.note %}
+                                                <div class="activite-avis-stars" aria-label="Note : {{ av.note }} sur 5">
+                                                    {% for i in 1..5 %}
+                                                        <i class="fas fa-star{% if i > av.note %} activite-star-empty{% endif %}" aria-hidden="true"></i>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            <p class="activite-avis-text mb-2">{{ av.commentaire|nl2br }}</p>
+                                            {% if visitor_user_id is not null and av.user.id == visitor_user_id %}
+                                                <div class="activite-avis-actions">
+                                                    <a href="{{ path('app_activite_avis_edit', { activiteId: activite.id, avisId: av.id }) }}" class="btn btn-sm activite-avis-btn-edit">
+                                                        <i class="bi bi-pencil me-1" aria-hidden="true"></i>Modifier
+                                                    </a>
+                                                    <form method="post" action="{{ path('app_activite_avis_delete', { activiteId: activite.id, avisId: av.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cet avis définitivement ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_avis_' ~ av.id) }}">
+                                                        <button type="submit" class="btn btn-sm btn-link activite-avis-btn-delete text-danger p-0 align-baseline">Supprimer</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-lg-5 activite-avis-hub-col activite-avis-hub-col--form">
+                        <div class="activite-avis-form-panel">
+                            <h3 class="activite-form-panel-title">
+                                <span class="activite-form-panel-icon" aria-hidden="true"><i class="bi bi-pen"></i></span>
+                                Rédiger un avis
+                            </h3>
+                            <p class="activite-form-panel-lead small text-muted">
+                                Choisissez votre profil, une note optionnelle et votre commentaire.
+                            </p>
+                            {{ form_start(form, { attr: { class: 'activite-avis-form', novalidate: 'novalidate' } }) }}
+                                {{ form_errors(form) }}
+                                <div class="mb-3">
+                                    {{ form_label(form.user) }}
+                                    {{ form_widget(form.user) }}
+                                    {{ form_errors(form.user) }}
+                                </div>
+                                <div class="mb-3 activite-star-field">
+                                    {{ form_label(form.note) }}
+                                    <div class="activite-star-rating" id="avis-star-rating" data-star-rating>
+                                        {% for child in form.note %}
+                                            {{ form_widget(child, { attr: { class: 'activite-star-input', 'data-index': loop.index0 } }) }}
+                                            <label for="{{ child.vars.id }}" class="activite-star-face {% if child.vars.value is empty %}activite-star-face--empty{% endif %}" title="{{ child.vars.label|e('html_attr') }}">
+                                                {% if child.vars.value is empty %}
+                                                    <span class="activite-star-no">Sans note</span>
+                                                {% else %}
+                                                    <i class="fas fa-star" aria-hidden="true" data-star-n="{{ child.vars.value }}"></i>
+                                                {% endif %}
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="activite-star-hint mb-0">Étoiles ou « Sans note ».</p>
+                                    {{ form_errors(form.note) }}
+                                </div>
+                                <div class="mb-0">
+                                    {{ form_label(form.commentaire) }}
+                                    {{ form_widget(form.commentaire) }}
+                                    {{ form_errors(form.commentaire) }}
+                                </div>
+                                <button type="submit" class="btn btn-primary activite-submit w-100 mt-3">Publier l’avis</button>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            var root = document.getElementById('avis-star-rating');
+            if (!root) return;
+            function paint() {
+                var checked = root.querySelector('input[type="radio"]:checked');
+                var val = 0;
+                if (checked) {
+                    var v = checked.value;
+                    val = v === '' ? 0 : parseInt(v, 10);
+                    if (isNaN(val)) val = 0;
+                }
+                root.querySelectorAll('.activite-star-face i.fa-star').forEach(function (icon) {
+                    var n = parseInt(icon.getAttribute('data-star-n'), 10);
+                    var on = val > 0 && n <= val;
+                    icon.style.opacity = on ? '1' : '0.3';
+                    icon.style.color = on ? '#c4a574' : '#a89888';
+                });
+            }
+            root.querySelectorAll('input[type="radio"]').forEach(function (inp) {
+                inp.addEventListener('change', paint);
+            });
+            paint();
+        })();
+    </script>
+{% endblock %}

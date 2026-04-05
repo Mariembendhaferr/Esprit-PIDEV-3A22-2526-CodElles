@@ -1,0 +1,110 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Réclamations{% endblock %}
+{% block admin_heading %}Réclamations{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Suivi des réclamations et demandes clients</p>
+    <a href="{{ path('app_admin_reclamations_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvelle réclamation</a>
+</div>
+
+<form method="get" id="admin-reclamation-filters" class="admin-filter-bar" action="{{ path('app_admin_reclamations') }}">
+    <div class="admin-filter-bar-inner">
+        <div class="admin-filter-field admin-filter-field--grow">
+            <label class="admin-filter-label" for="filter-q-rec">Recherche</label>
+            <input type="search" name="q" id="filter-q-rec" class="form-control admin-filter-input" value="{{ filter_q }}" placeholder="Titre, description, nom…" autocomplete="off">
+        </div>
+        <div class="admin-filter-field">
+            <label class="admin-filter-label" for="filter-statut-rec">Statut</label>
+            <select name="statut" id="filter-statut-rec" class="form-select admin-filter-select">
+                <option value="">Tous</option>
+                <option value="En attente" {{ filter_statut == 'En attente' ? 'selected' }}>En attente</option>
+                <option value="En cours" {{ filter_statut == 'En cours' ? 'selected' }}>En cours</option>
+                <option value="Traité" {{ filter_statut == 'Traité' ? 'selected' }}>Traité</option>
+            </select>
+        </div>
+        <div class="admin-filter-field">
+            <label class="admin-filter-label" for="filter-prio-rec">Priorité</label>
+            <select name="priorite" id="filter-prio-rec" class="form-select admin-filter-select">
+                <option value="">Toutes</option>
+                <option value="Faible" {{ filter_priorite == 'Faible' ? 'selected' }}>Faible</option>
+                <option value="Moyenne" {{ filter_priorite == 'Moyenne' ? 'selected' }}>Moyenne</option>
+                <option value="Élevée" {{ filter_priorite == 'Élevée' ? 'selected' }}>Élevée</option>
+            </select>
+        </div>
+        <div class="admin-filter-field admin-filter-field--action">
+            <span class="admin-filter-label admin-filter-label--spacer" aria-hidden="true">&nbsp;</span>
+            <a href="{{ path('app_admin_reclamations') }}" class="admin-filter-reset">Réinitialiser</a>
+        </div>
+    </div>
+    <p class="admin-filter-hint mb-0"><i class="fas fa-info-circle"></i> La recherche et les filtres s’appliquent automatiquement (liste mise à jour sans recharger la page).</p>
+</form>
+
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Demandeur</th>
+                <th>Titre</th>
+                <th>Statut</th>
+                <th>Priorité</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="admin-reclamation-tbody">
+            {% include 'admin/reclamation/_table_rows.html.twig' %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var form = document.getElementById('admin-reclamation-filters');
+    var tbody = document.getElementById('admin-reclamation-tbody');
+    if (!form || !tbody) return;
+
+    function debounce(fn, ms) {
+        var t;
+        return function () {
+            clearTimeout(t);
+            var args = arguments;
+            t = setTimeout(function () { fn.apply(null, args); }, ms);
+        };
+    }
+
+    function syncUrl() {
+        var fd = new FormData(form);
+        var params = new URLSearchParams();
+        fd.forEach(function (v, k) { if (v !== '') params.set(k, v); });
+        var qs = params.toString();
+        history.replaceState(null, '', qs ? '?' + qs : window.location.pathname);
+    }
+
+    function fetchRows() {
+        var fd = new FormData(form);
+        var params = new URLSearchParams();
+        fd.forEach(function (v, k) { if (v !== '') params.set(k, v); });
+        params.set('partial', '1');
+        fetch(form.getAttribute('action') + '?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                tbody.innerHTML = html;
+                syncUrl();
+            })
+            .catch(function () {});
+    }
+
+    var debouncedFetch = debounce(fetchRows, 320);
+    form.querySelectorAll('input[name="q"]').forEach(function (el) {
+        el.addEventListener('input', debouncedFetch);
+    });
+    form.querySelectorAll('select').forEach(function (el) {
+        el.addEventListener('change', fetchRows);
+    });
+})();
+</script>
+{% endblock %}

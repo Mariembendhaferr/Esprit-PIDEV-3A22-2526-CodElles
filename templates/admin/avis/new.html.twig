@@ -1,0 +1,13 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Nouvel avis{% endblock %}
+{% block admin_heading %}Nouvel avis{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Renseigner l’avis : voyageur, activité, note et commentaire.</p>
+</div>
+<div class="admin-table-wrap" style="padding: 28px 32px;">
+    {% include 'admin/avis/_form.html.twig' %}
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Modifier l’avis{% endblock %}
+{% block admin_heading %}Modifier l’avis{% endblock %}
+
+{% block admin_body %}
+<div class="admin-crud-head">
+    <p class="admin-crud-title mb-0">Avis #{{ avis.id }} · {{ avis.dateAvis ? avis.dateAvis|date('d/m/Y H:i') : '' }}</p>
+</div>
+<div class="admin-table-wrap" style="padding: 28px 32px;">
+    {% include 'admin/avis/_form.html.twig' %}
+</div>
+{% endblock %}
