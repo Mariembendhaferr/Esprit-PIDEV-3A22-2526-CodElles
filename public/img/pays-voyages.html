@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Doura Mondo — Voyages en France</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* On réutilise tes variables de inspirations.html */
+        :root {
+            --bordeaux: #8B2C2C;
+            --or: #9B7240;
+            --beige-lux: #E8DDC9;
+            --dark: #1a0f0f;
+            --fond-nav: #FCF8F0;
+        }
+
+        body { background: #faf7f2; font-family: 'Montserrat', sans-serif; }
+
+        /* --- NAVBAR (Recopiée de ton code) --- */
+        .navbar-premium { background-color: var(--fond-nav) !important; border-bottom: 1px solid rgba(139, 44, 44, 0.1); padding: 0 60px !important; sticky: top; z-index: 1000; }
+        .logo-script { font-family: 'Pinyon Script', cursive !important; font-size: 50px !important; color: var(--bordeaux) !important; margin: 0; }
+        .logo-subtitle { font-size: 8px; letter-spacing: 4.5px; text-transform: uppercase; color: var(--or); }
+
+        /* --- LAYOUT TYPE EVANEOS --- */
+        .main-wrapper { display: flex; min-height: calc(100vh - 72px); }
+
+        /* Côté Gauche : Contenu (60%) */
+        .content-side { width: 60%; padding: 40px 60px; overflow-y: auto; }
+        
+        /* Côté Droit : Carte (40% - Fixe) */
+        .map-side { width: 40%; position: sticky; top: 72px; height: calc(100vh - 72px); background: #e5e3df; border-left: 1px solid rgba(155, 114, 64, 0.2); }
+        #map-iframe { width: 100%; height: 100%; border: none; filter: sepia(20%) contrast(90%); }
+
+        /* --- TITRE ET DESCRIPTION --- */
+        .country-title { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; color: var(--bordeaux); margin-bottom: 20px; }
+        .country-desc { font-family: 'Cormorant Garamond', serif; font-size: 20px; line-height: 1.8; color: #4a3728; margin-bottom: 30px; }
+
+        /* --- FILTRES (Style épuré) --- */
+        .filter-strip { display: flex; gap: 15px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(155, 114, 64, 0.1); }
+        .filter-select { border: 1px solid #ddd; padding: 10px 15px; border-radius: 5px; font-size: 13px; font-family: 'Montserrat'; cursor: pointer; }
+
+        /* --- GRILLE D'OFFRES (Verticale comme sur ta capture) --- */
+        .offers-list { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .offer-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; text-decoration: none; color: inherit; }
+        .offer-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .offer-img { width: 100%; height: 200px; object-fit: cover; }
+        .offer-body { padding: 20px; }
+        .offer-price { color: var(--bordeaux); font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+        .offer-name { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 10px; }
+        
+        /* --- AVIS --- */
+        .reviews-summary { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 40px; display: flex; align-items: center; gap: 20px; border: 1px solid var(--beige-lux); }
+        .rating-big { font-size: 32px; font-weight: 700; color: var(--or); }
+        .stars { color: #f1c40f; }
+
+        @media (max-width: 992px) {
+            .main-wrapper { flex-direction: column-reverse; }
+            .content-side, .map-side { width: 100%; position: relative; height: auto; }
+            .map-side { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-premium">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <div class="logo-luxe-wrapper">
+                    <h1 class="logo-script">Doura Mondo</h1>
+                    <div class="logo-subtitle">Voyages d'Exception</div>
+                </div>
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="destinations.html">Destinations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="inspirations.html">Inspirations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="content-side">
+            <nav aria-label="breadcrumb" style="font-size: 12px; margin-bottom: 20px;">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Accueil</a></li>
+                    <li class="breadcrumb-item active">Voyage en France</li>
+                </ol>
+            </nav>
+
+            <h1 class="country-title">Nos circuits en France</h1>
+            
+            <div class="country-desc">
+                Choisir un circuit en France, c'est découvrir un patrimoine millénaire, des terroirs d'exception et une gastronomie mondialement réputée. Des châteaux de la Loire aux côtes d'Azur, laissez-vous guider.
+            </div>
+
+            <div class="reviews-summary">
+                <div class="rating-big">4.9/5</div>
+                <div>
+                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <div style="font-size: 12px; color: #666;">Basé sur 128 avis voyageurs</div>
+                </div>
+            </div>
+
+            <div class="filter-strip">
+                <select class="filter-select"><option>Durée</option></select>
+                <select class="filter-select"><option>Profil voyageur</option></select>
+                <select class="filter-select"><option>Budget</option></select>
+                <div style="margin-left: auto; font-size: 13px; align-self: center;">16 idées d'itinéraires</div>
+            </div>
+
+            <div class="offers-list">
+                <a href="#" class="offer-card">
+                    <img src="img/carousel-2.jpg" class="offer-img">
+                    <div class="offer-body">
+                        <div class="offer-price">À partir de 4 500 €</div>
+                        <h3 class="offer-name">Châteaux & Terroirs de la Loire</h3>
+                        <div style="font-size: 12px; color: #777;"><i class="far fa-clock"></i> 7 Jours • Privé</div>
+                    </div>
+                </a>
+                <a href="#" class="offer-card">
+                    <img src="img/destination-4.jpg" class="offer-img">
+                    <div class="offer-body">
+                        <div class="offer-price">À partir de 6 200 €</div>
+                        <h3 class="offer-name">Lumières de la Côte d'Azur</h3>
+                        <div style="font-size: 12px; color: #777;"><i class="far fa-clock"></i> 10 Jours • Gastronomie</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="map-side">
+            <iframe id="map-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5206240.231149463!2d-1.4285810777420503!3d46.22763800000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd54a02933785731%3A0x6bfd3f9ee30379d!2sFrance!5e0!3m2!1sfr!2stn!4v1700000000000!5m2!1sfr!2stn" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </div>
+
+</body>
+</html>
