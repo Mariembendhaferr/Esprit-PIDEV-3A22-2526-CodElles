@@ -1,0 +1,138 @@
+{% extends 'client/base_client.html.twig' %}
+{% block title %}Mes activités favoris – Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/clientActivite.css') }}">
+<link rel="stylesheet" href="{{ asset('css/favoriteActivite.css') }}">
+
+{% endblock %}
+
+{% block body %}
+<div class="client-container" style="padding-bottom: 0;">
+
+    {# ── Hero ── #}
+    <div class="fav-hero">
+        <h1>Mes Activités Favorites</h1>
+        <p>Vos expériences sauvegardées, prêtes à être vécues</p>
+        <div id="favCount" class="fav-hero-count" style="display:none;">
+            <i class="fa-solid fa-heart"></i>
+            <span id="favCountNum">0</span> activité(s) sauvegardée(s)
+        </div>
+    </div>
+
+    {# ── Empty state ── #}
+    <div id="favEmpty" class="fav-empty">
+        <div class="fav-empty-icon">💔</div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:26px; color:#2d1810; margin:0 0 10px;">
+            Aucun favori pour l'instant
+        </h3>
+        <p style="color:#8B0000; margin:0 0 28px; font-size:14px;">
+            Parcourez nos activités et cliquez sur ❤️ pour sauvegarder vos préférées
+        </p>
+        <a href="{{ path('app_client_activities') }}"
+           style="background:linear-gradient(135deg,#7A0000,#A52020); color:white; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(122,0,0,0.3);">
+            <i class="fa-solid fa-map-location-dot"></i> Découvrir les activités
+        </a>
+    </div>
+
+    {# ── Favorites list ── #}
+    <div id="favList" class="fav-list"></div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    renderFavorites();
+});
+
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem('doura_favorites') || '[]'); }
+    catch(e) { return []; }
+}
+
+function renderFavorites() {
+    const favs  = getFavorites();
+    const list  = document.getElementById('favList');
+    const empty = document.getElementById('favEmpty');
+    const count = document.getElementById('favCount');
+    const countNum = document.getElementById('favCountNum');
+
+    list.innerHTML = '';
+
+    if (!favs.length) {
+        empty.style.display = 'block';
+        count.style.display = 'none';
+        return;
+    }
+
+    empty.style.display = 'none';
+    count.style.display = 'inline-flex';
+    countNum.textContent = favs.length;
+
+    favs.forEach((f, index) => {
+        const card = document.createElement('div');
+        card.className = 'fav-card';
+        card.id = 'fav-card-' + f.id;
+        card.style.animationDelay = (index * 0.07) + 's';
+
+        card.innerHTML = `
+            <div class="fav-rank">${index + 1}</div>
+
+            <div class="fav-card-img-wrap">
+                ${f.image
+                    ? `<img src="${f.image}" alt="${escapeHtml(f.nom)}"
+                           onerror="this.parentElement.innerHTML='<div class=fav-card-img-placeholder><i class=fa-solid fa-image></i></div>'">`
+                    : `<div class="fav-card-img-placeholder"><i class="fa-solid fa-image"></i></div>`
+                }
+                <span class="fav-card-cat">❤ Favori</span>
+            </div>
+
+            <div class="fav-card-body">
+                <div>
+                    <div class="fav-card-title">${escapeHtml(f.nom)}</div>
+                    <div class="fav-card-meta">
+                        ${f.localisation ? `<span><i class="fa-solid fa-location-dot"></i>${escapeHtml(f.localisation)}</span>` : ''}
+                        ${f.duree ? `<span><i class="fa-solid fa-clock"></i>${f.duree} min</span>` : ''}
+                        ${f.categorie ? `<span><i class="fa-solid fa-tag"></i>${escapeHtml(f.categorie)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="fav-card-footer">
+                    <div class="fav-card-price">
+                        ${parseFloat(f.prix).toFixed(2).replace('.', ',')} DT
+                        <small>/ pers.</small>
+                    </div>
+                    <div class="fav-card-actions">
+                        <button class="btn-remove" onclick="removeFav(${f.id})">
+                            <i class="fa-solid fa-heart"></i> Retirer
+                        </button>
+                        <a href="/activities/${f.id}" class="btn-view">
+                            Voir plus <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function removeFav(id) {
+    const card = document.getElementById('fav-card-' + id);
+    if (card) {
+        card.classList.add('removing');
+        setTimeout(() => {
+            let favs = getFavorites().filter(f => f.id !== id);
+            localStorage.setItem('doura_favorites', JSON.stringify(favs));
+            renderFavorites();
+        }, 350);
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+{% endblock %}

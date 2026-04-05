@@ -47,6 +47,7 @@
             <i class="fa-solid fa-filter"></i> Filtrer
         </button>
     </div>
+
 </form>
 
 <div class="table-card">
@@ -98,6 +99,10 @@
                 </td>
                 <td>
                     <div class="actions">
+                        <a href="{{ path('app_fournisseur_activite_dashboard', {'id': f.id}) }}" 
+                        class="act-btn" style="background:#FFF3E0; color:#C9A84C;" title="Dashboard">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </a>
                         <a href="{{ path('app_fournisseur_activite_edit', {'id': f.id}) }}" class="act-btn act-edit" title="Modifier">
                             <i class="fa-solid fa-pen"></i>
                         </a>

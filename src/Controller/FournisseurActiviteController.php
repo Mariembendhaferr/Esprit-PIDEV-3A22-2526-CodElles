@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\ActiviteRepository;
 
 #[Route('/fournisseur/activite')]
 final class FournisseurActiviteController extends AbstractController
@@ -81,6 +82,43 @@ public function index(Request $request, FournisseurActiviteRepository $repo): Re
         return $this->render('fournisseur_activite/new.html.twig', [
             'fournisseur_activite' => $fournisseurActivite,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}/dashboard', name: 'app_fournisseur_activite_dashboard', methods: ['GET'])]
+    public function dashboard(FournisseurActivite $fournisseur): Response
+    {
+        $activites = $fournisseur->getActivites();
+    
+        // ── Stats ────────────────────────────────────────────
+        $totalActivites     = count($activites);
+        $activitesAcceptees = 0;
+        $revenuTotal        = 0;
+        $dureeTotale        = 0;
+        $parCategorie       = [];
+        $derniereActivite   = null;
+    
+        foreach ($activites as $a) {
+            if ($a->getStatutActivite() === 'acceptee') $activitesAcceptees++;
+            $revenuTotal  += $a->getCoutActivite();
+            $dureeTotale  += $a->getDureeActivite();
+            $cat = $a->getCategorieActivite() ?? 'Autre';
+            $parCategorie[$cat] = ($parCategorie[$cat] ?? 0) + 1;
+            if (!$derniereActivite || $a->getId() > $derniereActivite->getId()) {
+                $derniereActivite = $a;
+            }
+        }
+    
+        return $this->render('fournisseur_activite/dashboard.html.twig', [
+            'fournisseur' => $fournisseur,
+            'stats' => [
+                'totalActivites'     => $totalActivites,
+                'activitesAcceptees' => $activitesAcceptees,
+                'revenuTotal'        => $revenuTotal,
+                'dureeMoyenne'       => $totalActivites > 0 ? $dureeTotale / $totalActivites : 0,
+                'parCategorie'       => $parCategorie,
+                'derniereActivite'   => $derniereActivite,
+            ],
         ]);
     }
 

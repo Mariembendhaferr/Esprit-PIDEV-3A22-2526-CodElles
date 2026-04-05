@@ -77,7 +77,7 @@
                 {% endfor %}
             </div>
 
-            <div class="form-group" >
+            <div class="form-group">
                 <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8B0000; margin-bottom:6px; display:block;">Disponibilité</label>
                 <label class="toggle-wrap">
                     {{ form_widget(form.disponibiliteActivite, {'attr': {'class': 'toggle-input'}}) }}
@@ -105,7 +105,7 @@
                 <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8B0000; margin-bottom:8px; display:block;">
                     <i class="fa-solid fa-map"></i> Choisir sur la carte
                 </label>
-                <div style="width:100%; height:350px; border:2px solid #E8D8C8; border-radius:10px; overflow:hidden;">
+                <div style="width:100%; height:300px; border:2px solid #E8D8C8; border-radius:10px; overflow:hidden; position:relative; z-index:0;">
                     <div id="osmMap" style="width:100%; height:100%;"></div>
                 </div>
                 <small style="color:#A08070; font-size:11px; margin-top:6px; display:block;">
@@ -120,7 +120,21 @@
 
             <div class="form-group col-span-2">
                 {{ form_label(form.imageActivite) }}
-                {{ form_widget(form.imageActivite, {'attr': {'placeholder': 'https://...'}}) }}
+                <div style="display:flex; gap:10px; align-items:center;">
+                    {{ form_widget(form.imageActivite, {'attr': {'placeholder': 'https://...'}}) }}
+                    <button type="button" id="pexelsBtn"
+                        style="background:#05A081; color:white; border:none; border-radius:10px; padding:10px 16px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <i class="fa-solid fa-image"></i> Auto Pexels
+                    </button>
+                </div>
+                {# Single preview block — no duplicates #}
+                <div id="imgPreview" style="display:none; margin-top:10px;">
+                    <img id="previewImg" src=""
+                        style="width:100%; height:auto; max-height:400px; object-fit:contain; border-radius:10px; border:2px solid #E8D8C8; background:#F2E8D9;">
+                    <small style="color:#A08070; font-size:11px; margin-top:4px; display:block;">
+                        Image trouvée sur Pexels — cliquez "Auto Pexels" pour en chercher une autre
+                    </small>
+                </div>
                 <span class="field-error" id="err-image"></span>
                 {% for error in form.imageActivite.vars.errors %}
                     <span class="field-error show">{{ error.message }}</span>
@@ -148,21 +162,22 @@
         </button>
     </div>
 
-
     {{ form_end(form) }}
 
-    {# ── Load Leaflet then our JS files, all after form_end ── #}
+    {# ── Assets after form_end, inside the div ── #}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="{{ asset('js/activite-validation.js') }}"></script>
     <script src="{{ asset('js/activite-wikipedia.js') }}"></script>
     <script src="{{ asset('js/activite-map.js') }}"></script>
+    <script src="{{ asset('js/activite-pexels.js') }}"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         initActiviteValidation('activiteForm');
         initWikipediaAutofill('autoFillBtn', 'descActivite', 'desc-count');
         initActiviteMap();
+        initPexelsAutofill();
     });
     </script>
 

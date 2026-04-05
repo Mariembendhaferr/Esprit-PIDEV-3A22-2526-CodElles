@@ -13,6 +13,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Service\PexelsService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/activite')]
 final class ActiviteController extends AbstractController
@@ -89,14 +91,18 @@ final class ActiviteController extends AbstractController
     }
 
     // ── EXPORT PDF ────────────────────────────────────────────
-    // Must be before /{id} routes to avoid conflict
     #[Route('/export-pdf', name: 'app_activite_export_pdf', methods: ['GET'])]
     public function exportPdf(ActiviteRepository $repo): Response
     {
         $activites = $repo->findAll();
-        $html = $this->renderView('activite/pdf.html.twig', [
+        $html = $this->renderView('activite/activites_export.html.twig', [
             'activites' => $activites,
-            'date'      => new \DateTime(),
+            'generatedAt'      => new \DateTime(),
+            'filters'     => [
+            'search'    => '',
+            'categorie' => '',
+            'sortPrix'  => '',
+        ],
         ]);
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml($html);
@@ -133,6 +139,68 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
+    #[Route('/stats', name: 'app_activite_stats', methods: ['GET'])]
+    public function stats(
+        ActiviteRepository $repo,
+        \App\Repository\FournisseurActiviteRepository $fRepo
+    ): Response {
+        $all = $repo->findAll();
+    
+        $total       = count($all);
+        $disponibles = count(array_filter($all, fn($a) => $a->isDisponibiliteActivite()));
+        $enAttente   = count(array_filter($all, fn($a) => $a->getStatutActivite() === 'en_attente'));
+        $acceptees   = count(array_filter($all, fn($a) => $a->getStatutActivite() === 'acceptee'));
+        $refusees    = count(array_filter($all, fn($a) => $a->getStatutActivite() === 'refusee'));
+    
+        $prixTotal = 0;
+        $parCategorie = [];
+        foreach ($all as $a) {
+            $prixTotal += $a->getCoutActivite();
+            $cat = $a->getCategorieActivite() ?? 'Autre';
+            $parCategorie[$cat] = ($parCategorie[$cat] ?? 0) + 1;
+        }
+    
+        // Top 5 plus chères
+        $sorted = $all;
+        usort($sorted, fn($a, $b) => $b->getCoutActivite() <=> $a->getCoutActivite());
+        $topActivites = array_slice($sorted, 0, 5);
+    
+        return $this->render('activite/stats.html.twig', [
+            'stats' => [
+                'total'            => $total,
+                'disponibles'      => $disponibles,
+                'prixMoyen'        => $total > 0 ? $prixTotal / $total : 0,
+                'totalFournisseurs'=> count($fRepo->findAll()),
+                'enAttente'        => $enAttente,
+                'acceptees'        => $acceptees,
+                'refusees'         => $refusees,
+                'parCategorie'     => $parCategorie,
+                'topActivites'     => $topActivites,
+            ],
+            'catLabels' => array_keys($parCategorie),   // ← ADD
+            'catVals'   => array_values($parCategorie), // ← ADD
+        ]);
+    }
+
+    #[Route('/pexels-search', name: 'app_activite_pexels', methods: ['GET'])]
+    public function pexelsSearch(Request $request, PexelsService $pexels): JsonResponse
+    {
+        $query = $request->query->get('q', '');
+        if (!$query) {
+            return new JsonResponse(['error' => 'No query'], 400);
+        }
+
+        $url = $pexels->searchImage($query);
+
+        return new JsonResponse(['url' => $url]);
+    }
+
+    #[Route('/favorites', name: 'app_client_favorites', methods: ['GET'])]
+    public function favorites(): Response
+    {
+        return $this->render('client/favorites.html.twig');
+    }
+
     #[Route('/reponse/{token}/refuser', name: 'app_activite_refuser', methods: ['GET'])]
     public function refuser(string $token, ActiviteRepository $repo, EntityManagerInterface $em): Response
     {
@@ -158,12 +226,34 @@ final class ActiviteController extends AbstractController
 
     // ── SHOW ──────────────────────────────────────────────────
     // /{id} routes come LAST to avoid conflicts
-    #[Route('/{id}', name: 'app_activite_show', methods: ['GET'])]
+   /* #[Route('/{id}', name: 'app_activite_show', methods: ['GET'])]
     public function show(Activite $activite): Response
     {
         return $this->render('activite/show.html.twig', ['activite' => $activite]);
+    }*/
+
+
+        #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
+public function show(Activite $activite, ActiviteRepository $repo): Response
+{
+    if (!$activite->isDisponibiliteActivite()) {
+        throw $this->createNotFoundException('Cette activité n\'est pas disponible');
     }
 
+    $related = $repo->createQueryBuilder('a')
+        ->where('a.categorieActivite = :cat')
+        ->andWhere('a.id != :id')
+        //->setParameter('cat', strtolower($activite->getCategorieActivite()))
+        ->setParameter('id', $activite->getId())
+        ->setMaxResults(3)
+        ->getQuery()
+        ->getResult();
+
+    return $this->render('client/show.html.twig', [
+        'activite'         => $activite,
+        'relatedActivites' => $related,
+    ]);
+}
     // ── EDIT ──────────────────────────────────────────────────
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $em, MailerInterface $mailer): Response
@@ -210,6 +300,8 @@ final class ActiviteController extends AbstractController
         return $this->redirectToRoute('app_activite_index', [], Response::HTTP_SEE_OTHER);
     }
 
+
+
     // ── PRIVATE HELPER ────────────────────────────────────────
     private function notifierFournisseurs(
         Activite $activite,
@@ -254,4 +346,6 @@ final class ActiviteController extends AbstractController
             $mailer->send($email);
         }
     }
+
+    
 }

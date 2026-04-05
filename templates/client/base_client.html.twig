@@ -30,6 +30,10 @@
 
     <link href="{{ asset('css/doura-mondo-base.css') }}" rel="stylesheet">
 
+    <link href="{{ asset('css/favoriteActivite.css') }}" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="{{ asset('images/icon.png') }}">
+
     {% block stylesheets %}{% endblock %}
 
 </head>
@@ -71,9 +75,30 @@
                             <a class="nav-link" href="#"
                                >Inspirations</a>
                         </li>
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="#">Activités</a>
+                        </li>-->
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ path('app_client_activities') }}"
+                            id="activitesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Activités
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="activitesDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_client_activities') }}">
+                                        <i class="fa-solid fa-map-location-dot me-2"></i> Toutes les activités
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_client_favorites') }}">
+                                        <i class="fa-solid fa-heart me-2" style="color:#E53935;"></i> Mes Favoris
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="#">Réservations</a>
                         </li>

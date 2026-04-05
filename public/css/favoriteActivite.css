@@ -1,0 +1,383 @@
+
+/* ── Hero ── */
+.fav-hero {
+    text-align: center;
+    padding: 48px 20px 32px;
+    position: relative;
+}
+.fav-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    color: #2d1810;
+    font-weight: 800;
+    margin: 0 0 8px;
+}
+.fav-hero p {
+    color: #8B0000;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+}
+.fav-hero-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #7A0000, #A52020);
+    color: white;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 14px;
+}
+
+/* ── Empty state ── */
+.fav-empty {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(139,0,0,0.07);
+    margin: 0 20px;
+}
+.fav-empty-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: pulse-heart 1.5s ease-in-out infinite;
+}
+@keyframes pulse-heart {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.1); }
+}
+
+/* ── Favorites list ── */
+.fav-list {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Favorite card ── */
+.fav-card {
+    display: flex;
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(139,0,0,0.08);
+    border-left: 4px solid #C9A84C;
+    transition: all 0.25s ease;
+    position: relative;
+    animation: slideInCard 0.4s ease both;
+}
+.fav-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(139,0,0,0.14);
+    border-left-color: #8B0000;
+}
+@keyframes slideInCard {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Stagger animation delay */
+.fav-card:nth-child(1) { animation-delay: 0.05s; }
+.fav-card:nth-child(2) { animation-delay: 0.10s; }
+.fav-card:nth-child(3) { animation-delay: 0.15s; }
+.fav-card:nth-child(4) { animation-delay: 0.20s; }
+.fav-card:nth-child(5) { animation-delay: 0.25s; }
+
+/* ── Rank badge ── */
+.fav-rank {
+    position: absolute;
+    top: 12px;
+    left: -2px;
+    width: 28px;
+    height: 28px;
+    background: #C9A84C;
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 6px 6px 0;
+    z-index: 2;
+}
+
+/* ── Card image ── */
+.fav-card-img-wrap {
+    width: 220px;
+    min-width: 220px;
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.fav-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.fav-card:hover .fav-card-img-wrap img {
+    transform: scale(1.06);
+}
+.fav-card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #E8D8C8, #D4BFA8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #A08070;
+    font-size: 40px;
+}
+.fav-card-cat {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(139,0,0,0.85);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(4px);
+}
+
+/* ── Card body ── */
+.fav-card-body {
+    padding: 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.fav-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d1810;
+    margin: 0 0 6px;
+    line-height: 1.3;
+}
+.fav-card-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.fav-card-meta span { display: flex; align-items: center; gap: 4px; }
+.fav-card-meta i { color: #C9A84C; }
+
+/* ── Card footer ── */
+.fav-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.fav-card-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: #8B0000;
+}
+.fav-card-price small {
+    font-size: 11px;
+    font-weight: 500;
+    color: #999;
+    margin-left: 3px;
+}
+.fav-card-actions { display: flex; gap: 8px; }
+
+.btn-view {
+    background: linear-gradient(135deg, #7A0000, #A52020);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(122,0,0,0.25);
+}
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(122,0,0,0.35);
+    color: white;
+}
+
+.btn-remove {
+    background: white;
+    color: #E53935;
+    border: 1.5px solid #E53935;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+.btn-remove:hover {
+    background: #E53935;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ── Heart animation on remove ── */
+@keyframes heartBeat {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.3); }
+    50%  { transform: scale(0.9); }
+    75%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.btn-remove:active i {
+    animation: heartBeat 0.4s ease;
+}
+
+/* ── Removing animation ── */
+.fav-card.removing {
+    animation: slideOutCard 0.35s ease forwards;
+}
+@keyframes slideOutCard {
+    to { opacity: 0; transform: translateX(60px); max-height: 0; margin: 0; padding: 0; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .fav-card { flex-direction: column; }
+    .fav-card-img-wrap { width: 100%; min-width: 100%; height: 180px; }
+    .fav-hero h1 { font-size: 28px; }
+}
+
+
+/*for the favorite button in the nav bar*/
+/* Dropdown container */
+.navbar-premium .dropdown-menu {
+    border: none;
+    border-radius: 14px;
+    padding: 10px 0;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    min-width: 220px;
+    margin-top: 10px;
+    animation: fadeSlide 0.25s ease;
+}
+
+.navbar-premium .dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* Animation */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Dropdown items */
+.navbar-premium .dropdown-item {
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2d1810;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.navbar-premium .dropdown-item:hover {
+    background: linear-gradient(135deg, #7A0000, #A52020);
+    color: white;
+    transform: translateX(3px);
+}
+
+/* Icons inside */
+.navbar-premium .dropdown-item i {
+    width: 18px;
+    text-align: center;
+}
+
+/* Divider */
+.navbar-premium .dropdown-divider {
+    margin: 6px 0;
+    opacity: 0.2;
+}
+
+
+
+/*favorite button*/
+       body { background: linear-gradient(135deg, #f5f1ed 0%, #faf9f7 100%); margin: 0; padding: 0; }
+        .client-container-detail { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+
+        /* ── Favorite Button ── */
+        .fav-btn {
+            position: absolute; top: 16px; left: 16px; z-index: 10;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: white; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+        .fav-btn:hover { transform: scale(1.1); }
+        .fav-btn.active { background: #fff0f0; }
+        .fav-btn .fa-heart { color: #ddd; transition: color 0.2s; }
+        .fav-btn.active .fa-heart { color: #E53935; }
+
+        /* ── Image lightbox ── */
+        .detail-image { cursor: zoom-in; }
+        .lightbox {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+        .lightbox-close {
+            position: absolute; top: 20px; right: 24px;
+            color: white; font-size: 32px; cursor: pointer; line-height: 1;
+        }
+
+        /* ── Map ── */
+        #activityMap { width: 100%; height: 280px; border-radius: 12px; border: 1.5px solid #E8D8C8; }
+
+        /* ── Copy toast ── */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: #2E7D32; color: white; padding: 12px 24px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 9999;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── Related activities ── */
+        .related-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; margin-top: 20px;
+        }
+        .related-card {
+            background: white; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 12px rgba(139,0,0,0.07); transition: all 0.2s ease;
+            text-decoration: none; display: block;
+        }
+        .related-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(139,0,0,0.12); }
+        .related-card-img { height: 140px; object-fit: cover; width: 100%; background: #F2E8D9; }
+        .related-card-body { padding: 12px 14px; }
+        .related-card-title { font-weight: 700; color: #2d1810; font-size: 14px; margin: 0 0 4px; }
+        .related-card-price { font-weight: 800; color: #8B0000; font-size: 13px; }
+        .related-card-meta { font-size: 11px; color: #999; margin-top: 4px; }

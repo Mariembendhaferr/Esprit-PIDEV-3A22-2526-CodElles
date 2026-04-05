@@ -1,42 +1,65 @@
-{% extends 'base.html.twig' %}
+{% extends 'client/base_client.html.twig' %}
 
-{% block title %}{{ activite.nomActivite }} - Activités{% endblock %}
+{% block title %}{{ activite.nomActivite }} - Doura Mondo{% endblock %}
 
 {% block stylesheets %}
-    <style>
-        body { background: linear-gradient(135deg, #f5f1ed 0%, #faf9f7 100%); margin: 0; padding: 0; }
-        .client-container-detail { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-    </style>
     <link rel="stylesheet" href="{{ asset('css/clientActivite.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="{{ asset('css/favoriteActivite.css') }}">
+ 
 {% endblock %}
 
 {% block body %}
 <div class="client-container-detail">
-    <!-- Back Button -->
+
+    {# Toast notification #}
+    <div id="toast" class="toast">✓ Lien copié dans le presse-papiers !</div>
+
+    {# Lightbox #}
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightboxImg" src="" alt="">
+    </div>
+
     <a href="{{ path('app_client_activities') }}" class="back-link">
         <i class="fa-solid fa-arrow-left"></i> Retour aux activités
     </a>
 
     <div class="detail-wrapper">
-        <!-- Image Section -->
-        <div class="detail-image">
+
+        {# ── Image with favorite button ── #}
+        <div class="detail-image" style="position:relative;">
             {% if activite.imageActivite %}
-                <img src="{{ activite.imageActivite }}" alt="{{ activite.nomActivite }}" onerror="this.src='https://via.placeholder.com/800x500?text=Activité'">
+                <img src="{{ activite.imageActivite }}"
+                     alt="{{ activite.nomActivite }}"
+                     onclick="openLightbox(this.src)"
+                     onerror="this.src='https://via.placeholder.com/800x500?text=Activité'">
             {% else %}
                 <div class="placeholder-image-large">
                     <i class="fa-solid fa-image"></i>
                 </div>
             {% endif %}
             <span class="badge-category">{{ activite.categorieActivite }}</span>
+
+            {# Favorite button #}
+            <button class="fav-btn" id="favBtn" onclick="toggleFavorite(
+                        {{ activite.id }},
+                        '{{ activite.nomActivite|e('js') }}',
+                        '{{ activite.imageActivite|e('js') }}',
+                        {{ activite.coutActivite }},
+                        '{{ activite.localisationActivite|e('js') }}',
+                        {{ activite.dureeActivite }},
+                        '{{ activite.categorieActivite|e('js') }}'
+                    )"
+                 title="Ajouter aux favoris">
+                <i class="fa-solid fa-heart"></i>
+            </button>
         </div>
 
-        <!-- Content Grid -->
         <div class="detail-grid">
-            <!-- Main Content -->
             <div class="detail-main">
                 <h1>{{ activite.nomActivite }}</h1>
 
-                <!-- Price & Meta -->
                 <div class="detail-header-meta">
                     <div class="price-section">
                         <div class="price-label">À partir de</div>
@@ -48,94 +71,87 @@
                     </div>
                 </div>
 
-                <!-- Quick Info -->
                 <div class="quick-info">
                     <div class="info-item">
                         <i class="fa-solid fa-clock"></i>
-                        <div>
-                            <strong>Durée</strong>
-                            <p>{{ activite.dureeActivite }} minutes</p>
-                        </div>
+                        <div><strong>Durée</strong><p>{{ activite.dureeActivite }} minutes</p></div>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-users"></i>
-                        <div>
-                            <strong>Capacité</strong>
-                            <p>{{ activite.capaciteMaxActivite }} personnes</p>
-                        </div>
+                        <div><strong>Capacité</strong><p>{{ activite.capaciteMaxActivite }} personnes</p></div>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-location-dot"></i>
-                        <div>
-                            <strong>Lieu</strong>
-                            <p>{{ activite.localisationActivite }}</p>
-                        </div>
+                        <div><strong>Lieu</strong><p>{{ activite.localisationActivite }}</p></div>
                     </div>
                 </div>
 
-                <!-- Description -->
+                {# ── Description ── #}
                 <div class="detail-section">
                     <h2>À propos de cette activité</h2>
                     <p class="description-text">{{ activite.descriptionActivite }}</p>
                 </div>
 
-                <!-- Suppliers Section -->
-                {% if activite.fournisseurs|length > 0 %}
-                    <div class="detail-section">
-                        <h2>Partenaires & Fournisseurs</h2>
-                        <div class="suppliers-grid">
-                            {% for fournisseur in activite.fournisseurs %}
-                                <div class="supplier-card">
-                                    <div class="supplier-header">
-                                        <i class="fa-solid fa-building"></i>
-                                        <h3>{{ fournisseur.nomFournisseur }}</h3>
-                                    </div>
-
-                                    {% if fournisseur.specialiteFournisseur %}
-                                        <p class="supplier-specialty">{{ fournisseur.specialiteFournisseur }}</p>
-                                    {% endif %}
-
-                                    <div class="supplier-info">
-                                        {% if fournisseur.emailFournisseur %}
-                                            <div class="supplier-contact">
-                                                <i class="fa-solid fa-envelope"></i>
-                                                <a href="mailto:{{ fournisseur.emailFournisseur }}">{{ fournisseur.emailFournisseur }}</a>
-                                            </div>
-                                        {% endif %}
-
-                                        {% if fournisseur.telephoneFournisseur %}
-                                            <div class="supplier-contact">
-                                                <i class="fa-solid fa-phone"></i>
-                                                <a href="tel:{{ fournisseur.telephoneFournisseur }}">{{ fournisseur.telephoneFournisseur }}</a>
-                                            </div>
-                                        {% endif %}
-
-                                        {% if fournisseur.adresseFournisseur %}
-                                            <div class="supplier-contact">
-                                                <i class="fa-solid fa-map-location-dot"></i>
-                                                <span>{{ fournisseur.adresseFournisseur }}</span>
-                                            </div>
-                                        {% endif %}
-
-                                        {% if fournisseur.websiteFournisseur %}
-                                            <div class="supplier-contact">
-                                                <i class="fa-solid fa-globe"></i>
-                                                <a href="{{ fournisseur.websiteFournisseur }}" target="_blank">Visiter le site</a>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                {# ── Interactive Map ── #}
+                {% if activite.latitudeActivite and activite.longitudeActivite %}
+                <div class="detail-section">
+                    <h2>Localisation</h2>
+                    <div id="activityMap"></div>
+                </div>
                 {% endif %}
+
+                {# ── Suppliers ── #}
+                {% if activite.fournisseurs|length > 0 %}
+                <div class="detail-section">
+                    <h2>Partenaires & Fournisseurs</h2>
+                    <div class="suppliers-grid">
+                        {% for fournisseur in activite.fournisseurs %}
+                            <div class="supplier-card">
+                                <div class="supplier-header">
+                                    <i class="fa-solid fa-building"></i>
+                                    <h3>{{ fournisseur.nomFournisseur }}</h3>
+                                </div>
+                                {% if fournisseur.specialiteFournisseur %}
+                                    <p class="supplier-specialty">{{ fournisseur.specialiteFournisseur }}</p>
+                                {% endif %}
+                                <div class="supplier-info">
+                                    {% if fournisseur.emailFournisseur %}
+                                        <div class="supplier-contact">
+                                            <i class="fa-solid fa-envelope"></i>
+                                            <a href="mailto:{{ fournisseur.emailFournisseur }}">{{ fournisseur.emailFournisseur }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if fournisseur.telephoneFournisseur %}
+                                        <div class="supplier-contact">
+                                            <i class="fa-solid fa-phone"></i>
+                                            <a href="tel:{{ fournisseur.telephoneFournisseur }}">{{ fournisseur.telephoneFournisseur }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if fournisseur.adresseFournisseur %}
+                                        <div class="supplier-contact">
+                                            <i class="fa-solid fa-map-location-dot"></i>
+                                            <span>{{ fournisseur.adresseFournisseur }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if fournisseur.websiteFournisseur %}
+                                        <div class="supplier-contact">
+                                            <i class="fa-solid fa-globe"></i>
+                                            <a href="{{ fournisseur.websiteFournisseur }}" target="_blank">Visiter le site</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
 
-            <!-- Sidebar -->
+            {# ── Sidebar ── #}
             <div class="detail-sidebar">
                 <div class="booking-card">
                     <h3>Réserver cette activité</h3>
-                    
                     <div class="booking-info">
                         <div class="info-row">
                             <span>Prix par personne</span>
@@ -150,33 +166,171 @@
                             <strong>{{ activite.capaciteMaxActivite }} pers.</strong>
                         </div>
                     </div>
-
                     <button class="btn-booking">
                         <i class="fa-solid fa-calendar"></i>
                         Demander une réservation
                     </button>
-
                     <p class="booking-note">Contactez directement nos partenaires pour organiser votre expérience.</p>
                 </div>
 
-                <!-- Share Section -->
+                {# ── Share Section (wired) ── #}
                 <div class="share-section">
                     <p>Partager</p>
                     <div class="share-buttons">
-                        <button class="share-btn" title="Partager sur Facebook">
+                        <button class="share-btn" title="Partager sur Facebook" onclick="shareFacebook()">
                             <i class="fa-brands fa-facebook"></i>
                         </button>
-                        <button class="share-btn" title="Partager sur Twitter">
+                        <button class="share-btn" title="Partager sur Twitter" onclick="shareTwitter()">
                             <i class="fa-brands fa-twitter"></i>
                         </button>
-                        <button class="share-btn" title="Copier le lien">
+                        <button class="share-btn" title="Copier le lien" onclick="copyLink()">
                             <i class="fa-solid fa-link"></i>
                         </button>
                     </div>
                 </div>
+
+                {# ── Favorite card ── #}
+                <div class="booking-card" style="text-align:center;">
+                    <button id="favBtnSidebar" onclick="toggleFavorite({{ activite.id }}, '{{ activite.nomActivite|e('js') }}', '{{ activite.imageActivite|e('js') }}', {{ activite.coutActivite }})"
+                        style="width:100%; padding:12px; border:2px solid #E8D8C8; background:white; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+                        <i class="fa-solid fa-heart" style="color:#ddd;"></i>
+                        <span id="favText">Ajouter aux favoris</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
+    {# ── Related Activities ── #}
+    {% if relatedActivites is defined and relatedActivites|length > 0 %}
+    <div style="margin-top:48px;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:26px; color:#2d1810; margin-bottom:6px;">
+            Vous aimerez aussi
+        </h2>
+        <p style="color:#8B0000; font-size:13px; margin-bottom:0;">
+            Autres activités en <strong>{{ activite.categorieActivite }}</strong>
+        </p>
+        <div class="related-grid">
+            {% for related in relatedActivites %}
+                <a href="{{ path('app_client_activity_show', {'id': related.id}) }}" class="related-card">
+                    {% if related.imageActivite %}
+                        <img src="{{ related.imageActivite }}" alt="{{ related.nomActivite }}" class="related-card-img"
+                             onerror="this.style.background='#F2E8D9'">
+                    {% else %}
+                        <div class="related-card-img" style="display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-image" style="color:#D4BFA8;font-size:32px;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="related-card-body">
+                        <div class="related-card-title">{{ related.nomActivite }}</div>
+                        <div class="related-card-price">{{ related.coutActivite|number_format(2, ',', ' ') }} DT</div>
+                        <div class="related-card-meta">
+                            <i class="fa-solid fa-clock"></i> {{ related.dureeActivite }} min
+                            {% if related.localisationActivite %}
+                                &nbsp;·&nbsp;<i class="fa-solid fa-location-dot"></i> {{ related.localisationActivite }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
+{# ── Pass data to JS ── #}
+<script>
+const ACTIVITE_ID  = {{ activite.id }};
+const ACTIVITE_LAT = {{ activite.latitudeActivite ?? 'null' }};
+const ACTIVITE_LNG = {{ activite.longitudeActivite ?? 'null' }};
+const ACTIVITE_NOM = '{{ activite.nomActivite|e('js') }}';
+const PAGE_URL     = window.location.href;
+</script>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── 1. Interactive Map ─────────────────────────────────
+    if (ACTIVITE_LAT && ACTIVITE_LNG && document.getElementById('activityMap')) {
+        const map = L.map('activityMap').setView([ACTIVITE_LAT, ACTIVITE_LNG], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([ACTIVITE_LAT, ACTIVITE_LNG])
+            .addTo(map)
+            .bindPopup(`<strong>${ACTIVITE_NOM}</strong>`)
+            .openPopup();
+    }
+
+    // ── 2. Favorites ───────────────────────────────────────
+    updateFavUI();
+});
+
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem('doura_favorites') || '[]'); }
+    catch(e) { return []; }
+}
+function saveFavorites(favs) {
+    localStorage.setItem('doura_favorites', JSON.stringify(favs));
+}
+
+function toggleFavorite(id, nom, image, prix, localisation, duree, categorie) {
+    let favs = getFavorites();
+    const idx = favs.findIndex(f => f.id === id);
+    if (idx === -1) {
+        favs.push({ id, nom, image, prix, localisation, duree, categorie });
+    } else {
+        favs.splice(idx, 1);
+    }
+    saveFavorites(favs);
+    updateFavUI();
+}
+
+function updateFavUI() {
+    const favs   = getFavorites();
+    const isFav  = favs.some(f => f.id === ACTIVITE_ID);
+    const btn    = document.getElementById('favBtn');
+    const btnS   = document.getElementById('favBtnSidebar');
+    const favTxt = document.getElementById('favText');
+
+    if (btn) btn.classList.toggle('active', isFav);
+    if (btnS) {
+        const icon = btnS.querySelector('i');
+        if (icon) icon.style.color = isFav ? '#E53935' : '#ddd';
+        btnS.style.borderColor = isFav ? '#E53935' : '#E8D8C8';
+        btnS.style.background  = isFav ? '#fff0f0' : 'white';
+    }
+    if (favTxt) favTxt.textContent = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+}
+
+// ── 3. Lightbox ────────────────────────────────────────────
+function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ── 4. Share buttons ───────────────────────────────────────
+function shareFacebook() {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(PAGE_URL)}`, '_blank', 'width=600,height=400');
+}
+function shareTwitter() {
+    const text = `Découvrez "${ACTIVITE_NOM}" sur Doura Mondo !`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(PAGE_URL)}`, '_blank', 'width=600,height=400');
+}
+function copyLink() {
+    navigator.clipboard.writeText(PAGE_URL).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    });
+}
+</script>
 {% endblock %}

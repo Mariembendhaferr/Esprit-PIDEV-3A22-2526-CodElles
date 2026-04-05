@@ -26,6 +26,7 @@
            class="nav-link {{ app.request.attributes.get('_route') starts with 'app_fournisseur' ? 'active' : '' }}">
             <i class="fa-solid fa-building"></i> Fournisseurs
         </a>
+        <a href="{{ path('app_activite_stats') }}" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Statistiques</a>
     </nav>
 
     <div class="nav-bottom">
