@@ -86,7 +86,7 @@
                             {{ loop.index }}
                         </div>
                         <div>
-                            <a href="{{ path('app_activite_show', {'id': a.id}) }}" style="font-weight:700; color:#2A1010; font-size:13px; text-decoration:none;">{{ a.nomActivite }}</a>
+                            <a href="{{ path('app_activite_stats', {'id': a.id}) }}" style="font-weight:700; color:#2A1010; font-size:13px; text-decoration:none;">{{ a.nomActivite }}</a>
                             <p style="margin:2px 0 0; font-size:11px; color:#999;">{{ a.categorieActivite }}</p>
                         </div>
                     </div>

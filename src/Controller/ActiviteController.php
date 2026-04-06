@@ -115,7 +115,6 @@ final class ActiviteController extends AbstractController
     }
 
     // ── FOURNISSEUR RESPONSE ROUTES ───────────────────────────
-    // Must be before /{id} routes to avoid Symfony matching 'reponse' as an ID
     #[Route('/reponse/{token}/accepter', name: 'app_activite_accepter', methods: ['GET'])]
     public function accepter(string $token, ActiviteRepository $repo, EntityManagerInterface $em): Response
     {
