@@ -45,4 +45,22 @@ class ActiviteRepository extends ServiceEntityRepository
             ->groupBy('a.categorieActivite')
             ->getQuery()->getResult();
     }
+
+    public function findRelatedActivities(Activite $activite, int $limit = 3): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->where('a.categorieActivite = :category')
+            ->andWhere('a.id != :id')
+            // ->andWhere('a.disponibiliteActivite = true')  // REMOVED (as requested)
+            ->setParameter('category', $activite->getCategorieActivite())
+            ->setParameter('id', $activite->getId())
+            ->orderBy('a.id', 'DESC')  // stable + fast
+            ->setMaxResults($limit);
+
+        // If your related cards use a.fournisseurs, add this to avoid lazy-loading:
+        $qb->leftJoin('a.fournisseurs', 'f')
+        ->addSelect('f');
+
+        return $qb->getQuery()->getResult();
+    }
 }

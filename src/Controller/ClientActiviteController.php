@@ -8,79 +8,78 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\PexelsService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/activities')]
 final class ClientActiviteController extends AbstractController
 {
     #[Route('/', name: 'app_client_activities', methods: ['GET'])]
-    public function index(Request $request, ActiviteRepository $repo): Response
+    
+    #[Route('/explore', name: 'app_client_explore', methods: ['GET'])]
+    public function explore(ActiviteRepository $repo): Response
     {
-        $search    = $request->query->get('search', '');
-        $categorie = $request->query->get('categorie', '');
-        $sortPrix  = $request->query->get('sortPrix', '');
-        $page      = max(1, (int)$request->query->get('page', 1));
-        $itemsPerPage = 12;
+        $activites = $repo->createQueryBuilder('a')
+            ->where('a.disponibiliteActivite = true')
+            ->orderBy('a.nomActivite', 'ASC')
+            ->getQuery()
+            ->getResult();
 
-        $qb = $repo->createQueryBuilder('a')
-            ->where('a.disponibiliteActivite = :available')
-            ->setParameter('available', true);
-
-        if ($search) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    $qb->expr()->like('a.nomActivite',        ':search'),
-                    $qb->expr()->like('a.descriptionActivite',':search'),
-                    $qb->expr()->like('a.localisationActivite',':search'),
-                )
-            )->setParameter('search', '%' . $search . '%');
-        }
-
-        if ($categorie) {
-            $qb->andWhere('a.categorieActivite = :categorie')
-               ->setParameter('categorie', $categorie);
-        }
-
-        if ($sortPrix === 'asc') {
-            $qb->orderBy('a.coutActivite', 'ASC');
-        } elseif ($sortPrix === 'desc') {
-            $qb->orderBy('a.coutActivite', 'DESC');
-        } else {
-            $qb->orderBy('a.nomActivite', 'ASC');
-        }
-
-        // Get total count
-        $countQb = clone $qb;
-        $total = count($countQb->getQuery()->getResult());
-        $totalPages = ceil($total / $itemsPerPage);
-        $page = min($page, max(1, $totalPages));
-
-        // Apply pagination
-        $activites = $qb->setFirstResult(($page - 1) * $itemsPerPage)
-                         ->setMaxResults($itemsPerPage)
-                         ->getQuery()
-                         ->getResult();
-
-        return $this->render('client/index.html.twig', [
-            'activites'   => $activites,
-            'search'      => $search,
-            'categorie'   => $categorie,
-            'sortPrix'    => $sortPrix,
-            'currentPage' => $page,
-            'totalPages'  => $totalPages,
-            'total'       => $total,
+        return $this->render('clientActivite/explore.html.twig', [
+            'activites' => $activites,
         ]);
     }
+
+    #[Route('/destinations', name: 'app_client_destinations', methods: ['GET'])]
+    public function destinations(ActiviteRepository $repo, PexelsService $pexels): JsonResponse
+    {
+        $locations = $repo->createQueryBuilder('a')
+            ->select('a.localisationActivite as lieu, COUNT(a.id) as nbActivites')
+            ->where('a.disponibiliteActivite = true')
+            ->andWhere('a.localisationActivite IS NOT NULL')
+            ->groupBy('a.localisationActivite')
+            ->orderBy('nbActivites', 'DESC')
+            ->setMaxResults(12)
+            ->getQuery()
+            ->getResult();
+
+        $result = [];
+        foreach ($locations as $loc) {
+            $image = $pexels->searchImage($loc['lieu'] . ' travel destination');
+            $result[] = [
+                'lieu'        => $loc['lieu'],
+                'nbActivites' => $loc['nbActivites'],
+                'image'       => $image,
+            ];
+        }
+
+        return new JsonResponse($result);
+    }
+
+
 
     #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
-    public function show(Activite $activite): Response
+    public function show(int $id, ActiviteRepository $repo): Response
     {
-        // Only show available activities to clients
-        if (!$activite->isDisponibiliteActivite()) {
-            throw $this->createNotFoundException('Cette activité n\'est pas disponible');
+        // Eager load everything in ONE query
+        $activite = $repo->createQueryBuilder('a')
+            ->leftJoin('a.fournisseurs', 'f')
+            ->addSelect('f')
+            ->where('a.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$activite || !$activite->isDisponibiliteActivite()) {
+            throw $this->createNotFoundException('Activité non disponible');
         }
 
-        return $this->render('client/show.html.twig', [
-            'activite' => $activite,
+        $related = $repo->findRelatedActivities($activite, 3);
+
+        return $this->render('clientActivite/show.html.twig', [
+            'activite'         => $activite,
+            'relatedActivites' => $related,
         ]);
     }
+   
 }

@@ -32,6 +32,8 @@
 
     <link href="{{ asset('css/favoriteActivite.css') }}" rel="stylesheet">
 
+    <link href="{{ asset('css/clientActivite.css') }}" rel="stylesheet">
+
     <link rel="icon" type="image/png" href="{{ asset('images/icon.png') }}">
 
     {% block stylesheets %}{% endblock %}
@@ -79,14 +81,15 @@
                             <a class="nav-link" href="#">Activités</a>
                         </li>-->
 
+
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ path('app_client_activities') }}"
+                            <a class="nav-link dropdown-toggle" href="{{ path('app_client_explore') }}"
                             id="activitesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Activités
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="activitesDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="{{ path('app_client_activities') }}">
+                                    <a class="dropdown-item" href="{{ path('app_client_explore') }}">
                                         <i class="fa-solid fa-map-location-dot me-2"></i> Toutes les activités
                                     </a>
                                 </li>

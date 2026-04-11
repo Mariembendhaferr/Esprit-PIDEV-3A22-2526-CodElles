@@ -198,7 +198,7 @@ final class ActiviteController extends AbstractController
     #[Route('/favorites', name: 'app_client_favorites', methods: ['GET'])]
     public function favorites(): Response
     {
-        return $this->render('client/favorites.html.twig');
+        return $this->render('clientActivite/favorites.html.twig');
     }
 
     #[Route('/reponse/{token}/refuser', name: 'app_activite_refuser', methods: ['GET'])]
@@ -225,27 +225,7 @@ final class ActiviteController extends AbstractController
     }
 
     // ── SHOW ──────────────────────────────────────────────────
-    #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
-    public function show(Activite $activite, ActiviteRepository $repo): Response
-    {
-        if (!$activite->isDisponibiliteActivite()) {
-            throw $this->createNotFoundException('Cette activité n\'est pas disponible');
-        }
-
-        $related = $repo->createQueryBuilder('a')
-            ->where('a.categorieActivite = :cat')
-            ->andWhere('a.id != :id')
-            //->setParameter('cat', strtolower($activite->getCategorieActivite()))
-            ->setParameter('id', $activite->getId())
-            ->setMaxResults(3)
-            ->getQuery()
-            ->getResult();
-
-        return $this->render('client/show.html.twig', [
-            'activite'         => $activite,
-            'relatedActivites' => $related,
-        ]);
-    }
+ 
     // ── EDIT ──────────────────────────────────────────────────
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $em, MailerInterface $mailer): Response

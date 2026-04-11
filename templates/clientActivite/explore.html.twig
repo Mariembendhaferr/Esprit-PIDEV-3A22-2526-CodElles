@@ -1,0 +1,401 @@
+{% extends 'clientActivite/base_client.html.twig' %}
+{% block title %}Explorer – Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/clientActivite.css') }}">
+<style>
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# ── Hero ── #}
+<div class="explore-hero">
+    <div class="explore-hero-bg"></div>
+    <div class="explore-hero-content">
+        <h1>Découvrez nos <span>activités</span></h1>
+        <p>Destination ou activité</p>
+        <div style="position:relative; max-width:700px; margin:0 auto; width:100%;">
+            <div class="explore-search-bar" style="position:relative; max-width:700px; margin:0 auto; width:100%; z-index:9999;">
+                <input type="text" id="exploreSearch"
+                       placeholder="Recherchez des destinations ou des choses à faire..."
+                       autocomplete="off">
+                <button class="explore-search-btn" onclick="doSearch()">
+                    <i class="fa-solid fa-magnifying-glass"></i> Rechercher
+                </button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+    </div>
+</div>
+
+{# ── Main Content ── #}
+<div class="explore-content">
+
+    {# ── Destinations Carousel ── #}
+    <div id="destSection">
+        <div class="section-head">
+            <h2>Destinations recommandées</h2>
+
+        </div>
+        
+        <div class="dest-carousel-wrapper">
+            <button class="carousel-btn carousel-prev" onclick="slideDestinations(-1)">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            
+            <div class="dest-carousel" id="destCarousel">
+                <div class="dest-grid" id="destGrid">
+                    {# Skeletons while loading #}
+                    {% for i in 1..6 %}
+                        <div class="dest-tile-skeleton"></div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button class="carousel-btn carousel-next" onclick="slideDestinations(1)">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="carousel-indicators" id="carouselIndicators"></div>
+    </div>
+
+
+    {# ── Categories ── #}
+    <div class="section-head" style="margin-bottom:16px;">
+        <h2>Meilleures activités</h2>
+    </div>
+    <div class="cat-pills" id="catPills">
+        <div class="cat-pill active" data-cat="" onclick="filterCat(this, '')">
+            <i class="fa-solid fa-globe"></i> Toutes
+        </div>
+        <div class="cat-pill" data-cat="sports" onclick="filterCat(this, 'sports')">
+            <i class="fa-solid fa-person-running"></i> Sports
+        </div>
+        <div class="cat-pill" data-cat="culture" onclick="filterCat(this, 'culture')">
+            <i class="fa-solid fa-landmark"></i> Culture
+        </div>
+        <div class="cat-pill" data-cat="nature" onclick="filterCat(this, 'nature')">
+            <i class="fa-solid fa-leaf"></i> Nature
+        </div>
+        <div class="cat-pill" data-cat="aventure" onclick="filterCat(this, 'aventure')">
+            <i class="fa-solid fa-mountain"></i> Aventure
+        </div>
+        <div class="cat-pill" data-cat="gastronomie" onclick="filterCat(this, 'gastronomie')">
+            <i class="fa-solid fa-utensils"></i> Gastronomie
+        </div>
+        <div class="cat-pill" data-cat="plage" onclick="filterCat(this, 'plage')">
+            <i class="fa-solid fa-umbrella-beach"></i> Plage
+        </div>
+        <div class="cat-pill" data-cat="visite" onclick="filterCat(this, 'visite')">
+            <i class="fa-solid fa-binoculars"></i> Visites
+        </div>
+    </div>
+
+    {# ── Activities ── #}
+    <div class="explore-activities-grid" id="activitiesGrid">
+        {% for activite in activites %}
+    <div class="activity-card" style="position:relative;"
+         data-cat="{{ activite.categorieActivite }}"
+         data-loc="{{ activite.localisationActivite }}">
+
+        {# ← Favorite button on image #}
+        <button onclick="toggleFav({{ activite.id }}, '{{ activite.nomActivite|e('js') }}', '{{ activite.imageActivite|e('js') }}', {{ activite.coutActivite }}, '{{ activite.localisationActivite|e('js') }}', {{ activite.dureeActivite }}, '{{ activite.categorieActivite|e('js') }}')"
+            id="fav-{{ activite.id }}"
+            style="position:absolute; top:12px; left:12px; z-index:3; width:36px; height:36px; border-radius:50%; background:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 8px rgba(0,0,0,0.15); transition:all 0.2s;">
+            <i class="fa-solid fa-heart" style="color:#ddd; transition:color 0.2s;"></i>
+        </button>
+
+        <a href="{{ path('app_client_activity_show', {'id': activite.id}) }}"
+           style="text-decoration:none; display:flex; flex-direction:column; flex:1;">
+            <div class="card-image">
+                {% if activite.imageActivite %}
+                    <div class="card-img-wrap"
+                         style="background-image:url('{{ activite.imageActivite }}');"></div>
+                {% else %}
+                    <div class="placeholder-image">
+                        <i class="fa-solid fa-image"></i>
+                    </div>
+                {% endif %}
+                <span class="card-category">{{ activite.categorieActivite }}</span>
+            </div>
+            <div class="card-content">
+                <h3>{{ activite.nomActivite }}</h3>
+                <div class="card-meta">
+                    {% if activite.localisationActivite %}
+                    <div class="meta-item">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>{{ activite.localisationActivite }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="meta-item">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>{{ activite.dureeActivite }} min</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="price">
+                        <span class="amount">{{ activite.coutActivite|number_format(2,',',' ') }} DT</span>
+                    </div>
+                    <span class="card-link" style="pointer-events:none;">
+                        Voir plus <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+{% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// ── All activities data for client-side filtering ──────
+const ALL_ACTIVITIES = [
+    {% for a in activites %}
+    {
+        id:       {{ a.id }},
+        nom:      '{{ a.nomActivite|e('js') }}',
+        cat:      '{{ a.categorieActivite|e('js') }}',
+        loc:      '{{ a.localisationActivite|e('js') }}',
+    },
+    {% endfor %}
+];
+
+// ── Carousel State ─────────────────────────────────────
+let currentSlide = 0;
+const ITEMS_PER_SLIDE = 6;
+let totalDestinations = 0;
+
+// ── Load destinations & initialize carousel ────────────
+async function loadDestinations() {
+    try {
+        const res  = await fetch('/activities/destinations');
+        const data = await res.json();
+        const grid = document.getElementById('destGrid');
+        grid.innerHTML = '';
+        
+        totalDestinations = data.length;
+        
+        if (!data.length) {
+            grid.innerHTML = '<p style="color:#999;grid-column:1/-1;">Aucune destination trouvée.</p>';
+            return;
+        }
+
+        data.forEach(dest => {
+            const tile = document.createElement('div');
+            tile.className = 'dest-tile';
+            tile.onclick = () => filterByLocation(dest.lieu);
+            tile.innerHTML = `
+                ${dest.image
+                    ? `<img src="${dest.image}" alt="${dest.lieu}"
+                           onerror="this.outerHTML='<div class=dest-tile-placeholder><i class=fa-solid\\ fa-map></i></div>'"`
+                    : `<div class="dest-tile-placeholder"><i class="fa-solid fa-map"></i></div>`
+                }
+                <div class="dest-tile-overlay"></div>
+                <div class="dest-tile-name">${dest.lieu}</div>
+                <div class="dest-tile-count">${dest.nbActivites} activité(s)</div>
+            `;
+            grid.appendChild(tile);
+        });
+        
+        currentSlide = 0;
+        updateIndicators();
+        updateCarouselButtons();
+    } catch(e) {
+        console.error('Error loading destinations:', e);
+        document.getElementById('destGrid').innerHTML =
+            '<p style="color:#999;">Erreur de chargement.</p>';
+    }
+}
+
+// ── Carousel Navigation ────────────────────────────────
+function slideDestinations(direction) {
+    const grid = document.getElementById('destGrid');
+    const maxSlide = Math.ceil(totalDestinations / ITEMS_PER_SLIDE) - 1;
+    
+    currentSlide += direction;
+    
+    if (currentSlide < 0) currentSlide = 0;
+    if (currentSlide > maxSlide) currentSlide = maxSlide;
+    
+    grid.style.transform = `translateX(calc(-${currentSlide * 100}% - ${currentSlide * 12}px))`;
+    
+    updateIndicators();
+    updateCarouselButtons();
+}
+
+function updateIndicators() {
+    const maxSlide = Math.ceil(totalDestinations / ITEMS_PER_SLIDE);
+    const box = document.getElementById('carouselIndicators');
+    box.innerHTML = '';
+    
+    for (let i = 0; i < maxSlide; i++) {
+        const dot = document.createElement('div');
+        dot.className = `carousel-indicator ${i === currentSlide ? 'active' : ''}`;
+        dot.onclick = () => {
+            currentSlide = i;
+            slideDestinations(0);
+        };
+        box.appendChild(dot);
+    }
+}
+
+function updateCarouselButtons() {
+    const maxSlide = Math.ceil(totalDestinations / ITEMS_PER_SLIDE) - 1;
+    const prevBtn = document.querySelector('.carousel-prev');
+    const nextBtn = document.querySelector('.carousel-next');
+    
+    if (prevBtn) prevBtn.disabled = currentSlide === 0;
+    if (nextBtn) nextBtn.disabled = currentSlide === maxSlide;
+}
+
+// ── Filter by category ─────────────────────────────────
+function filterCat(el, cat) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+
+    const cards = document.querySelectorAll('#activitiesGrid .activity-card');
+    cards.forEach(card => {
+        const match = !cat || card.dataset.cat === cat;
+        card.style.display = match ? '' : 'none';
+    });
+
+    checkNoResults();
+}
+
+// ── Filter by location (click on destination tile) ─────
+function filterByLocation(location) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.cat-pill[data-cat=""]').classList.add('active');
+
+    const cards = document.querySelectorAll('#activitiesGrid .activity-card');
+    cards.forEach(card => {
+        const match = card.dataset.loc.toLowerCase().includes(location.toLowerCase());
+        card.style.display = match ? '' : 'none';
+    });
+
+    checkNoResults();
+    document.getElementById('activitiesGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Search ─────────────────────────────────────────────
+function doSearch() {
+    const q = document.getElementById('exploreSearch').value.trim().toLowerCase();
+    hideSuggestions();
+    if (!q) {
+        document.querySelectorAll('#activitiesGrid .activity-card')
+            .forEach(c => c.style.display = '');
+        checkNoResults();
+        return;
+    }
+
+    const cards = document.querySelectorAll('#activitiesGrid .activity-card');
+    cards.forEach(card => {
+        const nom = (card.querySelector('h3')?.textContent || '').toLowerCase();
+        const loc = (card.dataset.loc || '').toLowerCase();
+        card.style.display = (nom.includes(q) || loc.includes(q)) ? '' : 'none';
+    });
+
+    checkNoResults();
+    document.getElementById('activitiesGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Live search suggestions ────────────────────────────
+document.getElementById('exploreSearch').addEventListener('input', function () {
+    const q   = this.value.trim().toLowerCase();
+    const box = document.getElementById('searchSuggestions');
+
+    if (q.length < 2) { hideSuggestions(); return; }
+
+    const matches = ALL_ACTIVITIES.filter(a =>
+        a.nom.toLowerCase().includes(q) || a.loc.toLowerCase().includes(q)
+    ).slice(0, 6);
+
+    if (!matches.length) { hideSuggestions(); return; }
+
+    box.innerHTML = matches.map(a => `
+        <div class="search-suggestion-item"
+             onclick="document.getElementById('exploreSearch').value='${a.nom}'; doSearch();">
+            <i class="fa-solid fa-${a.loc ? 'location-dot' : 'map-location-dot'}"></i>
+            <div>
+                <div style="font-weight:600;">${a.nom}</div>
+                ${a.loc ? `<div style="font-size:11px;color:#999;">${a.loc}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+    box.style.display = 'block';
+});
+
+document.getElementById('exploreSearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+});
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.explore-search-bar') && !e.target.closest('.search-suggestions')) {
+        hideSuggestions();
+    }
+});
+
+function hideSuggestions() {
+    document.getElementById('searchSuggestions').style.display = 'none';
+}
+
+// ── Check no results ───────────────────────────────────
+function checkNoResults() {
+    const grid    = document.getElementById('activitiesGrid');
+    const visible = [...grid.querySelectorAll('.activity-card')]
+        .filter(c => c.style.display !== 'none');
+
+    let noRes = grid.querySelector('.no-results');
+    if (!visible.length) {
+        if (!noRes) {
+            noRes = document.createElement('div');
+            noRes.className = 'no-results';
+            noRes.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Aucune activité trouvée';
+            grid.appendChild(noRes);
+        }
+    } else {
+        noRes?.remove();
+    }
+}
+// ── Favorites ──────────────────────────────────────────
+function getFavs() {
+    try { return JSON.parse(localStorage.getItem('doura_favorites') || '[]'); }
+    catch(e) { return []; }
+}
+
+function toggleFav(id, nom, image, prix, localisation, duree, categorie) {
+    let favs = getFavs();
+    const idx = favs.findIndex(f => f.id === id);
+    if (idx === -1) {
+        favs.push({ id, nom, image, prix, localisation, duree, categorie });
+    } else {
+        favs.splice(idx, 1);
+    }
+    localStorage.setItem('doura_favorites', JSON.stringify(favs));
+    updateAllFavBtns();
+}
+
+function updateAllFavBtns() {
+    const favs = getFavs();
+    document.querySelectorAll('[id^="fav-"]').forEach(btn => {
+        const id  = parseInt(btn.id.replace('fav-', ''));
+        const isFav = favs.some(f => f.id === id);
+        const icon  = btn.querySelector('i');
+        if (icon) icon.style.color = isFav ? '#E53935' : '#ddd';
+        btn.style.background = isFav ? '#fff0f0' : 'white';
+    });
+}
+
+// Init favorites state on page load
+document.addEventListener('DOMContentLoaded', updateAllFavBtns);
+
+// ── Initialize on page load ────────────────────────────
+document.addEventListener('DOMContentLoaded', loadDestinations);
+</script>
+{% endblock %}

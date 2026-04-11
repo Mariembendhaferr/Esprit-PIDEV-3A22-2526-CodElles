@@ -1,4 +1,6 @@
-{% extends 'client/base_client.html.twig' %}
+{#Template pour afficher les détails d'une activité côté client.
+Affiche les informations de l'activité, une carte interactive, les fournisseurs associés, et des boutons de partage et de favoris.#}
+{% extends 'clientActivite/base_client.html.twig' %}
 
 {% block title %}{{ activite.nomActivite }} - Doura Mondo{% endblock %}
 
@@ -202,25 +204,24 @@
     </div>
 
     {# ── Related Activities ── #}
-    {% if relatedActivites is defined and relatedActivites|length > 0 %}
-    <div style="margin-top:48px;">
-        <h2 style="font-family:'Playfair Display',serif; font-size:26px; color:#2d1810; margin-bottom:6px;">
+    {% if relatedActivites is defined and relatedActivites is not empty %}
+    <div style="margin-top:60px; padding:40px 0; border-top: 2px solid #E8D8C8;">
+        <h2 style="font-family:'Playfair Display',serif; font-size:28px; color:#2d1810; margin-bottom:8px; font-weight:800;">
             Vous aimerez aussi
         </h2>
-        <p style="color:#8B0000; font-size:13px; margin-bottom:0;">
+        <p style="color:#8B0000; font-size:14px; margin-bottom:28px; font-weight:600;">
             Autres activités en <strong>{{ activite.categorieActivite }}</strong>
         </p>
+        
         <div class="related-grid">
             {% for related in relatedActivites %}
                 <a href="{{ path('app_client_activity_show', {'id': related.id}) }}" class="related-card">
-                    {% if related.imageActivite %}
-                        <img src="{{ related.imageActivite }}" alt="{{ related.nomActivite }}" class="related-card-img"
-                             onerror="this.style.background='#F2E8D9'">
-                    {% else %}
-                        <div class="related-card-img" style="display:flex;align-items:center;justify-content:center;">
-                            <i class="fa-solid fa-image" style="color:#D4BFA8;font-size:32px;"></i>
-                        </div>
-                    {% endif %}
+    <div class="related-card-img"
+        style="background:{% if related.imageActivite %}url('{{ related.imageActivite }}') center/cover no-repeat{% else %}linear-gradient(135deg,#E8D8C8,#D4BFA8){% endif %}; display:flex; align-items:center; justify-content:center;">
+        {% if not related.imageActivite %}
+            <i class="fa-solid fa-image" style="color:#A08070; font-size:28px;"></i>
+        {% endif %}
+    </div>
                     <div class="related-card-body">
                         <div class="related-card-title">{{ related.nomActivite }}</div>
                         <div class="related-card-price">{{ related.coutActivite|number_format(2, ',', ' ') }} DT</div>
@@ -236,8 +237,6 @@
         </div>
     </div>
     {% endif %}
-
-</div>
 
 {# ── Pass data to JS ── #}
 <script>
