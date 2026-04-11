@@ -138,6 +138,7 @@ final class ActiviteController extends AbstractController
         ]);
     }
 
+    //stats
     #[Route('/stats', name: 'app_activite_stats', methods: ['GET'])]
     public function stats(
         ActiviteRepository $repo,
@@ -159,7 +160,7 @@ final class ActiviteController extends AbstractController
             $parCategorie[$cat] = ($parCategorie[$cat] ?? 0) + 1;
         }
     
-        // Top 5 plus chères
+        
         $sorted = $all;
         usort($sorted, fn($a, $b) => $b->getCoutActivite() <=> $a->getCoutActivite());
         $topActivites = array_slice($sorted, 0, 5);
@@ -224,35 +225,27 @@ final class ActiviteController extends AbstractController
     }
 
     // ── SHOW ──────────────────────────────────────────────────
-    // /{id} routes come LAST to avoid conflicts
-   /* #[Route('/{id}', name: 'app_activite_show', methods: ['GET'])]
-    public function show(Activite $activite): Response
+    #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
+    public function show(Activite $activite, ActiviteRepository $repo): Response
     {
-        return $this->render('activite/show.html.twig', ['activite' => $activite]);
-    }*/
+        if (!$activite->isDisponibiliteActivite()) {
+            throw $this->createNotFoundException('Cette activité n\'est pas disponible');
+        }
 
+        $related = $repo->createQueryBuilder('a')
+            ->where('a.categorieActivite = :cat')
+            ->andWhere('a.id != :id')
+            //->setParameter('cat', strtolower($activite->getCategorieActivite()))
+            ->setParameter('id', $activite->getId())
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
 
-        #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
-public function show(Activite $activite, ActiviteRepository $repo): Response
-{
-    if (!$activite->isDisponibiliteActivite()) {
-        throw $this->createNotFoundException('Cette activité n\'est pas disponible');
+        return $this->render('client/show.html.twig', [
+            'activite'         => $activite,
+            'relatedActivites' => $related,
+        ]);
     }
-
-    $related = $repo->createQueryBuilder('a')
-        ->where('a.categorieActivite = :cat')
-        ->andWhere('a.id != :id')
-        //->setParameter('cat', strtolower($activite->getCategorieActivite()))
-        ->setParameter('id', $activite->getId())
-        ->setMaxResults(3)
-        ->getQuery()
-        ->getResult();
-
-    return $this->render('client/show.html.twig', [
-        'activite'         => $activite,
-        'relatedActivites' => $related,
-    ]);
-}
     // ── EDIT ──────────────────────────────────────────────────
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $em, MailerInterface $mailer): Response
