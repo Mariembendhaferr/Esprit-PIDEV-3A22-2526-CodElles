@@ -16,3 +16,7 @@ services:
     App\Service\PexelsService:
         arguments:
             $apiKey: '%pexels_api_key%'
+
+    App\Service\OpenAIService:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY)%'        

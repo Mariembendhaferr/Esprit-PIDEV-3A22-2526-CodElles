@@ -96,11 +96,22 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="{{ path('app_client_favorites') }}">
-                                        <i class="fa-solid fa-heart me-2" style="color:#E53935;"></i> Mes Favoris
+                                        <i class="fa-solid fa-heart me-2" ></i> Mes Favoris
                                     </a>
                                 </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_client_match') }}">
+                                        <i class="fa-solid fa-dice" ></i>L'arène des activités
+                                    </a>
+                                </li>
+                                
+
+                                
                             </ul>
                         </li>
+
+                        
 
                         <li class="nav-item">
                             <a class="nav-link" href="#">Réservations</a>
@@ -374,11 +385,18 @@
     <script src="{{ asset('js/main.js') }}"></script>
 
     <script>
-        $(window).on('load', function () {
+        // Hide spinner on page load with fallback timeout
+        function hideSpinner() {
             if ($('#spinner').length) {
                 $('#spinner').removeClass('show');
             }
-        });
+        }
+
+        $(window).on('load', hideSpinner);
+        $(document).ready(hideSpinner);
+        
+        // Fallback: hide spinner after 3 seconds if not hidden yet
+        setTimeout(hideSpinner, 3000);
     </script>
 
     {% block javascripts %}{% endblock %}

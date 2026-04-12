@@ -1266,3 +1266,289 @@
     .dest-tile { flex: 0 0 calc(50% - 10px); }
     .carousel-btn { width: 38px; height: 38px; }
 }
+/* *****************************************match game styles************************************** */
+/* ══ RESET ══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ══ PAGE ═══════════════════════════════════════════════ */
+.match-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #1a0505 100%);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 20px 60px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ══ SETUP VIEW ═════════════════════════════════════════ */
+#setupView {
+    width: 100%; max-width: 560px;
+    text-align: center;
+    animation: fadeInUp 0.5s ease both;
+}
+.setup-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px; color: white; font-weight: 800;
+    margin: 0 0 8px; text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+.setup-title span { color: #C9A84C; }
+.setup-subtitle { color: rgba(255,255,255,0.6); font-size:16px; margin:0 0 48px; }
+
+.setup-card {
+    background: white; border-radius: 20px; padding: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.setup-card h3 { color: #2d1810; font-size: 18px; font-weight: 700; margin: 0 0 24px; }
+.setup-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #8B0000; margin-bottom: 8px; display: block; text-align: left; }
+.setup-select {
+    width: 100%; padding: 14px 16px; border: 2px solid #E8D8C8;
+    border-radius: 12px; font-size: 14px; font-family: 'Inter', sans-serif;
+    color: #333; outline: none; margin-bottom: 20px;
+    transition: border-color 0.2s; appearance: none; cursor: pointer;
+    background: #FDF8F2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B0000' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 16px center;
+}
+.setup-select:focus { border-color: #8B0000; }
+.setup-btn {
+    width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
+    background: linear-gradient(135deg, #7A0000, #A52020); color: white;
+    border: none; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(122,0,0,0.4);
+    margin-top: 8px;
+}
+.setup-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(122,0,0,0.5); }
+.setup-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ══ GAME VIEW ══════════════════════════════════════════ */
+#gameView { display: none; width: 100%; max-width: 900px; }
+
+.game-header { text-align: center; margin-bottom: 32px; }
+.game-title { font-family: 'Playfair Display', serif; font-size: 28px; color: white; font-weight: 800; margin: 0 0 8px; }
+.round-info { color: rgba(255,255,255,0.6); font-size: 14px; margin: 0 0 16px; }
+
+/* Progress bar */
+.progress-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 20px; height: 6px; max-width: 300px; margin: 0 auto; }
+.progress-bar-fill {
+    height: 100%; border-radius: 20px;
+    background: linear-gradient(90deg, #C9A84C, #E8C070, #C9A84C);
+    background-size: 200% 100%;
+    transition: width 0.4s ease;
+    animation: shimmer 1.5s linear infinite;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.vs-label {
+    text-align: center; color: #C9A84C; font-size: 22px; font-weight: 900;
+    margin: 0 16px; align-self: center; flex-shrink: 0;
+    animation: vsPulse 1.5s ease infinite;
+}
+@keyframes vsPulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(201,168,76,0.5); transform: scale(1); }
+    50%       { text-shadow: 0 0 40px rgba(201,168,76,0.9); transform: scale(1.1); }
+}
+
+.duel-arena {
+    display: flex; align-items: stretch; gap: 0;
+    margin-bottom: 20px;
+}
+
+/* ══ ACTIVITY CARD ══════════════════════════════════════ */
+.duel-card {
+    flex: 1; border-radius: 20px; overflow: hidden; cursor: pointer;
+    position: relative; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    min-height: 420px; display: flex; flex-direction: column;
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+}
+.duel-card.card-enter {
+    animation: cardIn 0.4s ease both;
+}
+@keyframes cardIn {
+    from { opacity:0; transform: scale(0.85) translateY(30px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+}
+.duel-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+
+/* ── Winner flash — golden pulse ── */
+.duel-card.winner-flash {
+    animation: winFlash 0.6s ease forwards;
+}
+@keyframes winFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(201,168,76,1);  filter: brightness(1); }
+    30%  { box-shadow: 0 0 0 20px rgba(201,168,76,0.4); filter: brightness(1.3); }
+    60%  { box-shadow: 0 0 0 40px rgba(201,168,76,0);   filter: brightness(1.1); }
+    100% { box-shadow: 0 8px 32px rgba(0,0,0,0.3);  filter: brightness(1); }
+}
+
+/* ── Loser exit ── */
+.duel-card.loser-exit {
+    animation: loserExit 0.5s ease forwards;
+}
+@keyframes loserExit {
+    0%   { opacity:1; transform: scale(1) rotate(0deg);               filter: grayscale(0); }
+    40%  { opacity:0.7; transform: scale(0.95) rotate(-3deg);          filter: grayscale(0.5); }
+    100% { opacity:0;   transform: scale(0.7) rotate(-12deg) translateY(40px); filter: grayscale(1); }
+}
+
+.duel-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 50%);
+    transition: background 0.3s ease;
+}
+.duel-card:hover .duel-card-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%);
+}
+
+.duel-card-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: transform 0.4s ease;
+}
+.duel-card:hover .duel-card-bg { transform: scale(1.05); }
+
+.duel-card-body {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px; color: white;
+}
+.duel-card-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 0 0 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.duel-card-loc  { font-size: 13px; opacity: 0.8; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.duel-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.duel-tag { background: rgba(201,168,76,0.3); border: 1px solid rgba(201,168,76,0.5); color: #F5E8C0; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; backdrop-filter: blur(4px); }
+.duel-card-desc { font-size: 12px; opacity: 0.75; line-height: 1.5; margin: 0; }
+
+.choose-hint {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(201,168,76,0.9); color: #2d1010; padding: 6px 14px;
+    border-radius: 20px; font-size: 11px; font-weight: 800; opacity: 0;
+    transition: opacity 0.2s; white-space: nowrap; backdrop-filter: blur(4px);
+}
+.duel-card:hover .choose-hint { opacity: 1; }
+
+/* ══ RESULT VIEW ════════════════════════════════════════ */
+#resultView {
+    display: none;
+    width: 100%; max-width: 600px;
+    text-align: center;
+}
+/* Applied by JS after display:block + rAF so the browser paints first */
+#resultView.result-visible {
+    animation: resultEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes resultEntrance {
+    0%   { opacity:0; transform: scale(0.5) translateY(60px); }
+    60%  { transform: scale(1.05) translateY(-10px); }
+    100% { opacity:1; transform: scale(1) translateY(0); }
+}
+
+/* Trophy emoji — bounce in */
+.trophy-emoji {
+    display: inline-block;
+    font-size: 64px; line-height: 1;
+    margin-bottom: 12px;
+    animation: trophyBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+}
+@keyframes trophyBounce {
+    from { transform: scale(0) rotate(-30deg); opacity:0; }
+    to   { transform: scale(1) rotate(0deg);   opacity:1; }
+}
+
+.result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; color: #C9A84C; font-weight: 800;
+    margin: 0 0 8px;
+    animation: goldGlow 2s ease 1s infinite both;
+}
+@keyframes goldGlow {
+    0%, 100% { text-shadow: 0 0 20px rgba(201,168,76,0.5); }
+    50%       { text-shadow: 0 0 40px rgba(201,168,76,1), 0 0 80px rgba(201,168,76,0.4); }
+}
+
+.result-subtitle { color: rgba(255,255,255,0.7); font-size: 16px; margin: 0 0 32px; }
+
+.result-card {
+    background: white; border-radius: 24px; overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5); margin-bottom: 24px;
+    animation: cardReveal 0.7s ease 0.35s both;
+}
+@keyframes cardReveal {
+    from { opacity:0; transform: rotateY(90deg) scale(0.8); }
+    to   { opacity:1; transform: rotateY(0deg)  scale(1); }
+}
+
+.result-card-img { width: 100%; height: 280px; object-fit: cover; display: block; }
+.result-card-img-placeholder {
+    width: 100%; height: 280px;
+    background: linear-gradient(135deg, #3D0000, #8B0000);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.2); font-size: 80px;
+}
+.result-card-body { padding: 28px; text-align: left; }
+.result-card-name { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: #2d1810; margin: 0 0 8px; }
+.result-card-meta { display: flex; gap: 16px; font-size: 13px; color: #8B0000; font-weight: 600; margin-bottom: 16px; flex-wrap: wrap; }
+.result-card-meta span { display: flex; align-items: center; gap: 5px; }
+.result-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.result-tag { background: #FFF3E0; color: #7A3A00; border: 1px solid #FFD9A0; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+/* AI message */
+.ai-message {
+    background: linear-gradient(135deg, #FDF8F2, #FFF3E0);
+    border: 1.5px solid #C9A84C; border-radius: 16px; padding: 20px;
+    margin-top: 16px;
+}
+.ai-message-header { display: flex; align-items: center; gap: 8px; color: #7A3A00; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.ai-message-text { color: #5D4037; font-size: 14px; line-height: 1.7; margin: 0; }
+.ai-loading { display: flex; align-items: center; gap: 8px; color: #C9A84C; font-size: 13px; }
+.ai-loading::before {
+    content: '';
+    width: 16px; height: 16px;
+    border: 2px solid #E8D8C8; border-top-color: #C9A84C;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.result-actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    animation: fadeInUp 0.5s ease 0.8s both;
+}
+@keyframes fadeInUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+.btn-result-primary {
+    flex: 1; padding: 14px; background: linear-gradient(135deg, #7A0000, #A52020);
+    color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: flex; align-items: center;
+    justify-content: center; gap: 8px; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(122,0,0,0.3);
+}
+.btn-result-primary:hover { transform: translateY(-2px); color: white; }
+.btn-result-secondary {
+    flex: 1; padding: 14px; background: white; color: #8B0000;
+    border: 2px solid #E8D8C8; border-radius: 12px; font-size: 14px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+}
+.btn-result-secondary:hover { border-color: #8B0000; transform: translateY(-2px); }
+
+/* ══ CONFETTI ═══════════════════════════════════════════ */
+.confetti-piece {
+    position: fixed; width: 10px; height: 10px; border-radius: 2px;
+    pointer-events: none; z-index: 9999;
+    animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+    100% { transform: translateY(100vh)  rotate(720deg); opacity: 0; }
+}
+
+/* ══ RESPONSIVE ═════════════════════════════════════════ */
+@media(max-width:600px) {
+    .duel-arena { flex-direction: column; }
+    .vs-label { margin: 12px 0; }
+    .duel-card { min-height: 320px; }
+    .setup-title { font-size: 30px; }
+}
