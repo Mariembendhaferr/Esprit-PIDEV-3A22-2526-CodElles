@@ -1,9 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: #F2E8D9; }
+:root {
+    --bordeaux: #5C0000;
+    --bordeaux-light: #7A0000;
+    --bordeaux-dark: #3A0000;
+    --bordeaux-mid: #8B0000;
+    --beige-bg: #F4F1EA;
+    --beige-light: #FDFCF9;
+    --gold: #C5A880;
+    --gold-light: #D4BC9A;
+    --text-dark: #2C2C2C;
+    --text-gray: #6C6C6C;
+    --white: #FFFFFF;
+}
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--beige-bg);
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
 /* ════ SIDEBAR ════ */
-.sidebar { width: 220px; min-height: 100vh; background: #8B0000; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 200; box-shadow: 4px 0 24px rgba(0,0,0,0.3); }
 .sidebar-brand { padding: 20px 16px 18px; border-bottom: 1px solid rgba(201,168,76,0.12); text-align: center; }
 .brand-name { font-family: 'Playfair Display', serif; color: #C9A84C; font-size: 16px; font-weight: 800; letter-spacing: 2px; }
 .brand-sub  { color: rgba(201,168,76,0.35); font-size: 9px; letter-spacing: 1px; margin-top: 2px; }

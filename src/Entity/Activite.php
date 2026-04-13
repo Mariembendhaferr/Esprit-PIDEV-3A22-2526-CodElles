@@ -71,7 +71,7 @@ class Activite
     #[ORM\Column(name: 'assignationToken', length: 100, nullable: true)]
     private ?string $assignationToken = null;
 
-
+    
 
     #[ORM\ManyToMany(targetEntity: FournisseurActivite::class, inversedBy: 'activites')]
     #[ORM\JoinTable(
@@ -81,9 +81,13 @@ class Activite
     )]
     private Collection $fournisseurs;
 
+    #[ORM\ManyToMany(targetEntity: Activite::class, mappedBy: 'bookedByUsers')]
+    private Collection $activitiesBooked;
+
     public function __construct()
     {
         $this->fournisseurs = new ArrayCollection();
+        $this->activitiesBooked = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -153,4 +157,23 @@ class Activite
     }
 
     public function __toString(): string { return $this->nomActivite ?? ''; }
+
+        public function getActivitiesBooked(): Collection
+    {
+        return $this->activitiesBooked;
+    }
+
+    public function addActivityBooked(Activite $activite): static
+    {
+        if (!$this->activitiesBooked->contains($activite)) {
+            $this->activitiesBooked->add($activite);
+        }
+        return $this;
+    }
+
+    public function removeActivityBooked(Activite $activite): static
+    {
+        $this->activitiesBooked->removeElement($activite);
+        return $this;
+    }
 }

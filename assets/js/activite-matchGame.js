@@ -65,7 +65,7 @@ function renderCard(id, a) {
     el.innerHTML = `
         <div class="choose-hint">⚡ Je choisis celle-ci !</div>
         ${a.imageActivite
-            ? `<img class="duel-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" onerror="this.outerHTML='<div class=duel-card-img-placeholder><i class=fa-solid\\ fa-image></i></div>'">`
+            ? `<img class="duel-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" loading="eager" decoding="async" fetchpriority="high" style="display:block;" onerror="this.outerHTML='<div class=duel-card-img-placeholder><i class=fa-solid\\ fa-image></i></div>'">`
             : `<div class="duel-card-img-placeholder"><i class="fa-solid fa-image"></i></div>`
         }
         <div class="duel-card-overlay"></div>
@@ -110,7 +110,7 @@ function showResult() {
     const tags = (a.vibe_tags || [a.categorieActivite]).filter(Boolean).slice(0, 3);
     document.getElementById('resultCard').innerHTML = `
         ${a.imageActivite
-            ? `<img class="result-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" onerror="this.outerHTML='<div class=result-card-img-placeholder>🏆</div>'">`
+            ? `<img class="result-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" loading="eager" decoding="async" fetchpriority="high" style="display:block;" onerror="this.outerHTML='<div class=result-card-img-placeholder>🏆</div>'">`
             : `<div class="result-card-img-placeholder">🏆</div>`
         }
         <div class="result-card-body">

@@ -24,7 +24,8 @@ class PexelsService
             $data = $response->toArray();
 
             if (!empty($data['photos'])) {
-                return $data['photos'][0]['src']['large'];
+                // Use 'large' for lightbox, but also return 'medium' for initial display
+                return $data['photos'][0]['src']['medium']; // 350x for faster loading
             }
         } catch (\Exception $e) {}
 

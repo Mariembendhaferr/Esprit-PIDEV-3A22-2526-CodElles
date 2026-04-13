@@ -1,0 +1,407 @@
+{# Calendar view for user's booked activities #}
+{% extends 'base.html.twig' %}
+
+{% block title %}My Activities Calendar - Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            --secondary-color: #F2E8D9;
+            --accent-color: #C9A84C;
+            --light-bg: #FDFAF5;
+            --border-color: #E8D8C8;
+            --text-dark: #2d1810;
+            --text-light: #8B8680;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(139, 0, 0, 0.08);
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 1200px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .calendar-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: var(--text-dark);
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .calendar-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px 25px;
+            background: var(--light-bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-box .stat-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .stat-box .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        /* FullCalendar Custom Styling */
+        .fc {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .fc .fc-button-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: #6b0000;
+            border-color: #6b0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+        }
+
+        .fc .fc-button-primary.fc-button-active {
+            background-color: #6b0000;
+            border-color: #6b0000;
+        }
+
+        .fc .fc-daygrid-day {
+            border-color: var(--border-color);
+        }
+
+        .fc .fc-daygrid-day:hover {
+            background-color: var(--light-bg);
+        }
+
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: rgba(139, 0, 0, 0.05);
+        }
+
+        .fc .fc-daygrid-day-number {
+            color: var(--text-dark);
+            font-weight: 700;
+            padding: 8px;
+        }
+
+        .fc .fc-col-header-cell {
+            background-color: var(--secondary-color);
+            color: var(--text-dark);
+            font-weight: 700;
+            border-color: var(--border-color);
+        }
+
+        .fc .fc-daygrid-day-frame {
+            height: 120px;
+        }
+
+        .fc .fc-event {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 6px;
+            padding: 2px 4px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fc .fc-event:hover {
+            background-color: #6b0000;
+            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .fc .fc-event-title {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: white;
+        }
+
+        .fc .fc-toolbar {
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Tooltip / Popover */
+        .fc-popover {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(139, 0, 0, 0.15);
+        }
+
+        .fc-popover-title {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Empty State */
+        .calendar-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .calendar-empty i {
+            font-size: 64px;
+            color: var(--border-color);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .calendar-empty h3 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .calendar-empty p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-empty a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-empty a:hover {
+            background-color: #6b0000;
+            transform: translateY(-2px);
+        }
+
+        /* Event Details Modal */
+        .event-details {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+        }
+
+        .event-details.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .event-details h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-weight: 700;
+        }
+
+        .event-details p {
+            color: var(--text-light);
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-container {
+                padding: 15px;
+            }
+
+            .calendar-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .calendar-header h1 {
+                font-size: 24px;
+            }
+
+            .calendar-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .fc .fc-daygrid-day-frame {
+                height: 80px;
+            }
+
+            .fc .fc-event-title {
+                font-size: 11px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="calendar-container">
+    <div class="calendar-header">
+        <h1>📅 My Booked Activities</h1>
+        <div class="calendar-stats">
+            <div class="stat-box">
+                <div class="stat-number" id="total-bookings">0</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="available-spots">0</div>
+                <div class="stat-label">Available Spots</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="booked-spots">0</div>
+                <div class="stat-label">Booked Spots</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar will be rendered here -->
+    <div id="calendar"></div>
+
+    <!-- Event Details Panel -->
+    <div class="event-details" id="eventDetails">
+        <h4 id="eventTitle">Activity Name</h4>
+        <p><strong>Duration:</strong> <span id="eventDuration">-</span> min</p>
+        <p><strong>Location:</strong> <span id="eventLocation">-</span></p>
+        <p><strong>Price:</strong> <span id="eventPrice">-</span> DT</p>
+        <p><strong>Category:</strong> <span id="eventCategory">-</span></p>
+    </div>
+
+    <!-- Empty State (shown when no bookings) -->
+    <div class="calendar-empty" id="emptyState">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h3>No Activities Booked Yet</h3>
+        <p>Explore our amazing activities and start booking your adventures!</p>
+        <a href="{{ path('app_client_activities') }}" class="btn-browse">
+            <i class="fa-solid fa-compass"></i> Browse Activities
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const userId = {{ user.idUser ?? 'null' }}; // Get from authenticated user
+            
+            if (!userId) {
+                console.warn('User not authenticated');
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek,listMonth'
+                },
+                locale: 'fr',
+                contentHeight: 'auto',
+                eventClick: function(info) {
+                    showEventDetails(info.event);
+                },
+                dayCellDidMount: function(info) {
+                    info.el.style.minHeight = '120px';
+                },
+                datesSet: function(info) {
+                    // Update stats when dates change
+                    updateStats();
+                }
+            });
+
+            // Load events from API
+            loadActivitiesCalendar(userId, calendar);
+
+            calendar.render();
+        });
+
+        function loadActivitiesCalendar(userId, calendar) {
+            // This would fetch from your backend
+            // For now, we'll use the Calendar Bundle's eventSources
+            calendar.addEventSource({
+                url: '/fc-load-events',
+                method: 'POST',
+                extraParams: {
+                    filters: JSON.stringify({ user_id: userId })
+                },
+                failure: function() {
+                    console.error('Error loading calendar events');
+                }
+            });
+        }
+
+        function showEventDetails(event) {
+            const panel = document.getElementById('eventDetails');
+            document.getElementById('eventTitle').textContent = event.title;
+            // You would populate these from the event's extended properties
+            panel.classList.add('show');
+        }
+
+        function updateStats() {
+            // This would fetch stats from your API
+            // For now, placeholder
+            document.getElementById('total-bookings').textContent = '0';
+            document.getElementById('available-spots').textContent = '0';
+            document.getElementById('booked-spots').textContent = '0';
+        }
+    </script>
+{% endblock %}

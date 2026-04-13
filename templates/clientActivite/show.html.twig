@@ -32,10 +32,17 @@ Affiche les informations de l'activité, une carte interactive, les fournisseurs
         {# ── Image with favorite button ── #}
         <div class="detail-image" style="position:relative;">
             {% if activite.imageActivite %}
-                <img src="{{ activite.imageActivite }}"
+                {% set optimizedImage = 'https://images.weserv.nl/?url=' ~ activite.imageActivite|url_encode ~ '&w=800&h=500&fit=cover&q=85' %}
+                <img src="{{ optimizedImage }}"
                      alt="{{ activite.nomActivite }}"
-                     onclick="openLightbox(this.src)"
-                     onerror="this.src='https://via.placeholder.com/800x500?text=Activité'">
+                     loading="eager"
+                     decoding="async"
+                     fetchpriority="high"
+                     width="800"
+                     height="500"
+                     onclick="openLightbox('{{ activite.imageActivite }}')"
+                     onerror="this.src='https://via.placeholder.com/800x500?text=Activité'"
+                     style="display:block; width: 100%; height: 100%; object-fit: cover;">
             {% else %}
                 <div class="placeholder-image-large">
                     <i class="fa-solid fa-image"></i>
@@ -216,12 +223,14 @@ Affiche les informations de l'activité, une carte interactive, les fournisseurs
         <div class="related-grid">
             {% for related in relatedActivites %}
                 <a href="{{ path('app_client_activity_show', {'id': related.id}) }}" class="related-card">
-    <div class="related-card-img"
-        style="background:{% if related.imageActivite %}url('{{ related.imageActivite }}') center/cover no-repeat{% else %}linear-gradient(135deg,#E8D8C8,#D4BFA8){% endif %}; display:flex; align-items:center; justify-content:center;">
-        {% if not related.imageActivite %}
-            <i class="fa-solid fa-image" style="color:#A08070; font-size:28px;"></i>
-        {% endif %}
-    </div>
+                    {% if related.imageActivite %}
+                        {% set optimizedRelatedImage = 'https://images.weserv.nl/?url=' ~ related.imageActivite|url_encode ~ '&w=400&h=300&fit=cover&q=80' %}
+                        <div class="related-card-img" style="background-image:url('{{ optimizedRelatedImage }}'); background-position: center; background-size: cover; background-repeat: no-repeat; display:flex; align-items:center; justify-content:center;"></div>
+                    {% else %}
+                        <div class="related-card-img" style="background: linear-gradient(135deg,#E8D8C8,#D4BFA8); display:flex; align-items:center; justify-content:center;">
+                            <i class="fa-solid fa-image" style="color:#A08070; font-size:28px;"></i>
+                        </div>
+                    {% endif %}
                     <div class="related-card-body">
                         <div class="related-card-title">{{ related.nomActivite }}</div>
                         <div class="related-card-price">{{ related.coutActivite|number_format(2, ',', ' ') }} DT</div>
