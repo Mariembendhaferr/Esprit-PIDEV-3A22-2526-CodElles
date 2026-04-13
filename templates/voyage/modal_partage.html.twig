@@ -1,0 +1,156 @@
+{# templates/voyage/modal_partage.html.twig #}
+<div class="modal-partage-luxe" id="modalPartage" style="display: none;">
+    <div class="modal-partage-overlay" onclick="fermerModalPartage()"></div>
+    <div class="modal-partage-container">
+        <button class="modal-partage-close" onclick="fermerModalPartage()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-partage-header">
+            <div class="modal-partage-icon">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3 class="modal-partage-title">Partager ce forfait</h3>
+            <p class="modal-partage-subtitle">avec vos amis et proches</p>
+        </div>
+        
+        <div class="modal-partage-voyage-info">
+            <div class="partage-voyage-image">
+                <img id="modalVoyageImage" src="" alt="">
+            </div>
+            <div class="partage-voyage-details">
+                <h4 id="modalVoyageTitre"></h4>
+                <p id="modalVoyageDestination"><i class="fas fa-map-marker-alt"></i> </p>
+                <p id="modalVoyagePrix"><i class="fas fa-tag"></i> </p>
+            </div>
+        </div>
+        
+        <div class="modal-partage-lien">
+            <label class="partage-lien-label">
+                <i class="fas fa-link"></i> Lien du voyage
+            </label>
+            <div class="partage-lien-copy">
+                <input type="text" id="lienPartage" value="" readonly>
+                <button class="btn-copy-lien" onclick="copierLien()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+        
+        <div class="modal-partage-reseaux">
+            <span class="reseaux-label">Partager sur :</span>
+            <div class="reseaux-icons">
+                <a href="#" id="facebookShareBtn" target="_blank" class="reseaux-icon facebook" rel="noopener noreferrer">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" id="whatsappShareBtn" target="_blank" class="reseaux-icon whatsapp" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="#" id="twitterShareBtn" target="_blank" class="reseaux-icon twitter" rel="noopener noreferrer">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" id="linkedinShareBtn" target="_blank" class="reseaux-icon linkedin" rel="noopener noreferrer">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="modal-partage-footer">
+            <button class="btn-partage-email" onclick="partagerParEmail()">
+                <i class="fas fa-envelope"></i> Partager par email
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables pour stocker les données du voyage
+    let currentVoyageData = null;
+    
+    // Ouvrir le modal et charger les données via l'API
+    async function ouvrirModalPartage(voyageId) {
+        const modal = document.getElementById('modalPartage');
+        if (!modal) return;
+        
+        // Afficher le modal en mode chargement
+        modal.style.display = 'block';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Afficher un état de chargement
+        document.getElementById('modalVoyageTitre').textContent = 'Chargement...';
+        document.getElementById('modalVoyageDestination').innerHTML = '<i class="fas fa-map-marker-alt"></i> Chargement...';
+        document.getElementById('modalVoyagePrix').innerHTML = '<i class="fas fa-tag"></i> Chargement...';
+        
+        try {
+            // Appel à l'API
+            const response = await fetch(`/api/partage/${voyageId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                currentVoyageData = data;
+                
+                // Remplir le modal avec les données
+                document.getElementById('modalVoyageImage').src = data.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=100&q=80';
+                document.getElementById('modalVoyageImage').alt = data.titre;
+                document.getElementById('modalVoyageTitre').textContent = data.titre;
+                document.getElementById('modalVoyageDestination').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.destination}, ${data.continent}`;
+                document.getElementById('modalVoyagePrix').innerHTML = `<i class="fas fa-tag"></i> À partir de ${data.prix.toLocaleString()} DT / pers.`;
+                document.getElementById('lienPartage').value = data.url;
+                
+                // Mettre à jour les liens de partage
+                document.getElementById('facebookShareBtn').href = data.facebookShareUrl;
+                document.getElementById('whatsappShareBtn').href = data.whatsappShareUrl;
+                document.getElementById('twitterShareBtn').href = data.twitterShareUrl;
+                document.getElementById('linkedinShareBtn').href = data.linkedinShareUrl;
+            } else {
+                console.error('Erreur API:', data);
+                fermerModalPartage();
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement:', error);
+            fermerModalPartage();
+        }
+    }
+    
+    function fermerModalPartage() {
+        const modal = document.getElementById('modalPartage');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            currentVoyageData = null;
+        }
+    }
+    
+    function copierLien() {
+        const inputLien = document.getElementById('lienPartage');
+        if (inputLien && inputLien.value) {
+            inputLien.select();
+            inputLien.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            const btn = document.querySelector('.btn-copy-lien');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        }
+    }
+    
+    function partagerParEmail() {
+        if (!currentVoyageData) return;
+        
+        const sujet = encodeURIComponent(currentVoyageData.mailSubject);
+        const corps = encodeURIComponent(currentVoyageData.mailBody);
+        window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
+    }
+    
+    // Fermer avec la touche Echap
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            fermerModalPartage();
+        }
+    });
+</script>
