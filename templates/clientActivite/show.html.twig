@@ -85,9 +85,17 @@ Affiche les informations de l'activité, une carte interactive, les fournisseurs
                         <i class="fa-solid fa-clock"></i>
                         <div><strong>Durée</strong><p>{{ activite.dureeActivite }} minutes</p></div>
                     </div>
-                    <div class="info-item">
+                    {#<div class="info-item">
                         <i class="fa-solid fa-users"></i>
                         <div><strong>Capacité</strong><p>{{ activite.capaciteMaxActivite }} personnes</p></div>
+                    </div>-->#}
+
+                                        <div class="info-item">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <strong>Places disponibles</strong>
+                            <p>{{ activite.getPlacesRestantes() }} / {{ activite.capaciteMaxActivite }}</p>
+                        </div>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-location-dot"></i>
@@ -175,10 +183,38 @@ Affiche les informations de l'activité, une carte interactive, les fournisseurs
                             <strong>{{ activite.capaciteMaxActivite }} pers.</strong>
                         </div>
                     </div>
-                    <button class="btn-booking">
+                    <!--<button class="btn-booking">
                         <i class="fa-solid fa-calendar"></i>
                         Demander une réservation
-                    </button>
+                    </button>-->
+
+                   <!-- {#{% if app.user %}
+                        <a href="{{ path('activite_reserver', {'id': activite.id}) }}" class="btn-booking">
+                            <i class="fa-solid fa-calendar"></i>
+                            Réserver maintenant
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="btn-booking" style="background: #6c757d;">
+                            <i class="fa-solid fa-sign-in-alt"></i>
+                            Connectez-vous pour réserver
+                        </a>
+                    {% endif %}#}-->
+
+                    <a href="{{ path('activite_reserver', {'id': activite.id}) }}" class="btn-booking">
+                        <i class="fa-solid fa-calendar"></i>
+                        Réserver maintenant
+                    </a>
+
+                    <!--<div class="info-item">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <strong>Places disponibles</strong>
+                            <p>{{ activite.getPlacesRestantes() }} / {{ activite.capaciteMaxActivite }}</p>
+                        </div>
+                    </div>-->
+
+
+
                     <p class="booking-note">Contactez directement nos partenaires pour organiser votre expérience.</p>
                 </div>
 

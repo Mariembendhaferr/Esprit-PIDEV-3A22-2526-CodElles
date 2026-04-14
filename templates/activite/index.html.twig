@@ -97,9 +97,10 @@
                 <th>Prix</th>
                 <th>Durée</th>
                 <th>Destination</th>
+                <th>Capacité</th>
                 <th>Fournisseurs</th>
                 <th>Statut</th>
-                <th>disponibilité</th>
+                <!--<th>disponibilité</th>-->
                 <th>Actions</th>
             </tr>
         </thead>
@@ -116,6 +117,10 @@
                     {% else %}—{% endif %}
                 </td>
                 <td>
+    {# Affiche "X / Y" avec X = places restantes, Y = capacité max #}
+    {{ activite.placesRestantes }} / {{ activite.capaciteMaxActivite }}
+</td>
+                <td>
                     {% if activite.fournisseurs is not empty %}
                         {% for f in activite.fournisseurs %}
                             <span class="pill pill-spec" style="margin:1px;">{{ f.nomFournisseur }}</span>
@@ -124,13 +129,13 @@
                         <span style="color:#ccc;">—</span>
                     {% endif %}
                 </td>
-                <td>
+                {#<td>
                     {% if activite.disponibiliteActivite %}
                         <span class="pill pill-dispo"><span class="dot dot-green"></span> Disponible</span>
                     {% else %}
                         <span class="pill pill-indispo"><span class="dot dot-red"></span> Indisponible</span>
                     {% endif %}
-                </td>
+                </td>#}
 
                 <td>
                     {% if activite.statutActivite == 'acceptee' %}

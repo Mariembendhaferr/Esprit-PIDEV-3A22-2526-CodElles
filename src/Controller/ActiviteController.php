@@ -4,6 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Activite;
 use App\Form\ActiviteType;
+use App\Entity\ReservationActivite;
+use App\Form\ReservationActiviteType;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Repository\ActiviteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,9 +20,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Service\PexelsService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+
 #[Route('/activite')]
 final class ActiviteController extends AbstractController
 {
+    
     // ── LIST ─────────────────────────────────────────────────
     #[Route('/', name: 'app_activite_index', methods: ['GET'])]
     public function index(Request $request, ActiviteRepository $repo): Response
@@ -201,6 +207,7 @@ final class ActiviteController extends AbstractController
         return $this->render('clientActivite/favorites.html.twig');
     }
 
+
     #[Route('/reponse/{token}/refuser', name: 'app_activite_refuser', methods: ['GET'])]
     public function refuser(string $token, ActiviteRepository $repo, EntityManagerInterface $em): Response
     {
@@ -223,9 +230,58 @@ final class ActiviteController extends AbstractController
             'message'  => 'Vous avez refusé l\'activité "' . $activite->getNomActivite() . '".',
         ]);
     }
-
-    // ── SHOW ──────────────────────────────────────────────────
  
+    //reservation
+    #[Route('/activite/{id}/reserver', name: 'activite_reserver')]
+    public function reserver(Activite $activite, Request $request, EntityManagerInterface $em, UserRepository $userRepo): Response
+    {
+        //$this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        //@var User $user 
+        //$user = $this->getUser();
+
+
+        $user = $userRepo->find(18); // ID de l'admin (vérifie dans ta base)
+        if (!$user) {
+            throw new \Exception('Utilisateur de test introuvable. Vérifie l\'ID dans la table user.');
+        }
+
+        $reservation = new ReservationActivite();
+        $reservation->setUser($user);
+        $reservation->setActivite($activite);
+        $reservation->setDateReservation(new \DateTime());
+        $reservation->setStatut('confirmee'); // ou 'en_attente' selon ton flux
+
+        $form = $this->createForm(ReservationActiviteType::class, $reservation);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $nbPlaces = $reservation->getNombreParticipants();
+
+            // Vérifier la disponibilité
+            if (!$activite->isDisponible($nbPlaces)) {
+                $this->addFlash('danger', 'Désolé, il n\'y a plus assez de places disponibles.');
+                return $this->redirectToRoute('activite_show', ['id' => $activite->getId()]);
+            }
+
+            $em->persist($reservation);
+            $activite->setPlacesReserves($activite->getPlacesReserves() + $nbPlaces);
+            $em->flush();
+
+            $this->addFlash('success', 'Votre réservation a bien été enregistrée !');
+            return $this->redirectToRoute('app_client_activities'); // on créera cette route plus tard
+        }
+
+        return $this->render('clientActivite/reserver.html.twig', [
+            'activite' => $activite,
+            'form' => $form->createView(),
+            'placesRestantes' => $activite->getPlacesRestantes(),
+        ]);
+    }
+
+
+
+
     // ── EDIT ──────────────────────────────────────────────────
     #[Route('/{id}/edit', name: 'app_activite_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Activite $activite, EntityManagerInterface $em, MailerInterface $mailer): Response

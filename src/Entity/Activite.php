@@ -71,7 +71,9 @@ class Activite
     #[ORM\Column(name: 'assignationToken', length: 100, nullable: true)]
     private ?string $assignationToken = null;
 
-    
+    #[ORM\Column(name: 'places_reserves', type: 'integer', nullable: true, options: ['default' => 0])]
+    private ?int $placesReserves = 0;   
+
 
     #[ORM\ManyToMany(targetEntity: FournisseurActivite::class, inversedBy: 'activites')]
     #[ORM\JoinTable(
@@ -81,13 +83,17 @@ class Activite
     )]
     private Collection $fournisseurs;
 
-    #[ORM\ManyToMany(targetEntity: Activite::class, mappedBy: 'bookedByUsers')]
-    private Collection $activitiesBooked;
+    /**
+     * @var Collection<int, ReservationActivite>
+     */
+    #[ORM\OneToMany(targetEntity: ReservationActivite::class, mappedBy: 'activite')]
+    private Collection $reservationActivites;
 
     public function __construct()
     {
         $this->fournisseurs = new ArrayCollection();
-        $this->activitiesBooked = new ArrayCollection();
+        $this->reservationActivites = new ArrayCollection();
+        
     }
 
     public function getId(): ?int { return $this->id; }
@@ -131,6 +137,9 @@ class Activite
     public function getAssignationToken(): ?string { return $this->assignationToken; }
     public function setAssignationToken(?string $v): static { $this->assignationToken = $v; return $this; }
 
+    public function getPlacesReserves(): ?int { return $this->placesReserves; }
+    public function setPlacesReserves(?int $placesReserves): self { $this->placesReserves = $placesReserves; return $this; }       
+
     /** @return Collection<int, FournisseurActivite> */
     public function getFournisseurs(): Collection { return $this->fournisseurs; }
 
@@ -158,22 +167,45 @@ class Activite
 
     public function __toString(): string { return $this->nomActivite ?? ''; }
 
-        public function getActivitiesBooked(): Collection
+    /**
+     * @return Collection<int, ReservationActivite>
+     */
+    public function getReservationActivites(): Collection
     {
-        return $this->activitiesBooked;
+        return $this->reservationActivites;
     }
 
-    public function addActivityBooked(Activite $activite): static
+    public function addReservationActivite(ReservationActivite $reservationActivite): static
     {
-        if (!$this->activitiesBooked->contains($activite)) {
-            $this->activitiesBooked->add($activite);
+        if (!$this->reservationActivites->contains($reservationActivite)) {
+            $this->reservationActivites->add($reservationActivite);
+            $reservationActivite->setActivite($this);
         }
+
         return $this;
     }
 
-    public function removeActivityBooked(Activite $activite): static
+    public function removeReservationActivite(ReservationActivite $reservationActivite): static
     {
-        $this->activitiesBooked->removeElement($activite);
+        if ($this->reservationActivites->removeElement($reservationActivite)) {
+            // set the owning side to null (unless already changed)
+            if ($reservationActivite->getActivite() === $this) {
+                $reservationActivite->setActivite(null);
+            }
+        }
+
         return $this;
     }
+
+
+ public function getPlacesRestantes(): int
+{
+    return $this->capaciteMaxActivite - ($this->placesReserves ?? 0);
+}
+
+    public function isDisponible(int $nbPlacesDemandees): bool
+    {
+        return $this->getPlacesRestantes() >= $nbPlacesDemandees;
+    }
+
 }

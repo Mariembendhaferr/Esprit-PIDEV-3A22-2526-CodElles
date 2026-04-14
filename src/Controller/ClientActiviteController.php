@@ -30,6 +30,7 @@ final class ClientActiviteController extends AbstractController
         ]);
     }
 
+
     #[Route('/destinations', name: 'app_client_destinations', methods: ['GET'])]
     public function destinations(ActiviteRepository $repo, PexelsService $pexels): JsonResponse
     {

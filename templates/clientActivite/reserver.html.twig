@@ -1,0 +1,46 @@
+{# templates/clientActivite/reserver.html.twig #}
+{% extends 'clientActivite/base_client.html.twig' %}
+
+{% block title %}Réserver {{ activite.nomActivite }} - Doura Mondo{% endblock %}
+
+{% block body %}
+<div class="client-container-detail">
+    <a href="{{ path('app_client_activity_show', {'id': activite.id}) }}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Retour à l'activité
+    </a>
+
+    <div class="detail-wrapper">
+        <div class="detail-main" style="max-width: 600px; margin: 0 auto;">
+            <h1>Réserver : {{ activite.nomActivite }}</h1>
+
+            <div class="booking-card" style="margin-bottom: 30px;">
+                <div class="alert alert-info">
+                    <i class="fa-solid fa-users me-2"></i>
+                    Places restantes : <strong>{{ placesRestantes }}</strong> / {{ activite.capaciteMaxActivite }}
+                </div>
+
+                {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                    <div class="mb-3">
+                        {{ form_label(form.dateActivite, 'Date souhaitée', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.dateActivite, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.dateActivite) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.nombreParticipants, 'Nombre de participants', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.nombreParticipants, {'attr': {'class': 'form-control', 'max': placesRestantes}}) }}
+                        {{ form_errors(form.nombreParticipants) }}
+                        <small class="text-muted">Maximum {{ placesRestantes }} personne(s)</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn-booking" style="width:100%;">
+                            <i class="fa-solid fa-check-circle me-2"></i>Confirmer la réservation
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

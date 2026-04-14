@@ -95,14 +95,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'total_ratings', type: 'integer', nullable: true)]
     private ?int $totalRatings = 0;
 
-    // ====== BOOKING RELATIONSHIP ======
-    #[ORM\ManyToMany(targetEntity: Activite::class, mappedBy: 'bookedByUsers')]
-    private Collection $activitiesBooked;
+     // ====== RELATION WITH RESERVATIONACTIVITE ======
+    /**
+     * @var Collection<int, ReservationActivite>
+     */
+    #[ORM\OneToMany(targetEntity: ReservationActivite::class, mappedBy: 'User')]
+    private Collection $reservationActivites;
 
     public function __construct()
     {
-        $this->activitiesBooked = new ArrayCollection();
+        $this->reservationActivites = new ArrayCollection();
     }
+    ///////////// 
 
     // ====== EXISTING GETTERS & SETTERS ======
 
@@ -160,54 +164,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getTotalRatings(): ?int { return $this->totalRatings; }
     public function setTotalRatings(?int $t): self { $this->totalRatings = $t; return $this; }
 
-    // ====== BOOKING RELATIONSHIP METHODS ======
-
-    /**
-     * Get all activities booked by this user
-     */
-    public function getActivitiesBooked(): Collection
-    {
-        return $this->activitiesBooked;
-    }
-
-    /**
-     * Add an activity to user's bookings
-     */
-    public function addActivityBooked(Activite $activite): static
-    {
-        if (!$this->activitiesBooked->contains($activite)) {
-            $this->activitiesBooked->add($activite);
-            $activite->addBookedByUser($this);
-        }
-        return $this;
-    }
-
-    /**
-     * Remove an activity from user's bookings
-     */
-    public function removeActivityBooked(Activite $activite): static
-    {
-        if ($this->activitiesBooked->removeElement($activite)) {
-            $activite->removeBookedByUser($this);
-        }
-        return $this;
-    }
-
-    /**
-     * Check if user has booked a specific activity
-     */
-    public function hasBookedActivity(Activite $activite): bool
-    {
-        return $this->activitiesBooked->contains($activite);
-    }
-
-    /**
-     * Count total booked activities
-     */
-    public function countBookedActivities(): int
-    {
-        return $this->activitiesBooked->count();
-    }
+    
 
     // ====== USERINTERFACE IMPLEMENTATION ======
 
@@ -239,5 +196,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function isTraveler(): bool
     {
         return $this->role === 'voyageur';
+    }
+
+
+ // ====== RELATION WITH RESERVATIONACTIVITE ======
+    /**
+     * @return Collection<int, ReservationActivite>
+     */
+
+    public function getReservationActivites(): Collection
+    {
+        return $this->reservationActivites;
+    }
+
+    public function addReservationActivite(ReservationActivite $reservationActivite): static
+    {
+        if (!$this->reservationActivites->contains($reservationActivite)) {
+            $this->reservationActivites->add($reservationActivite);
+            $reservationActivite->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservationActivite(ReservationActivite $reservationActivite): static
+    {
+        if ($this->reservationActivites->removeElement($reservationActivite)) {
+            // set the owning side to null (unless already changed)
+            if ($reservationActivite->getUser() === $this) {
+                $reservationActivite->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
