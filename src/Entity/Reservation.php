@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ReservationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -52,6 +54,15 @@ class Reservation
     #[ORM\Column(nullable: true)]
     private ?int $idAgent = null;
 
+    // 👇 AJOUTEZ CETTE RELATION
+    #[ORM\OneToMany(mappedBy: 'reservation', targetEntity: Paiement::class, cascade: ['persist', 'remove'])]
+    private Collection $paiements;
+
+    public function __construct()
+    {
+        $this->paiements = new ArrayCollection();
+    }
+
     /**
      * Calcule le montant total basé sur le budgetEstime du voyage
      * budgetEstime = prix par personne pour la durée du voyage
@@ -95,4 +106,32 @@ class Reservation
     public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
     public function getIdAgent(): ?int { return $this->idAgent; }
     public function setIdAgent(?int $idAgent): static { $this->idAgent = $idAgent; return $this; }
+
+    // 👇 AJOUTEZ CES METHODES
+    /**
+     * @return Collection<int, Paiement>
+     */
+    public function getPaiements(): Collection
+    {
+        return $this->paiements;
+    }
+
+    public function addPaiement(Paiement $paiement): static
+    {
+        if (!$this->paiements->contains($paiement)) {
+            $this->paiements->add($paiement);
+            $paiement->setReservation($this);
+        }
+        return $this;
+    }
+
+    public function removePaiement(Paiement $paiement): static
+    {
+        if ($this->paiements->removeElement($paiement)) {
+            if ($paiement->getReservation() === $this) {
+                $paiement->setReservation(null);
+            }
+        }
+        return $this;
+    }
 }

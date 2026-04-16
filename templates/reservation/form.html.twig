@@ -13,7 +13,7 @@
 <!-- Formulaire -->
 <div style="background: linear-gradient(rgba(254,246,232,0.72), rgba(250,240,220,0.92)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; padding: 50px 20px; min-height: 60vh;">
     <div class="container">
-<div style="max-width: 960px; margin: 0 auto; background: rgba(255,255,255,0.15); border-radius: 16px; box-shadow: 0 8px 40px rgba(139,44,44,0.10); overflow: hidden; border: 1px solid rgba(212,184,150,0.4);">
+        <div style="max-width: 960px; margin: 0 auto; background: rgba(255,255,255,0.15); border-radius: 16px; box-shadow: 0 8px 40px rgba(139,44,44,0.10); overflow: hidden; border: 1px solid rgba(212,184,150,0.4);">
             {% for message in app.flashes('error') %}
                 <div style="background: #fdf0f0; border-left: 4px solid #8B2C2C; padding: 14px 24px; font-family: 'Montserrat', sans-serif; font-size: 13px; color: #8B2C2C;">{{ message }}</div>
             {% endfor %}
@@ -33,26 +33,40 @@
                         <div style="margin-bottom:18px;">
                             {{ form_label(client_form.nom, 'Nom', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(client_form.nom, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                            {% if client_form.nom.vars.errors|length > 0 %}
+                                <div style="color:#dc3545;font-size:12px;margin-top:5px;font-family:'Montserrat',sans-serif;">
+                                    {% for error in client_form.nom.vars.errors %}{{ error.message }}<br>{% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
+
                         <div style="margin-bottom:18px;">
                             {{ form_label(client_form.prenom, 'Prénom', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(client_form.prenom, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                            {% if client_form.prenom.vars.errors|length > 0 %}
+                                <div style="color:#dc3545;font-size:12px;margin-top:5px;font-family:'Montserrat',sans-serif;">
+                                    {% for error in client_form.prenom.vars.errors %}{{ error.message }}<br>{% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
+
                         <div style="margin-bottom:18px;">
                             {{ form_label(client_form.dateNaissance, 'Date de naissance', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(client_form.dateNaissance, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
                         </div>
+
                         <div style="margin-bottom:18px;">
                             {{ form_label(client_form.email, 'Email', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(client_form.email, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
                         </div>
+
                         <div style="margin-bottom:10px;">
                             {{ form_label(client_form.telephone, 'Téléphone', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(client_form.telephone, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
                         </div>
                         {{ form_rest(client_form) }}
                     </div>
-
+                    
                     <!-- Colonne droite : Détails du voyage -->
                     <div class="col-md-6" style="padding: 20px;">
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F0E8D8;">
@@ -66,32 +80,664 @@
                             {{ form_label(reservation_form.voyage, 'Destination', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(reservation_form.voyage, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
                         </div>
-                        <div style="margin-bottom:18px;">
-                            {{ form_label(reservation_form.dateDepart, 'Date de départ', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
-                            {{ form_widget(reservation_form.dateDepart, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+
+                        <!-- Bouton Vols disponibles avec animation (TRANSPARENT) -->
+                        <div style="display: flex; justify-content: center; margin-bottom: 18px; position: relative; left: -150px;">
+                            <div class="flight-btn-wrapper" id="flightBtnWrapper" onclick="openFlightModal()" style="background: transparent; box-shadow: none; border: 2px solid #8B2C2C; backdrop-filter: blur(10px);">
+                                <div class="plane-3d-scene">
+                                    <div class="plane-body">
+                                        <div class="plane-nose"></div>
+                                        <div class="plane-wing-left"></div>
+                                        <div class="plane-wing-right"></div>
+                                        <div class="plane-tail-v"></div>
+                                        <div class="plane-tail-h"></div>
+                                        <div class="plane-window w1"></div>
+                                        <div class="plane-window w2"></div>
+                                        <div class="plane-window w3"></div>
+                                        <div class="plane-engine e1"></div>
+                                        <div class="plane-engine e2"></div>
+                                    </div>
+                                </div>
+                                <span class="flight-btn-label" style="color: #8B2C2C;">Vols disponibles</span>
+                                <div class="flight-btn-glow"></div>
+                                <div class="flight-btn-pulse"></div>
+                            </div>
                         </div>
-                        <div style="margin-bottom:18px;">
-                            {{ form_label(reservation_form.dateRetour, 'Date de retour', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
-                            {{ form_widget(reservation_form.dateRetour, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+
+                        <!-- LIGNE : Date départ + Date retour -->
+                        <div style="display: flex; gap: 15px; margin-bottom: 18px; flex-wrap: wrap;">
+                            <!-- Date départ -->
+                            <div style="flex: 1; min-width: 120px;">
+                                {{ form_label(reservation_form.dateDepart, 'Date de départ', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                                {{ form_widget(reservation_form.dateDepart, {'attr': {'class': 'form-control', 'id': 'dateDepart', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;', 'min': 'now'|date('Y-m-d')}}) }}
+                            </div>
+
+                            <!-- Date retour -->
+                            <div style="flex: 1; min-width: 120px;">
+                                {{ form_label(reservation_form.dateRetour, 'Date de retour', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
+                                {{ form_widget(reservation_form.dateRetour, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
+                            </div>
                         </div>
+
                         <div style="margin-bottom:18px;">
                             {{ form_label(reservation_form.nombrePersonnes, 'Nombre de personnes', {'label_attr': {'style': 'font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;'}}) }}
                             {{ form_widget(reservation_form.nombrePersonnes, {'attr': {'class': 'form-control', 'style': 'border:1px solid #E8DDD0; border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:#FDFAF5;'}}) }}
                         </div>
+
+                        {{ form_widget(reservation_form.statut, {'attr': {'style': 'display: none;'}}) }}
                         {{ form_rest(reservation_form) }}
 
-                        <!-- Bouton -->
-                        <div style="margin-top: 32px;">
-                            <button type="submit" style="width:100%; background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 40px; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:6px; color:white; cursor:pointer; transition:0.3s; box-shadow: 0 4px 15px rgba(139,44,44,0.3);">
-                                ✈ Confirmer la réservation
+                        <!-- Bouton Confirmer avec animation -->
+                        <div style="margin-top: 24px;">
+                            <button type="submit" id="confirmButton" style="width:100%; background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 16px 40px; font-family:'Montserrat',sans-serif; font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; border-radius:50px; color:white; cursor:pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(139,44,44,0.4); position: relative; overflow: hidden;">
+                                <span class="btn-text">✈ Confirmer la réservation</span>
+                                <span class="btn-loader" style="display:none;">⏳ Chargement...</span>
                             </button>
                         </div>
                     </div>
-
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- ===================== MODAL VOLS HORIZONTALE AVEC ANIMATION D'AVIONS EN FOND ===================== -->
+<div id="flightModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(63,44,36,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#FDFAF5; border-radius:16px; max-width:1300px; width:95%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(139,44,44,0.25); border:1px solid #D4B896; position:relative; animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);">
+        
+        <!-- Header modal avec animation -->
+        <div style="background:linear-gradient(135deg,#8B2C2C,#6B1E1E); padding:20px 28px; border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:space-between; position: relative; overflow: hidden;">
+            <div style="position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: headerShine 3s infinite;"></div>
+            
+            <div style="display:flex;align-items:center;gap:12px; position:relative; z-index:1;">
+                <span style="font-size:1.8rem; animation: planeSpin 2s ease-in-out infinite; display: inline-block;">✈</span>
+                <div>
+                    <div style="font-family:'Playfair Display',serif; color:white; font-size:1.2rem;">Vols disponibles</div>
+                    <div style="font-family:Montserrat,sans-serif; color:rgba(255,255,255,0.75); font-size:11px; letter-spacing:2px; text-transform:uppercase;">Données en temps réel</div>
+                </div>
+            </div>
+            
+            <button onclick="closeFlightModal()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:34px; height:34px; border-radius:50%; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.3s ease; position:relative; z-index:1;">&times;</button>
+        </div>
+
+        <!-- Filtres IATA - Version horizontale avec espacement et animation de fond -->
+        <div style="padding:30px 28px; border-bottom:1px solid #F0E8D8; background:#FEF6E8; position: relative; overflow: hidden;">
+            
+            <!-- Animation des petits avions qui volent en fond -->
+            <div class="flying-planes-bg">
+                <div class="flying-plane plane1">✈</div>
+                <div class="flying-plane plane2">🛩️</div>
+                <div class="flying-plane plane3">✈</div>
+                <div class="flying-plane plane4">🛫</div>
+                <div class="flying-plane plane5">✈</div>
+                <div class="flying-plane plane6">🛬</div>
+            </div>
+            
+            <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-end; position: relative; z-index: 2;">
+                <!-- Départ -->
+                <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 12px;">
+                    <label style="font-family:Montserrat,sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9B7240;">Départ (IATA)</label>
+                    <input id="depIata" type="text" maxlength="3" placeholder="ex: TUN" style="width:100%; border:1px solid #E8DDD0; border-radius:8px; padding:12px 10px; font-family:Montserrat,sans-serif; font-size:14px; color:#3f2c24; background:#FDFAF5; text-transform:uppercase; transition: all 0.3s ease;">
+                </div>
+                
+                <!-- Arrivée -->
+                <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 12px;">
+                    <label style="font-family:Montserrat,sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9B7240;">Arrivée (IATA)</label>
+                    <input id="arrIata" type="text" maxlength="3" placeholder="ex: CDG" style="width:100%; border:1px solid #E8DDD0; border-radius:8px; padding:12px 10px; font-family:Montserrat,sans-serif; font-size:14px; color:#3f2c24; background:#FDFAF5; text-transform:uppercase; transition: all 0.3s ease;">
+                </div>
+                
+                <!-- Date -->
+                <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 12px;">
+                    <label style="font-family:Montserrat,sans-serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#9B7240;">Date</label>
+                    <input id="flightDate" type="date" style="width:100%; border:1px solid #E8DDD0; border-radius:8px; padding:12px 10px; font-family:Montserrat,sans-serif; font-size:14px; color:#3f2c24; background:#FDFAF5; transition: all 0.3s ease;">
+                </div>
+                
+                <!-- Bouton Rechercher -->
+                <div style="flex-shrink: 0;">
+                    <button onclick="searchFlights()" id="searchBtn" style="background:linear-gradient(135deg,#8B2C2C,#6B1E1E); border:none; color:white; padding:12px 32px; border-radius:50px; font-family:Montserrat,sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition: all 0.3s ease; position:relative; overflow:hidden; box-shadow: 0 4px 15px rgba(139,44,44,0.3);">
+                        Rechercher
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats -->
+        <div id="flightResults" style="padding:20px 28px; min-height:120px; font-family:Montserrat,sans-serif;">
+            <div style="text-align:center; color:#9B7240; font-size:13px; padding:30px 0;">Entrez les codes IATA et une date pour rechercher des vols.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== STYLES COMPLETS ===================== -->
+<style>
+/* Styles bouton Vols disponibles */
+.flight-btn-wrapper {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 32px 14px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #f5ece0, #ede0cc);
+    box-shadow: 6px 6px 14px rgba(139,44,44,0.18), -4px -4px 10px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(212,184,150,0.5);
+    transition: all 0.25s ease;
+    user-select: none;
+    animation: btnPulse 2s infinite;
+}
+
+.flight-btn-wrapper:hover {
+    box-shadow: 8px 8px 20px rgba(139,44,44,0.25), -5px -5px 14px rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,0.7);
+    transform: translateY(-3px);
+}
+
+.flight-btn-wrapper:active {
+    transform: translateY(2px);
+}
+
+.flight-btn-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(139,44,44,0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.flight-btn-pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 19px;
+    background: rgba(139,44,44,0.2);
+    opacity: 0;
+    animation: ripple 2s infinite;
+    pointer-events: none;
+}
+
+.flight-btn-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+}
+
+/* Avion 3D CSS */
+.plane-3d-scene {
+    position: relative;
+    width: 80px;
+    height: 40px;
+}
+.plane-body {
+    position: absolute;
+    width: 70px;
+    height: 16px;
+    background: linear-gradient(180deg, #9B3A3A 0%, #6B1E1E 60%, #4a1515 100%);
+    border-radius: 8px 30px 8px 8px;
+    top: 12px;
+    left: 5px;
+    box-shadow: 0 4px 10px rgba(139,44,44,0.4), inset 0 2px 4px rgba(255,255,255,0.15);
+    animation: planeFloat 3s ease-in-out infinite;
+}
+.plane-nose {
+    position: absolute;
+    right: -10px;
+    top: 2px;
+    width: 18px;
+    height: 12px;
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    border-radius: 0 50% 50% 0;
+    box-shadow: inset -2px 0 4px rgba(255,255,255,0.1);
+}
+.plane-wing-left {
+    position: absolute;
+    left: 20px;
+    top: -14px;
+    width: 26px;
+    height: 14px;
+    background: linear-gradient(135deg, #D4B896, #9B7240);
+    border-radius: 4px 12px 0 4px;
+    transform: skewX(-10deg);
+    box-shadow: 0 3px 8px rgba(155,114,64,0.3);
+}
+.plane-wing-right {
+    position: absolute;
+    left: 20px;
+    bottom: -14px;
+    width: 26px;
+    height: 14px;
+    background: linear-gradient(225deg, #D4B896, #9B7240);
+    border-radius: 4px 12px 4px 0;
+    transform: skewX(10deg);
+    box-shadow: 0 3px 8px rgba(155,114,64,0.3);
+}
+.plane-tail-v {
+    position: absolute;
+    left: 2px;
+    top: -10px;
+    width: 10px;
+    height: 12px;
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    border-radius: 4px 4px 0 0;
+    transform: skewX(-5deg);
+}
+.plane-tail-h {
+    position: absolute;
+    left: -2px;
+    top: 4px;
+    width: 16px;
+    height: 7px;
+    background: linear-gradient(135deg, #9B3A3A, #7a2222);
+    border-radius: 3px 8px 3px 3px;
+    transform: skewX(-8deg);
+}
+.plane-window { position: absolute; top: 4px; width: 6px; height: 6px; background: linear-gradient(135deg, #FEF6E8, #f0d8a0); border-radius: 50%; box-shadow: 0 0 4px rgba(254,246,232,0.6); }
+.plane-window.w1 { right: 18px; }
+.plane-window.w2 { right: 28px; }
+.plane-window.w3 { right: 38px; }
+.plane-engine {
+    position: absolute;
+    width: 10px;
+    height: 7px;
+    background: linear-gradient(180deg, #6B1E1E, #3a0f0f);
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.plane-engine.e1 { left: 28px; top: -9px; }
+.plane-engine.e2 { left: 28px; bottom: -9px; }
+
+/* Animations bouton Vols disponibles */
+@keyframes btnPulse {
+    0%, 100% { box-shadow: 6px 6px 14px rgba(139,44,44,0.18), -4px -4px 10px rgba(255,255,255,0.85); }
+    50% { box-shadow: 6px 6px 18px rgba(139,44,44,0.3), -4px -4px 14px rgba(255,255,255,0.95); }
+}
+
+@keyframes ripple {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes planeFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+}
+
+/* Animations bouton Confirmer */
+#confirmButton {
+    animation: pulseGlow 2s infinite, float 3s ease-in-out infinite;
+    position: relative;
+}
+
+#confirmButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+#confirmButton:hover::before {
+    left: 100%;
+}
+
+#confirmButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(139,44,44,0.6);
+    letter-spacing: 4px;
+}
+
+#confirmButton:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(139,44,44,0.4);
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 4px 20px rgba(139,44,44,0.4); background: linear-gradient(135deg, #8B2C2C, #6B1E1E); }
+    50% { box-shadow: 0 0 25px 8px rgba(139,44,44,0.7); background: linear-gradient(135deg, #9B3A3A, #7A2A2A); }
+    100% { box-shadow: 0 4px 20px rgba(139,44,44,0.4); background: linear-gradient(135deg, #8B2C2C, #6B1E1E); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+}
+
+#confirmButton.clicked {
+    animation: clickEffect 0.3s ease-out;
+}
+
+@keyframes clickEffect {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+/* Animations modale */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes headerShine {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes planeSpin {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(10deg); }
+}
+
+/* Animation des petits avions en fond */
+.flying-planes-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.flying-plane {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0.4;
+    white-space: nowrap;
+    pointer-events: none;
+    color: #4a2a1a;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
+/* Avion 1 - vole de gauche à droite */
+.plane1 {
+    top: 10%;
+    left: -30px;
+    animation: flyRight 12s linear infinite;
+    font-size: 25px;
+}
+
+/* Avion 2 - vole de droite à gauche */
+.plane2 {
+    bottom: 20%;
+    right: -30px;
+    animation: flyLeft 10s linear infinite;
+    font-size: 18px;
+    animation-delay: 2s;
+}
+
+/* Avion 3 - vole de gauche à droite plus lent */
+.plane3 {
+    top: 40%;
+    left: -40px;
+    animation: flyRight 15s linear infinite;
+    font-size: 22px;
+    animation-delay: 5s;
+}
+
+/* Avion 4 - vole de droite à gauche plus rapide */
+.plane4 {
+    bottom: 50%;
+    right: -35px;
+    animation: flyLeft 8s linear infinite;
+    font-size: 16px;
+    animation-delay: 1s;
+}
+
+/* Avion 5 - vole horizontalement en zigzag */
+.plane5 {
+    top: 70%;
+    left: -50px;
+    animation: flyRightWave 14s ease-in-out infinite;
+    font-size: 20px;
+    animation-delay: 3s;
+}
+
+/* Avion 6 - vole en diagonale */
+.plane6 {
+    bottom: 10%;
+    left: -30px;
+    animation: flyDiagonal 11s linear infinite;
+    font-size: 24px;
+    animation-delay: 7s;
+}
+
+@keyframes flyRight {
+    0% {
+        left: -50px;
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        left: 100%;
+        transform: translateY(15px) rotate(5deg);
+    }
+}
+
+@keyframes flyLeft {
+    0% {
+        right: -50px;
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        right: 100%;
+        transform: translateY(-15px) rotate(-5deg);
+    }
+}
+
+@keyframes flyRightWave {
+    0% {
+        left: -50px;
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-20px) rotate(5deg);
+    }
+    50% {
+        transform: translateY(10px) rotate(-3deg);
+    }
+    75% {
+        transform: translateY(-10px) rotate(3deg);
+    }
+    100% {
+        left: 100%;
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes flyDiagonal {
+    0% {
+        left: -50px;
+        top: 10%;
+        transform: rotate(0deg);
+    }
+    100% {
+        left: 100%;
+        top: 80%;
+        transform: rotate(15deg);
+    }
+}
+
+input:focus {
+    outline: none;
+    border-color: #8B2C2C !important;
+    box-shadow: 0 0 0 3px rgba(139,44,44,0.2);
+}
+
+#searchBtn {
+    animation: btnPulse 2s infinite;
+}
+
+#searchBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139,44,44,0.4);
+    letter-spacing: 3px;
+}
+
+@keyframes btnPulse {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(139,44,44,0.3);
+    }
+    50% {
+        box-shadow: 0 6px 25px rgba(139,44,44,0.5);
+    }
+}
+
+/* Animation résultat de vol */
+@keyframes resultFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.flight-result {
+    animation: resultFadeIn 0.4s ease-out;
+}
+</style>
+
+<!-- ===================== SCRIPT MODAL ===================== -->
+<script>
+function openFlightModal() {
+    const modal = document.getElementById('flightModal');
+    modal.style.display = 'flex';
+    const dep = document.getElementById('dateDepart');
+    if (dep && dep.value) {
+        document.getElementById('flightDate').value = dep.value;
+    }
+}
+
+function closeFlightModal() {
+    const modal = document.getElementById('flightModal');
+    modal.style.animation = 'modalSlideOut 0.3s ease-out';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.style.animation = '';
+    }, 300);
+}
+
+document.getElementById('flightModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFlightModal();
+});
+
+async function searchFlights() {
+    const dep = document.getElementById('depIata').value.trim().toUpperCase();
+    const arr = document.getElementById('arrIata').value.trim().toUpperCase();
+    const date = document.getElementById('flightDate').value;
+    const box = document.getElementById('flightResults');
+    const searchBtn = document.getElementById('searchBtn');
+
+    if (dep.length !== 3 || arr.length !== 3) {
+        box.innerHTML = '<div style="color:#8B2C2C; text-align:center; padding:20px; font-size:13px;">⚠ Veuillez entrer des codes IATA valides (3 lettres, ex: TUN, CDG, ORY).</div>';
+        return;
+    }
+    if (!date) {
+        box.innerHTML = '<div style="color:#8B2C2C; text-align:center; padding:20px; font-size:13px;">⚠ Veuillez sélectionner une date.</div>';
+        return;
+    }
+
+    // Animation du bouton recherche
+    searchBtn.style.transform = 'scale(0.95)';
+    setTimeout(() => { searchBtn.style.transform = 'scale(1)'; }, 150);
+    
+    box.innerHTML = '<div style="text-align:center; padding:30px; color:#9B7240; font-size:13px;">⏳ Recherche des vols en cours...</div>';
+
+    try {
+        const res = await fetch(`/api/flights/search?dep=${dep}&arr=${arr}&date=${date}`);
+        const data = await res.json();
+
+        if (data.error) { 
+            box.innerHTML = `<div style="color:#8B2C2C;text-align:center;padding:20px;font-size:13px;">❌ ${data.error}</div>`; 
+            return; 
+        }
+        if (!data.flights || data.flights.length === 0) {
+            box.innerHTML = '<div style="text-align:center; padding:30px; color:#9B7240; font-size:13px;">Aucun vol trouvé pour ce trajet et cette date.</div>';
+            return;
+        }
+
+        let html = `<div style="font-size:11px; color:#9B7240; margin-bottom:14px; font-family:Montserrat,sans-serif;">${data.count} vol(s) trouvé(s) — ${dep} → ${arr}</div>`;
+        data.flights.forEach((f, index) => {
+            const depTime = f.dep_time !== 'N/A' ? new Date(f.dep_time).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : 'N/A';
+            const arrTime = f.arr_time !== 'N/A' ? new Date(f.arr_time).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : 'N/A';
+            
+            // Traduction du statut en français
+            let statusText = f.status;
+            let statusColor = '#2d7a2d';
+            
+            if (f.status === 'scheduled') {
+                statusText = 'Planifié';
+                statusColor = '#2d7a2d';
+            } else if (f.status === 'active') {
+                statusText = 'En vol';
+                statusColor = '#e68a2e';
+            } else if (f.status === 'landed') {
+                statusText = 'Atterri';
+                statusColor = '#2d7a2d';
+            } else if (f.status === 'cancelled') {
+                statusText = 'Annulé';
+                statusColor = '#8B2C2C';
+            } else if (f.status === 'delayed') {
+                statusText = 'Retardé';
+                statusColor = '#e68a2e';
+            }
+            
+            html += `
+            <div class="flight-result" style="border:1px solid #E8DDD0; border-radius:10px; padding:14px 18px; margin-bottom:12px; background:linear-gradient(135deg,#FDFAF5,#f5ede0); display:flex; align-items:center; gap:16px; flex-wrap:wrap; animation-delay: ${index * 0.05}s;">
+                <div style="font-size:1.4rem;">✈</div>
+                <div style="flex:1; min-width:150px;">
+                    <div style="font-family:'Playfair Display',serif; color:#8B2C2C; font-size:15px; font-weight:600;">${f.flight_number}</div>
+                    <div style="font-family:Montserrat,sans-serif; font-size:11px; color:#9B7240; margin-top:2px;">${f.airline}</div>
+                </div>
+                <div style="text-align:center; min-width:80px;">
+                    <div style="font-family:Montserrat,sans-serif; font-size:17px; font-weight:700; color:#3f2c24;">${depTime}</div>
+                    <div style="font-family:Montserrat,sans-serif; font-size:10px; color:#9B7240;">${f.departure}</div>
+                </div>
+                <div style="color:#D4B896; font-size:18px;">→</div>
+                <div style="text-align:center; min-width:80px;">
+                    <div style="font-family:Montserrat,sans-serif; font-size:17px; font-weight:700; color:#3f2c24;">${arrTime}</div>
+                    <div style="font-family:Montserrat,sans-serif; font-size:10px; color:#9B7240;">${f.arrival}</div>
+                </div>
+                <div style="font-family:Montserrat,sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:${statusColor}; background:${statusColor}18; padding:4px 10px; border-radius:20px;">${statusText}</div>
+            </div>`;
+        });
+        box.innerHTML = html;
+    } catch(e) {
+        box.innerHTML = '<div style="color:#8B2C2C; text-align:center; padding:20px; font-size:13px;">❌ Erreur de connexion à l\'API.</div>';
+    }
+}
+
+// Animation bouton Confirmer
+const confirmBtn = document.getElementById('confirmButton');
+if (confirmBtn) {
+    confirmBtn.addEventListener('click', function(e) {
+        this.classList.add('clicked');
+        setTimeout(() => { this.classList.remove('clicked'); }, 300);
+        const originalText = this.innerHTML;
+        this.innerHTML = '✈ TRAITEMENT... ✈';
+        this.style.opacity = '0.9';
+        setTimeout(() => {
+            if (this.innerHTML !== originalText) {
+                this.innerHTML = originalText;
+                this.style.opacity = '1';
+            }
+        }, 2000);
+    });
+}
+</script>
 
 {% endblock %}

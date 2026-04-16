@@ -104,6 +104,10 @@
             border-top: 1px solid #eee;
             padding-top: 10px;
         }
+        .reduction {
+            color: #28a745;
+            font-size: 9px;
+        }
     </style>
 </head>
 <body>
@@ -154,7 +158,7 @@
                 <th>Date départ</th>
                 <th>Date retour</th>
                 <th>Personnes</th>
-                <th>Montant</th>
+                <th>Montant payé</th>
                 <th>Statut</th>
             </tr>
         </thead>
@@ -169,7 +173,18 @@
                 <td>{{ reservation.dateDepart|date('d/m/Y') }}</td>
                 <td>{{ reservation.dateRetour|date('d/m/Y') }}</td>
                 <td>{{ reservation.nombrePersonnes }}</td>
-                <td><strong>{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</strong></td>
+                <td>
+                    {% set montantPaye = reservation.paiements|first ? reservation.paiements|first.montant : null %}
+                    {% if montantPaye %}
+                        <strong>{{ montantPaye|number_format(2, ',', ' ') }} €</strong>
+                        {% if montantPaye != reservation.montantTotal %}
+                            <br><span class="reduction">(-{{ ((reservation.montantTotal - montantPaye) / reservation.montantTotal * 100)|round }}%)</span>
+                        {% endif %}
+                    {% else %}
+                        {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                        <br><small>(non payé)</small>
+                    {% endif %}
+                </td>
                 <td>
                     {% if reservation.statut == 'payé' %}
                         <span class="badge badge-paye">PAYÉE</span>

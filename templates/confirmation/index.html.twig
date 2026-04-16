@@ -4,6 +4,8 @@
 
 {% block body %}
 
+<audio id="sound-start" src="{{ asset('sounds/start.mp3') }}" preload="auto"></audio>
+
 <!-- Hero Banner -->
 <div style="background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%); padding: 35px 20px; text-align: center; color: white;">
     <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0; letter-spacing: 2px;">✨ Réservation confirmée ✨</h2>
@@ -113,8 +115,16 @@
                                         <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); border-radius: 16px; padding: 25px; text-align: center; margin-bottom: 20px;">
                                             <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.7); text-transform: uppercase; margin-bottom: 10px;">Montant total réglé</div>
                                             <div style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: white; font-weight: 600;">
-                                                {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                                                {{ paiement.montant|number_format(2, ',', ' ') }} €
                                             </div>
+                                            {% if reservation.montantTotal > paiement.montant %}
+                                                <div style="margin-top: 8px; font-size: 12px; color: #FFD700;">
+                                                    <i class="bi bi-tag"></i> Réduction appliquée : -{{ ((reservation.montantTotal - paiement.montant) / reservation.montantTotal * 100)|round }}%
+                                                </div>
+                                                <div style="font-size: 11px; color: rgba(255,255,255,0.7);">
+                                                    Prix initial : {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                                                </div>
+                                            {% endif %}
                                         </div>
 
                                         <div style="margin-bottom: 12px;">
@@ -174,10 +184,23 @@
                     </div>
 
                     <!-- Boutons d'action -->
-                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #F0E8D8;">
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #F0E8D8; flex-wrap: wrap;">
                         <a href="{{ path('app_reservation') }}" style="background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: white; text-decoration: none; display: inline-block; transition: 0.3s;">
                             <i class="bi bi-plus-circle"></i> Nouvelle réservation
                         </a>
+                        
+                        <a href="{{ path('app_confirmation_download_pdf', {'id': reservation.id}) }}" 
+                           style="background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: white; text-decoration: none; display: inline-block; transition: 0.3s; border: 2px solid #D4A853;">
+                            <i class="bi bi-download"></i> Télécharger PDF
+                        </a>
+                        
+                        {# BOUTON GAGNER DES POINTS AVEC SON SIMULTANÉ #}
+                        <a href="{{ path('app_quiz', {'id': reservation.id}) }}" 
+                           id="btn-quiz"
+                           style="background: linear-gradient(135deg, #FFD700, #FFA500); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: #6B1E1E; text-decoration: none; display: inline-block; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">
+                            <i class="bi bi-question-circle"></i> 🎯 Gagner des points
+                        </a>
+
                         <button onclick="window.print();" style="background: transparent; border: 2px solid #D4B896; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-radius: 50px; color: #6B1E1E; cursor: pointer; transition: 0.3s;">
                             <i class="bi bi-printer"></i> Imprimer
                         </button>
@@ -206,5 +229,32 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-quiz');
+    var audio = document.getElementById('sound-start');
+    
+    if (btn && audio) {
+        audio.load();
+        
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var url = this.href;
+            
+            audio.currentTime = 0;
+            var playPromise = audio.play();
+            
+            window.location.href = url;
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(function(error) {
+                    console.log('Audio non disponible:', error);
+                });
+            }
+        });
+    }
+});
+</script>
 
 {% endblock %}

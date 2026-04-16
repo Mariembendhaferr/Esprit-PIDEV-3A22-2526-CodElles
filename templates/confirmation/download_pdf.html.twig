@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>FACTURE - Doura Mondo #{{ reservation.id }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+            background: #f5f5f5;
+            padding: 40px;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* ========== EN-TÊTE ========== */
+        .invoice-header {
+            background: #8B2C2C;
+            padding: 25px 30px;
+            color: white;
+        }
+
+        .logo-section h1 {
+            font-size: 28px;
+            font-family: 'Times New Roman', serif;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        .logo-section p {
+            font-size: 10px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .invoice-title {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .invoice-title h2 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .invoice-title p {
+            font-size: 10px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        /* ========== COORDONNÉES ========== */
+        .company-box {
+            padding: 20px 30px;
+            background: #FAF6EE;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #E8DDD0;
+        }
+
+        .company-info h3, .client-info h3 {
+            font-size: 11px;
+            color: #8B2C2C;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .company-info p, .client-info p {
+            font-size: 11px;
+            margin: 4px 0;
+            color: #555;
+        }
+
+        /* ========== NUMÉRO FACTURE ========== */
+        .invoice-number {
+            padding: 12px 30px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #E8DDD0;
+            font-size: 11px;
+        }
+
+        .invoice-number strong {
+            color: #8B2C2C;
+        }
+
+        /* ========== TABLEAU ========== */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .items-table th {
+            background: #FAF6EE;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: bold;
+            color: #8B2C2C;
+            text-transform: uppercase;
+            border-bottom: 2px solid #8B2C2C;
+        }
+
+        .items-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #E8DDD0;
+            font-size: 11px;
+        }
+
+        .items-table .text-right {
+            text-align: right;
+        }
+
+        /* ========== TOTAUX ========== */
+        .totals-box {
+            padding: 20px 30px;
+            background: #FAF6EE;
+            margin: 20px 0;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: flex-end;
+            padding: 6px 0;
+        }
+
+        .total-line .label {
+            width: 180px;
+            text-align: right;
+            padding-right: 20px;
+            font-size: 11px;
+        }
+
+        .total-line .value {
+            width: 100px;
+            text-align: right;
+            font-size: 11px;
+        }
+
+        .total-line.grand-total {
+            border-top: 2px solid #8B2C2C;
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+
+        .total-line.grand-total .label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #8B2C2C;
+        }
+
+        .total-line.grand-total .value {
+            font-weight: bold;
+            font-size: 16px;
+            color: #8B2C2C;
+        }
+
+        /* ========== PAIEMENT ========== */
+        .payment-box {
+            padding: 20px 30px;
+            border-top: 1px solid #E8DDD0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .payment-method h4, .bank-info h4 {
+            font-size: 10px;
+            color: #8B2C2C;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .payment-method p, .bank-info p {
+            font-size: 10px;
+            margin: 4px 0;
+            color: #666;
+        }
+
+        .badge-attente {
+            background: #fff3cd;
+            color: #856404;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* ========== MENTIONS ========== */
+        .legal-notes {
+            padding: 15px 30px;
+            background: #FAF6EE;
+            border-top: 1px solid #E8DDD0;
+            font-size: 8px;
+            color: #999;
+            text-align: center;
+        }
+
+        .legal-notes p {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+
+        <!-- EN-TÊTE -->
+        <div class="invoice-header">
+            <div class="logo-section">
+                <h1>DOURA MONDO</h1>
+                <p>VOYAGES D'EXCEPTION</p>
+            </div>
+            <div class="invoice-title">
+                <h2>FACTURE</h2>
+                <p>Original à conserver par le client</p>
+            </div>
+        </div>
+
+        <!-- COORDONNÉES -->
+        <div class="company-box">
+            <div class="company-info">
+                <h3>DOURA MONDO</h3>
+                <p>12 Rue des Voyages, Tunis, Tunisie</p>
+                <p>Tél : +216 29 327 092</p>
+                <p>Email : contact@douramondo.tn</p>
+                <p>RC : 12345678 | MF : 1234567X</p>
+            </div>
+            <div class="client-info">
+                <h3>FACTURER À</h3>
+                <p><strong>{{ client.prenom }} {{ client.nom }}</strong></p>
+                <p>{{ client.email }}</p>
+                <p>Tél : {{ client.telephone }}</p>
+            </div>
+        </div>
+
+        <!-- NUMÉRO FACTURE -->
+        <div class="invoice-number">
+            <span><strong>N° FACTURE :</strong> FAC-{{ "now"|date("Y") }}-{{ reservation.id }}</span>
+            <span><strong>DATE D'ÉMISSION :</strong> {{ "now"|date("d/m/Y") }}</span>
+            <span><strong>RÉFÉRENCE :</strong> DMT{{ reservation.id }}</span>
+        </div>
+
+        <!-- TABLEAU DES ARTICLES -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>DÉSIGNATION</th>
+                    <th>DATE DÉPART</th>
+                    <th>DATE RETOUR</th>
+                    <th>NBR PERS</th>
+                    <th class="text-right">PRIX TTC</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Séjour à {{ destination }}</strong><br>
+                        <small style="color: #888;">Référence : V-{{ reservation.voyage.id }}</small>
+                    </td>
+                    <td>{{ reservation.dateDepart|date('d/m/Y') }}</td>
+                    <td>{{ reservation.dateRetour|date('d/m/Y') }}</td>
+                    <td>{{ reservation.nombrePersonnes }}</td>
+                    <td class="text-right">
+                        {{ (reservation.montantTotal / reservation.nombrePersonnes)|number_format(2, ',', ' ') }} €
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- RÉCAPITULATIF TVA -->
+        {% set ht = (reservation.montantTotal / 1.19)|number_format(2, ',', ' ') %}
+        {% set tva = (reservation.montantTotal - (reservation.montantTotal / 1.19))|number_format(2, ',', ' ') %}
+        
+        <div class="totals-box">
+            <div class="total-line">
+                <div class="label">TOTAL HORS TAXE (HT)</div>
+                <div class="value">{{ ht }} €</div>
+            </div>
+            <div class="total-line">
+                <div class="label">TVA (19%)</div>
+                <div class="value">{{ tva }} €</div>
+            </div>
+            <div class="total-line grand-total">
+                <div class="label">TOTAL TTC</div>
+                <div class="value">{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</div>
+            </div>
+        </div>
+
+        <!-- PAIEMENT ET COORDONNÉES BANCAIRES -->
+        <div class="payment-box">
+            <div class="payment-method">
+                <h4>MODE DE PAIEMENT</h4>
+                {% if paiement %}
+                    <p><strong>{{ paiement.modePaiement }}</strong></p>
+                    <p>Référence : {{ paiement.referencePaiement }}</p>
+                    <p>Date : {{ paiement.datePaiement|date('d/m/Y H:i') }}</p>
+                {% else %}
+                    <p>Paiement en attente</p>
+                    <p>Statut : <span class="badge-attente">EN ATTENTE</span></p>
+                {% endif %}
+            </div>
+            <div class="bank-info">
+                <h4>COORDONNÉES BANCAIRES</h4>
+                <p>IBAN : TN59 1234 5678 9012 3456 7890</p>
+                <p>BIC : BKTNTNTTXXX</p>
+                <p>Banque : Banque de Tunisie</p>
+            </div>
+        </div>
+
+        <!-- MENTIONS LÉGALES -->
+        <div class="legal-notes">
+            <p>Conformément à la loi n° 2005-83 du 15 août 2005, le client dispose d'un délai de rétractation de 14 jours.</p>
+            <p>En cas d'annulation, des frais de dossier de 50€ TTC seront retenus.</p>
+            <p>Merci de votre confiance - Doura Mondo - Voyages d'Exception</p>
+            <p>Facture générée le {{ "now"|date("d/m/Y H:i") }} - Document non contractuel</p>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DOURA MONDO - Administration{% endblock %}</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ========== SIDEBAR ROUGE ========== */
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #8B0000 0%, #5C0000 100%);
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-header {
+            padding: 35px 24px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-logo span {
+            font-size: 0.7rem;
+            display: block;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 3px;
+            margin-top: 5px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .sidebar-menu-item {
+            list-style: none;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-menu-link i {
+            width: 22px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-menu-link:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        .sidebar-menu-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid #FFD700;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: auto;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout-link i {
+            width: 22px;
+        }
+
+        .logout-link:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        /* ========== MAIN CONTENT AVEC IMAGE D'AVION ========== */
+        .admin-main {
+            margin-left: 280px;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        .admin-content {
+            position: relative;
+            z-index: 1;
+            padding: 30px;
+        }
+
+        /* Mobile toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            z-index: 1100;
+            background: #8B0000;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* ========== CARTES STATISTIQUES TRANSPARENTES ========== */
+        .stat-card {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.75);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-icon i {
+            font-size: 24px;
+            color: #FFD700;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #FFD700;
+            margin-bottom: 6px;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.1;
+        }
+        .stat-sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        /* ========== FILTRES TRANSPARENTS ========== */
+        .filter-card {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 160px;
+        }
+        .filter-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #FFD700;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .filter-input {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            transition: all 0.2s;
+        }
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .filter-input:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+        select.filter-input option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* ========== TABLEAU TRANSPARENT ========== */
+        .table-container {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .admin-table thead tr {
+            background: rgba(255, 215, 0, 0.15);
+        }
+        .admin-table thead th {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #FFD700;
+            padding: 14px 16px;
+            text-align: left;
+        }
+        .admin-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s;
+        }
+        .admin-table tbody tr:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .admin-table tbody td {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 14px 16px;
+        }
+
+        /* Badges */
+        .badge-paye { background: rgba(40, 167, 69, 0.8); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-attente { background: rgba(255, 193, 7, 0.8); color: #1a1a2e; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-annule { background: rgba(220, 53, 69, 0.8); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: #8B0000;
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary-custom:hover {
+            background: #5C0000;
+            color: white;
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #FFD700;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #FFD700;
+            border-color: #FFD700;
+            color: #1a1a2e;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            padding-bottom: 20px;
+        }
+        .pagination .page-link {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #FFD700;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .pagination .page-link:hover {
+            background: #FFD700;
+            color: #1a1a2e;
+            border-color: #FFD700;
+        }
+        .pagination .active {
+            background: #FFD700;
+            color: #1a1a2e;
+            border-color: #FFD700;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .admin-main {
+                margin-left: 0;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .admin-content {
+                padding-top: 20px;
+            }
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+    <button class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- SIDEBAR ROUGE -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <a href="{{ path('admin_reservations') }}" class="sidebar-logo">
+                DOURA MONDO
+                <span>TOUS DU MONDE</span>
+            </a>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link" onclick="alert('Page en construction'); return false;">
+                    <i class="fas fa-home"></i>
+                    <span>ACCUEIL</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link" onclick="alert('Page en construction'); return false;">
+                    <i class="fas fa-users"></i>
+                    <span>UTILISATEURS</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link" onclick="alert('Page en construction'); return false;">
+                    <i class="fas fa-plane"></i>
+                    <span>VOYAGE</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link" onclick="alert('Page en construction'); return false;">
+                    <i class="fas fa-hiking"></i>
+                    <span>ACTIVITÉS</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ path('admin_reservations') }}" class="sidebar-menu-link {{ app.request.get('_route') == 'admin_reservations' ? 'active' : '' }}">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>RÉSERVATION</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="#" class="sidebar-menu-link" onclick="alert('Page en construction'); return false;">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>RÉCLAMATIONS</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <a href="#" class="logout-link" onclick="alert('Déconnexion'); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>DÉCONNEXION</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main">
+        <div class="admin-content">
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: rgba(40, 167, 69, 0.8); border: none; border-radius: 10px; color: white;">
+                    <i class="fas fa-check-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background: rgba(220, 53, 69, 0.8); border: none; border-radius: 10px; color: white;">
+                    <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const mobileToggle = document.getElementById('mobileToggle');
+        const adminSidebar = document.getElementById('adminSidebar');
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function() {
+                adminSidebar.classList.toggle('open');
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 992) {
+                const isClickInside = adminSidebar.contains(event.target) || mobileToggle.contains(event.target);
+                if (!isClickInside && adminSidebar.classList.contains('open')) {
+                    adminSidebar.classList.remove('open');
+                }
+            }
+        });
+    </script>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

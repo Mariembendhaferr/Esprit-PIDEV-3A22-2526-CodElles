@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends '/admin/layout.html.twig' %}
 {% block title %}Modifier réservation #{{ reservation.id }}{% endblock %}
 
 {% block stylesheets %}
@@ -163,6 +163,14 @@
     width: 50%;
     padding: 0 12px;
 }
+/* Style pour le select du statut */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B2C2C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
 @media (max-width: 768px) {
     .col-6 {
         width: 100%;
@@ -230,6 +238,29 @@
                             {{ form_widget(form.dateRetour, {'attr': {'class': 'form-control'}}) }}
                             {{ form_errors(form.dateRetour) }}
                         </div>
+                    </div>
+                </div>
+
+                <!-- ========== AJOUT DU CHAMP STATUT ========== -->
+                <div class="form-group">
+                    {{ form_label(form.statut, 'Statut de la réservation', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.statut) }}
+                    
+                    {# Affichage du badge du statut actuel #}
+                    <div style="margin-top: 10px;">
+                        <span style="font-size: 11px; color: #666;">Statut actuel :</span>
+                        {% if reservation.statut == 'payé' %}
+                            <span class="badge-paye" style="margin-left: 8px; background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 11px;">✓ PAYÉ</span>
+                            <small style="color: #888; display: block; margin-top: 5px;">
+                                <i class="fas fa-info-circle"></i> 
+                                Note: Une réservation payée ne peut pas être supprimée.
+                            </small>
+                        {% elseif reservation.statut == 'annulé' %}
+                            <span class="badge-annule" style="margin-left: 8px; background: #f8d7da; color: #721c24; padding: 4px 12px; border-radius: 20px; font-size: 11px;">✕ ANNULÉ</span>
+                        {% else %}
+                            <span class="badge-attente" style="margin-left: 8px; background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 11px;">⏳ EN ATTENTE</span>
+                        {% endif %}
                     </div>
                 </div>
 

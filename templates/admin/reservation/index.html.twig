@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 {% block title %}Tableau de bord - Réservations{% endblock %}
 
 {% block stylesheets %}
@@ -29,19 +29,41 @@
 }
 .admin-hero {
     background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%);
-    padding: 28px 40px; color: white;
-    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 40px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.admin-hero h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin: 0; letter-spacing: 2px; }
-.admin-hero p  { font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 2px; margin: 6px 0 0; opacity: 0.75; text-transform: uppercase; }
-.admin-hero .date { font-family: 'Cormorant Garamond', serif; font-size: 14px; opacity: 0.8; font-style: italic; }
-.admin-body { padding: 30px 40px; }
-
-/* Stats */
+.admin-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin: 0;
+    letter-spacing: 2px;
+}
+.admin-hero p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin: 6px 0 0;
+    opacity: 0.75;
+    text-transform: uppercase;
+}
+.admin-hero .date {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    opacity: 0.8;
+    font-style: italic;
+}
+.admin-body {
+    padding: 30px 40px;
+}
 .stat-card {
+    flex: 1;
+    min-width: 200px;
     background: white;
     border-radius: 12px;
-    padding: 20px 22px;
+    padding: 20px;
     border: 1px solid rgba(212,184,150,0.3);
     box-shadow: 0 2px 12px rgba(139,44,44,0.06);
     display: flex;
@@ -52,16 +74,6 @@
 .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(139,44,44,0.1);
-}
-.stat-left { flex: 1; }
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
 }
 .stat-label {
     font-family: 'Montserrat', sans-serif;
@@ -76,7 +88,6 @@
     font-family: 'Playfair Display', serif;
     font-size: 1.8rem;
     color: #2c1810;
-    line-height: 1.1;
     font-weight: 700;
 }
 .stat-sub {
@@ -85,55 +96,16 @@
     color: #aaa;
     margin-top: 5px;
 }
-
-/* Pagination */
-.pagination {
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(212,168,83,0.12);
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-top: 25px;
-    flex-wrap: wrap;
+    flex-shrink: 0;
 }
-.pagination .page-link {
-    display: inline-block;
-    padding: 8px 16px;
-    border: 1px solid #E8DDD0;
-    border-radius: 6px;
-    background: white;
-    color: #8B2C2C;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-.pagination .page-link:hover {
-    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
-    color: white;
-    border-color: #8B2C2C;
-}
-.pagination .active {
-    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
-    color: white;
-    border-color: #8B2C2C;
-    cursor: default;
-}
-.pagination .disabled {
-    color: #ccc;
-    cursor: not-allowed;
-    pointer-events: none;
-    background: #f5f5f5;
-}
-.pagination-info {
-    text-align: center;
-    margin-top: 20px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
-    color: #9B7240;
-}
-
-/* Section */
 .section-card {
     background: transparent;
     border-radius: 12px;
@@ -156,8 +128,6 @@
     padding-bottom: 12px;
     border-bottom: 2px solid #FAF6EE;
 }
-
-/* Form controls - MODIFICATION : espace sous les labels augmenté */
 .admin-label {
     font-family: 'Montserrat', sans-serif;
     font-size: 10px;
@@ -166,7 +136,7 @@
     text-transform: uppercase;
     color: #9B7240;
     display: block;
-    margin-bottom: 6px;  /* était 6px, maintenant 16px pour plus d'espace */
+    margin-bottom: 6px;
 }
 .admin-input {
     border: 1px solid #E8DDD0;
@@ -178,45 +148,21 @@
     background: #FDFAF5;
     width: 100%;
 }
-.admin-input:focus {
-    outline: none;
-    border-color: #8B2C2C;
-    box-shadow: 0 0 0 2px rgba(139,44,44,0.1);
+.filter-row {
+    display: flex;
+    gap: 40px;
+    row-gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
 }
-select.admin-input { cursor: pointer; }
-
-
-
-/* Table */
-.admin-table { width: 100%; border-collapse: collapse; }
-.admin-table thead tr { background: linear-gradient(135deg, #6B1E1E, #8B2C2C); }
-.admin-table thead th {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(232,221,201,0.9);
-    padding: 14px 14px;
-    text-align: left;
+.filter-item {
+    flex: 1;
+    min-width: 180px;
 }
-.admin-table tbody tr { border-bottom: 1px solid #FAF6EE; transition: background 0.15s; }
-.admin-table tbody tr:hover { background: rgba(139,44,44,0.04); }
-.admin-table tbody td {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
-    color: #3f2c24;
-    padding: 14px 14px;
-    vertical-align: middle;
+.filter-item-large {
+    flex: 2;
+    min-width: 250px;
 }
-.admin-table tbody td small { color: #aaa; font-size: 10px; }
-
-/* Badges */
-.badge-paye    { background: rgba(34,197,94,0.12); color: #16a34a; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
-.badge-attente { background: rgba(234,179,8,0.12); color: #ca8a04; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
-.badge-annule  { background: rgba(239,68,68,0.12); color: #dc2626; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
-
-/* Buttons */
 .btn-admin-primary {
     background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
     border: none;
@@ -228,9 +174,7 @@ select.admin-input { cursor: pointer; }
     font-weight: 600;
     letter-spacing: 1px;
     cursor: pointer;
-    transition: 0.2s;
 }
-.btn-admin-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 .btn-admin-secondary {
     background: #F0E8D8;
     border: none;
@@ -243,9 +187,7 @@ select.admin-input { cursor: pointer; }
     letter-spacing: 1px;
     text-decoration: none;
     display: inline-block;
-    transition: 0.2s;
 }
-.btn-admin-secondary:hover { background: #e8ddcd; text-decoration: none; color: #3f2c24; }
 .btn-action {
     width: 32px;
     height: 32px;
@@ -256,113 +198,77 @@ select.admin-input { cursor: pointer; }
     justify-content: center;
     font-size: 12px;
     cursor: pointer;
-    transition: 0.2s;
 }
 .btn-view   { background: rgba(139,44,44,0.12); color: #8B2C2C; }
-.btn-view:hover { background: rgba(139,44,44,0.2); }
 .btn-edit   { background: rgba(155,114,64,0.12); color: #9B7240; }
-.btn-edit:hover { background: rgba(155,114,64,0.2); }
 .btn-del    { background: rgba(239,68,68,0.12); color: #dc2626; }
-.btn-del:hover { background: rgba(239,68,68,0.2); }
-
-/* Filtres - MODIFICATION : ajout de row-gap pour espacer les lignes */
-.filter-row {
-    display: flex;
-    gap: 40px;
-    row-gap: 20px;  /* espace vertical lorsque les éléments passent à la ligne */
-    flex-wrap: wrap;
-    align-items: flex-end;
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
 }
-.filter-item { flex: 1; min-width: 180px; }
-.filter-item-large { flex: 2; min-width: 250px; }
-/* ========== STYLES POUR L'IMPRESSION ========== */
+.admin-table thead tr {
+    background: linear-gradient(135deg, #6B1E1E, #8B2C2C);
+}
+.admin-table thead th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(232,221,201,0.9);
+    padding: 14px 14px;
+    text-align: left;
+}
+.admin-table tbody tr {
+    border-bottom: 1px solid #FAF6EE;
+}
+.admin-table tbody td {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #3f2c24;
+    padding: 14px 14px;
+    vertical-align: middle;
+}
+.badge-paye    { background: rgba(34,197,94,0.12); color: #16a34a; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-attente { background: rgba(234,179,8,0.12); color: #ca8a04; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-annule  { background: rgba(239,68,68,0.12); color: #dc2626; padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+.pagination .page-link {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #E8DDD0;
+    border-radius: 6px;
+    background: white;
+    color: #8B2C2C;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    text-decoration: none;
+}
+.pagination .active {
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    color: white;
+    border-color: #8B2C2C;
+}
+.pagination-info {
+    text-align: center;
+    margin-top: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #9B7240;
+}
 @media print {
-    /* Cacher les éléments non nécessaires à l'impression */
-    .admin-hero .date,
-    .btn-action,
-    .pagination,
-    .pagination-info,
-    .filter-row,
-    .section-title .d-flex.gap-2,
-    .btn-admin-primary,
-    .btn-admin-secondary,
-    .btn-view,
-    .btn-edit,
-    .btn-del,
-    form,
-    .filter-item[style*="flex: 0 0 auto"] {
-        display: none !important;
-    }
-
-    /* Garder les cartes statistiques mais en noir/blanc et sans ombres */
-    .stat-card {
-        background: white !important;
-        border: 1px solid #ddd !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
-    }
-
-    /* Tableau : bordures noires, police plus petite */
-    .admin-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .admin-table th,
-    .admin-table td {
-        border: 1px solid #000 !important;
-        padding: 8px !important;
-        font-size: 10pt !important;
-    }
-    .admin-table th {
-        background: #f2f2f2 !important;
-        color: black !important;
-    }
-    .admin-table tbody tr {
-        border-bottom: none !important;
-    }
-
-    /* En-tête personnalisé pour l'impression */
-    .print-header {
-        display: block !important;
-        text-align: center;
-        margin-bottom: 20px;
-        font-family: 'Playfair Display', serif;
-    }
-    .print-header h1 {
-        font-size: 24pt;
-        color: #6B1E1E;
-        margin: 0;
-    }
-    .print-header p {
-        font-size: 10pt;
-        color: #555;
-    }
-
-    /* Ajuster les marges de la page */
-    @page {
-        margin: 1.5cm;
-    }
-
-    /* Forcer l'affichage de l'en-tête d'impression (caché par défaut) */
-    .print-header {
-        display: block;
-    }
-    body {
-        background: white !important;
-    }
-    .admin-wrapper {
-        background: white !important;
-        padding: 0 !important;
-    }
-    .admin-wrapper::before {
-        display: none !important;
-    }
-    .section-card {
-        background: white !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-    }
+    .admin-hero .date, .btn-action, .pagination, .pagination-info, .filter-row, .section-title .d-flex, .btn-admin-primary, .btn-admin-secondary { display: none !important; }
+    .stat-card { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+    .admin-table th, .admin-table td { border: 1px solid #000 !important; }
+    .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+    .print-header h1 { font-size: 24pt; color: #6B1E1E; }
+    @page { margin: 1.5cm; }
 }
 </style>
 {% endblock %}
@@ -378,53 +284,46 @@ select.admin-input { cursor: pointer; }
     </div>
 
     <div class="admin-body">
-     <div class="print-header" style="display: none;">
-        <h1>Doura Mondo</h1>
-        <p>Voyages d'Exception - Liste des réservations</p>
-        <p>Date d'impression : {{ "now"|date("d/m/Y H:i") }}</p>
-        <hr>
-    </div>
+        <div class="print-header" style="display: none;">
+            <h1>Doura Mondo</h1>
+            <p>Voyages d'Exception - Liste des réservations</p>
+            <p>Date d'impression : {{ "now"|date("d/m/Y H:i") }}</p>
+            <hr>
+        </div>
+
         <!-- 4 cartes statistiques -->
         <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px; background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(212,184,150,0.3); box-shadow: 0 2px 12px rgba(139,44,44,0.06); display: flex; align-items: center; justify-content: space-between;">
+            <div class="stat-card">
                 <div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #9B7240; margin-bottom: 6px;">CHIFFRE D'AFFAIRE</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c1810; font-weight: 700;">{{ chiffreAffaire|number_format(2, ',', ' ') }} €</div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: #aaa; margin-top: 5px;">Total des paiements validés</div>
+                    <div class="stat-label">CHIFFRE D'AFFAIRE</div>
+                    <div class="stat-value">{{ chiffreAffaire|number_format(2, ',', ' ') }} €</div>
+                    <div class="stat-sub">Total des paiements validés</div>
                 </div>
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(212,168,83,0.12); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-chart-line" style="color: #D4A853; font-size: 22px;"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-chart-line" style="color: #D4A853; font-size: 22px;"></i></div>
             </div>
-            <div style="flex: 1; min-width: 200px; background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(212,184,150,0.3); box-shadow: 0 2px 12px rgba(139,44,44,0.06); display: flex; align-items: center; justify-content: space-between;">
+            <div class="stat-card">
                 <div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #9B7240; margin-bottom: 6px;">RÉSERVATIONS TOTALES</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c1810; font-weight: 700;">{{ totalReservations }}</div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: #aaa; margin-top: 5px;">Toutes réservations confondues</div>
+                    <div class="stat-label">RÉSERVATIONS TOTALES</div>
+                    <div class="stat-value">{{ totalReservations }}</div>
+                    <div class="stat-sub">Toutes réservations confondues</div>
                 </div>
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(139,44,44,0.10); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-ticket-alt" style="color: #8B2C2C; font-size: 22px;"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-ticket-alt" style="color: #8B2C2C; font-size: 22px;"></i></div>
             </div>
-            <div style="flex: 1; min-width: 200px; background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(212,184,150,0.3); box-shadow: 0 2px 12px rgba(139,44,44,0.06); display: flex; align-items: center; justify-content: space-between;">
+            <div class="stat-card">
                 <div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #9B7240; margin-bottom: 6px;">PAIEMENTS COMPLETS</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c1810; font-weight: 700;">{{ totalPaiements }}</div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: #aaa; margin-top: 5px;">Transactions validées</div>
+                    <div class="stat-label">PAIEMENTS COMPLETS</div>
+                    <div class="stat-value">{{ totalPaiements }}</div>
+                    <div class="stat-sub">Transactions validées</div>
                 </div>
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(34,197,94,0.10); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-credit-card" style="color: #16a34a; font-size: 22px;"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-credit-card" style="color: #16a34a; font-size: 22px;"></i></div>
             </div>
-            <div style="flex: 1; min-width: 200px; background: white; border-radius: 12px; padding: 20px; border: 1px solid rgba(212,184,150,0.3); box-shadow: 0 2px 12px rgba(139,44,44,0.06); display: flex; align-items: center; justify-content: space-between;">
+            <div class="stat-card">
                 <div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #9B7240; margin-bottom: 6px;">CLIENTS</div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c1810; font-weight: 700;">{{ totalClients }}</div>
-                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: #aaa; margin-top: 5px;">Clients enregistrés</div>
+                    <div class="stat-label">CLIENTS</div>
+                    <div class="stat-value">{{ totalClients }}</div>
+                    <div class="stat-sub">Clients enregistrés</div>
                 </div>
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(59,130,246,0.10); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-users" style="color: #3b82f6; font-size: 22px;"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-users" style="color: #3b82f6; font-size: 22px;"></i></div>
             </div>
         </div>
 
@@ -469,23 +368,8 @@ select.admin-input { cursor: pointer; }
             <div class="section-title" style="justify-content: space-between;">
                 <span><i class="fas fa-list me-2"></i> LISTE DES RÉSERVATIONS</span>
                 <div class="d-flex gap-2">
-                          <a href="{{ path('admin_reservations_export_pdf', {
-            search: app.request.query.get('search'),
-            statut: app.request.query.get('statut'),
-            date_debut: app.request.query.get('date_debut'),
-            date_fin: app.request.query.get('date_fin')
-        }) }}" class="btn-action btn-view" title="Télécharger PDF">
-            <i class="fas fa-file-pdf"></i>
-        </a>
-
-                    <a href="{{ path('admin_reservations_export_csv', {
-    search: app.request.query.get('search'),
-    statut: app.request.query.get('statut'),
-    date_debut: app.request.query.get('date_debut'),
-    date_fin: app.request.query.get('date_fin')
-}) }}" class="btn-action btn-edit" title="Exporter en CSV">
-    <i class="fas fa-file-csv"></i>
-</a>
+                    <a href="{{ path('admin_reservations_export_pdf', { search: app.request.query.get('search'), statut: app.request.query.get('statut'), date_debut: app.request.query.get('date_debut'), date_fin: app.request.query.get('date_fin') }) }}" class="btn-action btn-view" title="Télécharger PDF"><i class="fas fa-file-pdf"></i></a>
+                    <a href="{{ path('admin_reservations_export_csv', { search: app.request.query.get('search'), statut: app.request.query.get('statut'), date_debut: app.request.query.get('date_debut'), date_fin: app.request.query.get('date_fin') }) }}" class="btn-action btn-edit" title="Exporter CSV"><i class="fas fa-file-csv"></i></a>
                     <button class="btn-action btn-view" onclick="window.print()" title="Imprimer"><i class="fas fa-print"></i></button>
                 </div>
             </div>
@@ -498,7 +382,7 @@ select.admin-input { cursor: pointer; }
                             <th>CLIENT</th>
                             <th>DATE DÉPART</th>
                             <th>DATE RETOUR</th>
-                            <th>MONTANT TOTAL</th>
+                            <th>MONTANT PAYÉ</th>
                             <th>STATUT</th>
                             <th>ACTIONS</th>
                         </tr>
@@ -513,7 +397,18 @@ select.admin-input { cursor: pointer; }
                             </td>
                             <td>{{ reservation.dateDepart|date('d/m/Y') }}</td>
                             <td>{{ reservation.dateRetour|date('d/m/Y') }}</td>
-                            <td><strong>{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</strong></td>
+                            <td>
+                                {% set montantPaye = reservation.paiements|first ? reservation.paiements|first.montant : null %}
+                                {% if montantPaye %}
+                                    <strong>{{ montantPaye|number_format(2, ',', ' ') }} €</strong>
+                                    {% if montantPaye != reservation.montantTotal %}
+                                        <small style="display: block; color: #28a745;">(-{{ ((reservation.montantTotal - montantPaye) / reservation.montantTotal * 100)|round }}%)</small>
+                                    {% endif %}
+                                {% else %}
+                                    <strong>{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</strong>
+                                    <small style="display: block; color: #999;">(non payé)</small>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if reservation.statut == 'payé' %}
                                     <span class="badge-paye">✓ PAYÉE</span>
@@ -525,18 +420,11 @@ select.admin-input { cursor: pointer; }
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ path('admin_reservation_detail', {'id': reservation.id}) }}" class="btn-action btn-view" title="Voir">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ path('admin_reservation_edit', {'id': reservation.id}) }}" class="btn-action btn-edit" title="Modifier">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <!-- Formulaire de suppression -->
+                                    <a href="{{ path('admin_reservation_detail', {'id': reservation.id}) }}" class="btn-action btn-view" title="Voir"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ path('admin_reservation_edit', {'id': reservation.id}) }}" class="btn-action btn-edit" title="Modifier"><i class="fas fa-edit"></i></a>
                                     <form method="post" action="{{ path('admin_reservation_delete', {'id': reservation.id}) }}" onsubmit="return confirm('Supprimer définitivement cette réservation ?');" style="display:inline;">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
-                                        <button class="btn-action btn-del" title="Supprimer">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        <button class="btn-action btn-del" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
                                     </form>
                                 </div>
                             </td>

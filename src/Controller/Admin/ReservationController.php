@@ -9,15 +9,13 @@ use App\Repository\ReservationRepository;
 use App\Repository\ClientRepository;
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Snappy\Pdf;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 class ReservationController extends AbstractController
 {
     #[Route('/admin/reservations', name: 'admin_reservations')]
@@ -34,6 +32,14 @@ class ReservationController extends AbstractController
 
         $allReservationsFiltered = $reservationRepo->findByFilters($search, $statut, $dateDebut, $dateFin);
 
+        // Calcul du chiffre d'affaires réel (montants payés)
+        $chiffreAffaire = 0;
+        foreach ($allReservationsFiltered as $r) {
+            $paiements = $paiementRepo->findBy(['reservation' => $r]);
+            $montantPaye = $paiements ? $paiements[0]->getMontant() : $r->getMontantTotal();
+            $chiffreAffaire += $montantPaye;
+        }
+
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
         $offset = ($page - 1) * $limit;
@@ -41,7 +47,6 @@ class ReservationController extends AbstractController
 
         $totalReservations = count($allReservationsFiltered);
         $totalPages = ceil($totalReservations / $limit);
-        $chiffreAffaire = array_sum(array_map(fn($r) => $r->getMontantTotal(), $allReservationsFiltered));
         $totalPaiements = count($paiementRepo->findAll());
         $totalClients = count($clientRepo->findAll());
 
@@ -57,7 +62,6 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    // ==================== DÉTAIL ====================
     #[Route('/admin/reservations/{id}/detail', name: 'admin_reservation_detail')]
     public function detail(Reservation $reservation, PaiementRepository $paiementRepo): Response
     {
@@ -69,7 +73,6 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    // ==================== MODIFIER ====================
     #[Route('/admin/reservations/{id}/edit', name: 'admin_reservation_edit')]
     public function edit(Request $request, Reservation $reservation, EntityManagerInterface $em): Response
     {
@@ -89,121 +92,146 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    // ==================== SUPPRIMER ====================
     #[Route('/admin/reservations/{id}/delete', name: 'admin_reservation_delete', methods: ['POST'])]
     public function delete(Request $request, Reservation $reservation, EntityManagerInterface $em): Response
     {
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete'.$reservation->getId(), $token)) {
-            $this->addFlash('error', 'Token de sécurité invalide. Veuillez réessayer.');
+            $this->addFlash('error', 'Token de sécurité invalide.');
             return $this->redirectToRoute('admin_reservations');
         }
 
         $paiement = $em->getRepository(Paiement::class)->findOneBy(['reservation' => $reservation]);
+
+        if ($reservation->getStatut() === 'annulé') {
+            try {
+                if ($paiement) $em->remove($paiement);
+                $em->remove($reservation);
+                $em->flush();
+                $this->addFlash('success', 'Réservation annulée supprimée.');
+                return $this->redirectToRoute('admin_reservations');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur technique.');
+                return $this->redirectToRoute('admin_reservations');
+            }
+        }
+
         if ($paiement) {
-            $this->addFlash('error', 'Impossible de supprimer une réservation qui a déjà un paiement associé (ID paiement : '.$paiement->getId().').');
+            $this->addFlash('error', 'Impossible de supprimer une réservation avec un paiement.');
             return $this->redirectToRoute('admin_reservations');
         }
 
         if ($reservation->getStatut() === 'payé') {
-            $this->addFlash('error', 'Impossible de supprimer une réservation dont le statut est "payé".');
+            $this->addFlash('error', 'Impossible de supprimer une réservation payée.');
             return $this->redirectToRoute('admin_reservations');
         }
 
         try {
             $em->remove($reservation);
             $em->flush();
-            $this->addFlash('success', 'Réservation #DMT'.$reservation->getId().' supprimée avec succès.');
+            $this->addFlash('success', 'Réservation supprimée.');
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur technique lors de la suppression : ' . $e->getMessage());
+            $this->addFlash('error', 'Erreur technique.');
         }
 
         return $this->redirectToRoute('admin_reservations');
     }
-// ==================== EXPORT PDF (avec Dompdf) ====================
-#[Route('/admin/reservations/export-pdf', name: 'admin_reservations_export_pdf')]
-public function exportPdf(
-    Request $request,
-    ReservationRepository $reservationRepo,
-    ClientRepository $clientRepo,
-    PaiementRepository $paiementRepo
-): Response {
-    $search = $request->query->get('search');
-    $statut = $request->query->get('statut');
-    $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
-    $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
 
-    $reservations = $reservationRepo->findByFilters($search, $statut, $dateDebut, $dateFin);
+    #[Route('/admin/reservations/export-pdf', name: 'admin_reservations_export_pdf')]
+    public function exportPdf(
+        Request $request,
+        ReservationRepository $reservationRepo,
+        ClientRepository $clientRepo,
+        PaiementRepository $paiementRepo
+    ): Response {
+        $search = $request->query->get('search');
+        $statut = $request->query->get('statut');
+        $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
+        $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
 
-    $chiffreAffaire = array_sum(array_map(fn($r) => $r->getMontantTotal(), $reservations));
-    $totalReservations = count($reservations);
-    $totalPaiements = count($paiementRepo->findAll());
-    $totalClients = count($clientRepo->findAll());
+        $reservations = $reservationRepo->findByFilters($search, $statut, $dateDebut, $dateFin);
 
-    $html = $this->renderView('admin/reservation/export_pdf.html.twig', [
-        'reservations' => $reservations,
-        'chiffreAffaire' => $chiffreAffaire,
-        'totalReservations' => $totalReservations,
-        'totalPaiements' => $totalPaiements,
-        'totalClients' => $totalClients,
-        'search' => $search,
-        'statut' => $statut,
-        'dateDebut' => $dateDebut,
-        'dateFin' => $dateFin,
-    ]);
+        $chiffreAffaire = 0;
+        foreach ($reservations as $r) {
+            $paiements = $paiementRepo->findBy(['reservation' => $r]);
+            $montantPaye = $paiements ? $paiements[0]->getMontant() : $r->getMontantTotal();
+            $chiffreAffaire += $montantPaye;
+        }
 
-    $options = new Options();
-    $options->set('defaultFont', 'Helvetica');
-    $dompdf = new Dompdf($options);
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
+        $totalReservations = count($reservations);
+        $totalPaiements = count($paiementRepo->findAll());
+        $totalClients = count($clientRepo->findAll());
 
-    return new Response(
-        $dompdf->output(),
-        200,
-        [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="reservations_' . date('Y-m-d') . '.pdf"',
-        ]
-    );
-}
- // ==================== EXPORT CSV ====================
-#[Route('/admin/reservations/export-csv', name: 'admin_reservations_export_csv')]
-public function exportCsv(
-    Request $request,
-    ReservationRepository $reservationRepo
-): Response {
-    $search = $request->query->get('search');
-    $statut = $request->query->get('statut');
-    $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
-    $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
+        $html = $this->renderView('admin/reservation/export_pdf.html.twig', [
+            'reservations' => $reservations,
+            'chiffreAffaire' => $chiffreAffaire,
+            'totalReservations' => $totalReservations,
+            'totalPaiements' => $totalPaiements,
+            'totalClients' => $totalClients,
+            'search' => $search,
+            'statut' => $statut,
+            'dateDebut' => $dateDebut,
+            'dateFin' => $dateFin,
+        ]);
 
-    $reservations = $reservationRepo->findByFilters($search, $statut, $dateDebut, $dateFin);
+        $options = new Options();
+        $options->set('defaultFont', 'Helvetica');
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
 
-    // Construction manuelle du CSV
-    $csvContent = "ID;Client;Email;Téléphone;Destination;Date départ;Date retour;Personnes;Montant total;Statut\n";
-
-    foreach ($reservations as $r) {
-        $csvContent .= '#DMT' . $r->getId() . ';'
-                     . $r->getClient()->getPrenom() . ' ' . $r->getClient()->getNom() . ';'
-                     . $r->getClient()->getEmail() . ';'
-                     . $r->getClient()->getTelephone() . ';'
-                     . $r->getVoyage()->getDestination() . ';'
-                     . $r->getDateDepart()->format('d/m/Y') . ';'
-                     . $r->getDateRetour()->format('d/m/Y') . ';'
-                     . $r->getNombrePersonnes() . ';'
-                     . $r->getMontantTotal() . ' €;'
-                     . ucfirst($r->getStatut()) . "\n";
+        return new Response(
+            $dompdf->output(),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="reservations_' . date('Y-m-d') . '.pdf"',
+            ]
+        );
     }
 
-    return new Response(
-        $csvContent,
-        200,
-        [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="reservations_' . date('Y-m-d') . '.csv"',
-        ]
-    );
-}
+    #[Route('/admin/reservations/export-csv', name: 'admin_reservations_export_csv')]
+    public function exportCsv(
+        Request $request,
+        ReservationRepository $reservationRepo,
+        PaiementRepository $paiementRepo
+    ): Response {
+        $search = $request->query->get('search');
+        $statut = $request->query->get('statut');
+        $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
+        $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
+
+        $reservations = $reservationRepo->findByFilters($search, $statut, $dateDebut, $dateFin);
+
+        $csvContent = "ID;Client;Email;Téléphone;Destination;Date départ;Date retour;Personnes;Montant initial;Montant payé;Réduction;Statut\n";
+
+        foreach ($reservations as $r) {
+            $paiements = $paiementRepo->findBy(['reservation' => $r]);
+            $montantPaye = $paiements ? $paiements[0]->getMontant() : null;
+            $reduction = ($montantPaye && $montantPaye < $r->getMontantTotal()) ? round((1 - $montantPaye / $r->getMontantTotal()) * 100) . '%' : '-';
+
+            $csvContent .= '#DMT' . $r->getId() . ';'
+                         . $r->getClient()->getPrenom() . ' ' . $r->getClient()->getNom() . ';'
+                         . $r->getClient()->getEmail() . ';'
+                         . $r->getClient()->getTelephone() . ';'
+                         . $r->getVoyage()->getDestination() . ';'
+                         . $r->getDateDepart()->format('d/m/Y') . ';'
+                         . $r->getDateRetour()->format('d/m/Y') . ';'
+                         . $r->getNombrePersonnes() . ';'
+                         . $r->getMontantTotal() . ' €;'
+                         . ($montantPaye ? $montantPaye . ' €' : 'Non payé') . ';'
+                         . $reduction . ';'
+                         . ucfirst($r->getStatut()) . "\n";
+        }
+
+        return new Response(
+            $csvContent,
+            200,
+            [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="reservations_' . date('Y-m-d') . '.csv"',
+            ]
+        );
+    }
 }

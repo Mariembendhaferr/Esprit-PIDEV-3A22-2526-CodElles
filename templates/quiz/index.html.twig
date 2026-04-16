@@ -1,0 +1,925 @@
+{# templates/quiz/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - Testez vos connaissances sur {{ destination }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    * { box-sizing: border-box; }
+
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .quiz-header {
+        background: linear-gradient(135deg, #6B1E1E, #8B2C2C);
+        padding: 30px;
+        text-align: center;
+        color: white;
+    }
+    .quiz-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        margin: 0;
+    }
+    .quiz-header p { margin: 10px 0 0; opacity: 0.85; }
+    .promo-hint {
+        display: inline-block;
+        margin-top: 12px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 30px;
+        padding: 6px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .03em;
+    }
+
+    .progress-wrap {
+        padding: 16px 30px 0;
+        background: #faf6ee;
+        border-bottom: 1px solid #eee;
+    }
+    .progress-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 6px;
+    }
+    .progress-track {
+        height: 5px;
+        background: #e8ddd0;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #8B2C2C, #c0392b);
+        border-radius: 999px;
+        transition: width .4s cubic-bezier(.4,0,.2,1);
+        width: 0%;
+    }
+
+    .loading { text-align: center; padding: 60px 30px; }
+    .spinner {
+        width: 50px; height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #8B2C2C;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-message { text-align: center; padding: 50px 30px; color: #dc2626; }
+    .btn-back {
+        display: inline-block;
+        margin-top: 20px;
+        background: #8B2C2C;
+        color: white;
+        text-decoration: none;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: .2s;
+    }
+    .btn-back:hover { background: #6B1E1E; color: white; }
+
+    .question-card {
+        padding: 30px;
+        border-bottom: 1px solid #eee;
+        animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .question-text {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #6B1E1E;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .choice-item {
+        margin-bottom: 12px;
+        padding: 12px 15px;
+        background: #FDF8F0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s;
+        border: 2px solid #E8DDD0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .95rem;
+    }
+    .choice-item:hover:not(.disabled-choice) {
+        background: #F0E8D8;
+        border-color: #c0a080;
+        transform: translateX(5px);
+    }
+    .choice-item.selected { background: #8B2C2C; color: white; border-color: #8B2C2C; }
+    .choice-item.correct  { background: #d4edda; color: #155724; border-color: #28a745; }
+    .choice-item.wrong    { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+    .choice-item.disabled-choice { cursor: default; }
+    .choice-letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.08);
+        font-weight: bold;
+        font-size: .8rem;
+        flex-shrink: 0;
+        transition: background .2s;
+    }
+    .selected .choice-letter { background: rgba(255,255,255,0.25); }
+    .correct  .choice-letter { background: #28a745; color: white; }
+    .wrong    .choice-letter { background: #dc3545; color: white; }
+
+    .q-nav {
+        display: none;
+        justify-content: flex-end;
+        padding: 16px 30px;
+        background: #faf6ee;
+        border-bottom: 1px solid #eee;
+    }
+    .btn-next {
+        display: none;
+        background: #8B2C2C;
+        color: white;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .2s;
+        font-size: .95rem;
+    }
+    .btn-next:hover { background: #6B1E1E; transform: scale(1.03); }
+    .btn-next.visible { display: inline-block; }
+
+    .quiz-footer {
+        padding: 20px 30px;
+        background: #FAF6EE;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .points-display { font-size: 1.1rem; font-weight: bold; color: #8B2C2C; }
+    .btn-submit {
+        background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: .95rem;
+    }
+    .btn-submit:hover { transform: scale(1.05); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ===================== RESULT MODAL ===================== */
+    .result-modal {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+        animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .result-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        max-width: 580px;
+        width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(.8); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    .result-card h2 { font-family: 'Playfair Display', serif; color: #6B1E1E; margin-bottom: 5px; }
+    .result-score { font-size: 3.5rem; font-weight: bold; color: #8B2C2C; margin: 15px 0 5px; line-height: 1; }
+    .result-pct   { font-size: 1rem; color: #999; margin-bottom: 12px; }
+    .result-points { font-size: 1.4rem; color: #28a745; font-weight: bold; margin: 10px 0; }
+    .result-total { font-size: .95rem; color: #666; margin-bottom: 16px; }
+    .result-msg {
+        background: #FDF8F0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: #555;
+        font-size: .9rem;
+        margin-bottom: 20px;
+    }
+
+    /* ===================== PROMO 3D CARD ===================== */
+    .promo-3d-scene {
+        perspective: 1000px;
+        margin: 24px 0;
+    }
+    .promo-3d-card {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        transform-style: preserve-3d;
+        animation: card3dEntrance 1s cubic-bezier(.34,1.56,.64,1) both, cardFloat 4s ease-in-out 1s infinite;
+        cursor: pointer;
+        border-radius: 18px;
+    }
+    @keyframes card3dEntrance {
+        0%   { opacity: 0; transform: rotateY(-90deg) scale(0.6); }
+        60%  { opacity: 1; transform: rotateY(12deg) scale(1.04); }
+        80%  { transform: rotateY(-6deg) scale(0.98); }
+        100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+    }
+    @keyframes cardFloat {
+        0%, 100% { transform: translateY(0px) rotateX(2deg); }
+        50%       { transform: translateY(-8px) rotateX(-2deg); }
+    }
+    .promo-3d-card:hover {
+        animation: card3dEntrance 0s, cardHover .3s ease forwards;
+    }
+    @keyframes cardHover {
+        to { transform: scale(1.04) rotateY(5deg); }
+    }
+
+    .promo-card-front {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #533483 100%);
+        border-radius: 18px;
+        padding: 28px 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+            0 25px 60px rgba(0,0,0,0.5),
+            0 0 0 1px rgba(255,255,255,0.08),
+            inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    /* Holographic shimmer */
+    .promo-card-front::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            105deg,
+            transparent 30%,
+            rgba(255,255,255,0.04) 40%,
+            rgba(200,180,255,0.08) 50%,
+            rgba(255,255,255,0.04) 60%,
+            transparent 70%
+        );
+        animation: hologram 3s linear infinite;
+        border-radius: 18px;
+    }
+    @keyframes hologram {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    /* Sparkle dots */
+    .promo-card-front::after {
+        content: '✦ ✧ ✦ ✧ ✦';
+        position: absolute;
+        top: 10px; right: 14px;
+        color: rgba(255,255,255,0.2);
+        font-size: 10px;
+        letter-spacing: 4px;
+        animation: sparkle 2s ease-in-out infinite alternate;
+    }
+    @keyframes sparkle {
+        from { opacity: 0.2; }
+        to   { opacity: 0.7; }
+    }
+
+    .promo-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,215,0,0.18);
+        border: 1px solid rgba(255,215,0,0.4);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 11px;
+        color: #FFD700;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+    .promo-discount-big {
+        font-size: 3.8rem;
+        font-weight: 900;
+        color: #FFD700;
+        line-height: 1;
+        text-shadow: 0 0 30px rgba(255,215,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+        animation: glowPulse 2s ease-in-out infinite;
+        margin-bottom: 4px;
+    }
+    @keyframes glowPulse {
+        0%, 100% { text-shadow: 0 0 20px rgba(255,215,0,0.5), 0 4px 12px rgba(0,0,0,0.4); }
+        50%       { text-shadow: 0 0 40px rgba(255,215,0,0.9), 0 0 60px rgba(255,215,0,0.4), 0 4px 12px rgba(0,0,0,0.4); }
+    }
+    .promo-discount-label {
+        font-size: .85rem;
+        color: rgba(255,255,255,0.7);
+        margin-bottom: 20px;
+        letter-spacing: .05em;
+    }
+
+    .promo-code-display {
+        background: rgba(255,255,255,0.08);
+        border: 1.5px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin: 0 0 18px;
+        position: relative;
+        backdrop-filter: blur(4px);
+    }
+    .promo-code-label {
+        font-size: 10px;
+        color: rgba(255,255,255,0.5);
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        margin-bottom: 6px;
+    }
+    .promo-code-value {
+        font-family: 'Courier New', monospace;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: .2em;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        animation: codeReveal 1.2s steps(1) both;
+    }
+    @keyframes codeReveal {
+        0%  { opacity: 0; clip-path: inset(0 100% 0 0); }
+        100%{ opacity: 1; clip-path: inset(0 0% 0 0); }
+    }
+
+    .promo-card-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: rgba(255,255,255,0.5);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 14px;
+        margin-top: 4px;
+    }
+    .promo-card-meta span { display: flex; flex-direction: column; gap: 2px; }
+    .promo-card-meta strong { color: rgba(255,255,255,0.85); font-size: 12px; }
+
+    /* Copy & Share Actions */
+    .promo-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 18px;
+    }
+    .btn-copy-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #1a1a2e;
+        border: none;
+        padding: 13px 20px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: .95rem;
+        cursor: pointer;
+        transition: all .25s;
+        box-shadow: 0 4px 15px rgba(255,165,0,0.4);
+        letter-spacing: .04em;
+    }
+    .btn-copy-main:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(255,165,0,0.6);
+    }
+    .btn-copy-main:active { transform: scale(0.98); }
+
+    .share-row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    .btn-share-social {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: none;
+        padding: 10px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: .8rem;
+        cursor: pointer;
+        transition: all .2s;
+        color: white;
+    }
+    .btn-share-social:hover { transform: translateY(-2px); filter: brightness(1.15); }
+    .btn-wa   { background: #25D366; box-shadow: 0 3px 10px rgba(37,211,102,0.35); }
+    .btn-fb   { background: #1877F2; box-shadow: 0 3px 10px rgba(24,119,242,0.35); }
+    .btn-tw   { background: #1DA1F2; box-shadow: 0 3px 10px rgba(29,161,242,0.35); }
+    .btn-mail { background: #EA4335; box-shadow: 0 3px 10px rgba(234,67,53,0.35); }
+
+    .copy-toast {
+        background: #28a745;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: .8rem;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: all .3s;
+        pointer-events: none;
+    }
+    .copy-toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Confetti */
+    .confetti-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2000;
+        overflow: hidden;
+    }
+    .confetti-piece {
+        position: absolute;
+        top: -10px;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        animation: confettiFall linear both;
+    }
+    @keyframes confettiFall {
+        0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Review */
+    .review-wrap { text-align: left; margin-bottom: 20px; }
+    .review-title { font-weight: 700; color: #6B1E1E; font-size: .9rem; margin-bottom: 10px; text-align: left; }
+    .review-item {
+        background: #fdf8f0;
+        border: 1px solid #e8ddd0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        font-size: .82rem;
+    }
+    .review-item.r-ok  { border-left: 4px solid #28a745; }
+    .review-item.r-bad { border-left: 4px solid #dc3545; }
+    .review-q   { font-weight: 600; color: #333; margin-bottom: 5px; }
+    .review-ans { color: #555; display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+    .rtag { font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+    .rtag-ok  { background: #d4edda; color: #155724; }
+    .rtag-bad { background: #f8d7da; color: #721c24; }
+
+    .btn-close-modal {
+        background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+        color: white;
+        border: none;
+        padding: 13px 35px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: .95rem;
+        transition: .2s;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(139,44,44,0.35);
+    }
+    .btn-close-modal:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(139,44,44,0.5); }
+
+    /* Score badge for low score */
+    .score-badge-low {
+        font-size: 3rem;
+        margin: 10px 0;
+    }
+    .encouragement-box {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border: 2px solid #ffc107;
+        border-radius: 14px;
+        padding: 16px;
+        margin: 16px 0;
+        color: #856404;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div style="background: linear-gradient(rgba(254,246,232,0.9), rgba(250,240,220,0.9)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; min-height: 100vh; padding: 40px 20px;">
+    <div class="container">
+        <div class="quiz-container">
+
+            <div class="quiz-header">
+                <h2>🎯 Quiz Voyage</h2>
+                <p>Testez vos connaissances sur <strong>{{ destination }}</strong></p>
+                <p style="font-size:12px; margin-top:8px;">⭐ 10 points par bonne réponse ⭐</p>
+                <span class="promo-hint">🎟️ Score 4/5 ou 5/5 = Code promo offert à partager !</span>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-meta">
+                    <span id="prog-label">Question 0 / 5</span>
+                    <span id="prog-pct">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="quiz-content">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p><strong>Génération des questions via Groq AI…</strong></p>
+                    <p style="font-size:12px; color:#666; margin-top:8px;">
+                        ✨ Questions personnalisées sur {{ destination }} ✨
+                    </p>
+                </div>
+            </div>
+
+            <div class="q-nav" id="q-nav">
+                <button class="btn-next" id="btn-next" onclick="nextQuestion()">Suivant →</button>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="points-display">
+                    ⭐ Vos points : <span id="current-points">{{ client.points }}</span>
+                </div>
+                <button id="submit-btn" class="btn-submit" style="display:none;" onclick="submitQuiz()">
+                    📤 Valider et gagner des points
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const RESERVATION_ID      = {{ reservation.id }};
+    const DESTINATION         = {{ destination | json_encode | raw }};
+    const CONFIRMATION_URL    = "{{ path('app_confirmation', {'id': reservation.id}) }}";
+
+    let questions   = [];
+    let userAnswers = {};
+    let current     = 0;
+
+    /* ─── Progress ─── */
+    function updateProgress(step) {
+        const pct = Math.round((step / 5) * 100);
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('prog-label').textContent = 'Question ' + step + ' / 5';
+        document.getElementById('prog-pct').textContent   = pct + '%';
+    }
+
+    /* ─── Load questions ─── */
+    async function loadQuestions() {
+        try {
+            const res  = await fetch('/quiz/generate-questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservation_id: RESERVATION_ID }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                questions = data.questions;
+                renderQuestion(0);
+            } else {
+                showError(data.error || 'Erreur lors de la génération des questions.');
+            }
+        } catch (err) {
+            showError('Erreur de connexion au serveur : ' + err.message);
+        }
+    }
+
+    /* ─── Render question ─── */
+    function renderQuestion(idx) {
+        const q      = questions[idx];
+        const labels = ['A', 'B', 'C', 'D'];
+        updateProgress(idx);
+
+        const choicesHtml = q.choices.map((choice, i) => `
+            <div class="choice-item"
+                 data-choice="${choice.replace(/"/g, '&quot;')}"
+                 onclick="selectChoice(${idx}, this)">
+                <span class="choice-letter">${labels[i]}</span>
+                ${choice}
+            </div>
+        `).join('');
+
+        document.getElementById('quiz-content').innerHTML = `
+            <div class="question-card">
+                <div class="question-text">${idx + 1}. ${q.question}</div>
+                ${choicesHtml}
+            </div>
+        `;
+
+        const nav = document.getElementById('q-nav');
+        nav.style.display = 'flex';
+        const btnNext = document.getElementById('btn-next');
+        btnNext.classList.remove('visible');
+        btnNext.textContent = idx < questions.length - 1 ? 'Suivant →' : 'Voir les résultats 🏁';
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    /* ─── Select choice ─── */
+    function selectChoice(idx, clickedEl) {
+        if (document.querySelector('.choice-item.correct, .choice-item.wrong')) return;
+        const allChoices = document.querySelectorAll('.choice-item');
+        const chosen     = clickedEl.dataset.choice;
+        userAnswers[idx] = chosen;
+
+        allChoices.forEach(el => {
+            el.classList.add('disabled-choice');
+            el.style.pointerEvents = 'none';
+            if (el.dataset.choice === questions[idx].correct) el.classList.add('correct');
+            else if (el.dataset.choice === chosen) el.classList.add('wrong');
+        });
+
+        document.getElementById('btn-next').classList.add('visible');
+    }
+
+    /* ─── Next question ─── */
+    function nextQuestion() {
+        if (userAnswers[current] === undefined) {
+            alert('Veuillez sélectionner une réponse avant de continuer.');
+            return;
+        }
+        current++;
+        if (current < questions.length) {
+            renderQuestion(current);
+        } else {
+            document.getElementById('q-nav').style.display = 'none';
+            submitQuiz();
+        }
+    }
+
+    /* ─── Submit quiz ─── */
+    async function submitQuiz() {
+        document.getElementById('quiz-content').innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <p><strong>Calcul de votre score…</strong></p>
+            </div>
+        `;
+        document.getElementById('q-nav').style.display = 'none';
+
+        const answers = questions.map((_, i) => userAnswers[i] || '');
+        try {
+            const res  = await fetch('/quiz/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservation_id: RESERVATION_ID, answers }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('current-points').textContent = data.totalPoints;
+                updateProgress(5);
+                showResult(data);
+            } else {
+                showError(data.error || 'Erreur lors de la validation.');
+            }
+        } catch (err) {
+            showError('Erreur : ' + err.message);
+        }
+    }
+
+    /* ─── Share helpers ─── */
+    function shareOnWhatsApp(code, discount) {
+        const text = `🎁 J'ai obtenu ${discount}% de réduction sur mon voyage ! Utilise mon code promo : *${code}* 🌍✈️`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+    function shareOnFacebook(code, discount) {
+        const text = `🎁 Code promo ${discount}% de réduction sur votre prochain voyage ! Code : ${code}`;
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(text)}`, '_blank');
+    }
+    function shareOnTwitter(code, discount) {
+        const text = `🎁 Code promo ${discount}% de réduction sur votre prochain voyage ! Code : ${code} ✈️🌍 #Voyage #BonPlan`;
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    }
+    function shareByEmail(code, discount) {
+        const subject = encodeURIComponent(`Code promo voyage ${discount}% de réduction !`);
+        const body    = encodeURIComponent(`Bonjour !\n\nJ'ai joué au quiz voyage et j'ai gagné un code promo !\nUtilise ce code pour avoir ${discount}% de réduction sur ton prochain voyage :\n\n🎁 Code : ${code}\n\nDépêche-toi, il est valable 30 jours !\n\nBonne route ! ✈️`);
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    }
+
+    function copyPromo(code) {
+        const copy = (text) => {
+            if (navigator.clipboard) {
+                return navigator.clipboard.writeText(text);
+            }
+            const ta = document.createElement('textarea');
+            ta.value = text; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); ta.remove();
+            return Promise.resolve();
+        };
+        copy(code).then(() => {
+            const toast = document.getElementById('copy-toast');
+            if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
+        });
+    }
+
+    /* ─── Confetti ─── */
+    function launchConfetti() {
+        const colors = ['#FFD700','#FF6B6B','#4ECDC4','#A855F7','#F97316','#22C55E','#3B82F6','#EC4899'];
+        const container = document.createElement('div');
+        container.className = 'confetti-container';
+        document.body.appendChild(container);
+
+        for (let i = 0; i < 80; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.cssText = `
+                left: ${Math.random()*100}%;
+                background: ${colors[Math.floor(Math.random()*colors.length)]};
+                width: ${6 + Math.random()*8}px;
+                height: ${6 + Math.random()*8}px;
+                border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                animation-duration: ${2 + Math.random()*3}s;
+                animation-delay: ${Math.random()*1.5}s;
+            `;
+            container.appendChild(piece);
+        }
+        setTimeout(() => container.remove(), 5500);
+    }
+
+    /* ─── Show result ─── */
+    function showResult(data) {
+        const pct = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0;
+        const hasPromo = !!data.promo;
+
+        /* Build promo section */
+        let promoHtml = '';
+        if (hasPromo) {
+            promoHtml = `
+            <div class="promo-3d-scene">
+                <div class="promo-3d-card" onclick="copyPromo('${data.promo.code}')">
+                    <div class="promo-card-front">
+                        <div class="promo-card-badge">🎟️ Code Promo Exclusif</div>
+                        <div class="promo-discount-big">${data.promo.discount}%</div>
+                        <div class="promo-discount-label">DE RÉDUCTION SUR VOTRE PROCHAIN VOYAGE</div>
+                        <div class="promo-code-display">
+                            <div class="promo-code-label">Votre code personnel</div>
+                            <div class="promo-code-value" id="promo-code-text">${data.promo.code}</div>
+                        </div>
+                        <div class="promo-card-meta">
+                            <span>
+                                <span style="color:rgba(255,255,255,0.4)">VALIDE JUSQU'AU</span>
+                                <strong>${data.promo.expires_at}</strong>
+                            </span>
+                            <span>
+                                <span style="color:rgba(255,255,255,0.4)">UTILISATIONS MAX</span>
+                                <strong>10 fois</strong>
+                            </span>
+                            <span>
+                                <span style="color:rgba(255,255,255,0.4)">PARTAGEABLE</span>
+                                <strong>✅ Oui</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-actions">
+                <button class="btn-copy-main" onclick="copyPromo('${data.promo.code}')">
+                    📋 Copier le code
+                </button>
+                <div class="share-row">
+                    <button class="btn-share-social btn-wa" onclick="shareOnWhatsApp('${data.promo.code}',${data.promo.discount})">
+                        📱 WhatsApp
+                    </button>
+                    <button class="btn-share-social btn-fb" onclick="shareOnFacebook('${data.promo.code}',${data.promo.discount})">
+                        📘 Facebook
+                    </button>
+                    <button class="btn-share-social btn-tw" onclick="shareOnTwitter('${data.promo.code}',${data.promo.discount})">
+                        🐦 Twitter
+                    </button>
+                    <button class="btn-share-social btn-mail" onclick="shareByEmail('${data.promo.code}',${data.promo.discount})">
+                        ✉️ Email
+                    </button>
+                </div>
+                <div class="copy-toast" id="copy-toast">✅ Code copié dans le presse-papier !</div>
+            </div>
+            `;
+        } else {
+            promoHtml = `
+            <div class="encouragement-box">
+                <div class="score-badge-low">📚</div>
+                <strong>Encore un petit effort !</strong><br>
+                Il faut au moins <strong>4/5</strong> pour débloquer un code promo.<br>
+                Revenez après votre voyage et retentez votre chance !
+            </div>
+            `;
+        }
+
+        /* Build review */
+        let reviewHtml = '';
+        data.results.forEach((r, i) => {
+            const cls = r.is_correct ? 'r-ok' : 'r-bad';
+            reviewHtml += `
+                <div class="review-item ${cls}">
+                    <div class="review-q">${i + 1}. ${r.question}</div>
+                    <div class="review-ans">
+                        <span class="rtag rtag-ok">✅ Bonne réponse</span>
+                        ${r.correct_answer}
+                    </div>
+                    ${!r.is_correct ? `
+                    <div class="review-ans">
+                        <span class="rtag rtag-bad">❌ Votre réponse</span>
+                        ${r.user_answer || '(aucune)'}
+                    </div>` : ''}
+                </div>
+            `;
+        });
+
+        const modal = document.createElement('div');
+        modal.className = 'result-modal';
+        modal.innerHTML = `
+            <div class="result-card">
+                <h2>🎉 Quiz terminé !</h2>
+                <div class="result-score">${data.score} / ${data.total}</div>
+                <div class="result-pct">${pct}% de bonnes réponses</div>
+                <div class="result-points">🏆 +${data.pointsEarned} points gagnés !</div>
+                <div class="result-total">Total de vos points : <strong>${data.totalPoints}</strong></div>
+                <div class="result-msg">${getScoreMessage(data.score, data.total)}</div>
+
+                ${promoHtml}
+
+                <div class="review-wrap">
+                    <div class="review-title">📋 Récapitulatif de vos réponses</div>
+                    ${reviewHtml}
+                </div>
+
+                <button class="btn-close-modal" id="btn-close-result">
+                    ✕ Fermer et retourner à ma réservation
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        /* ✅ FIX : bouton fermer redirige vers la page de confirmation */
+        document.getElementById('btn-close-result').addEventListener('click', function() {
+            window.location.href = CONFIRMATION_URL;
+        });
+
+        /* ✅ Lance les confettis uniquement si score >= 4 */
+        if (hasPromo) {
+            setTimeout(launchConfetti, 400);
+        }
+    }
+
+    function getScoreMessage(score, total) {
+        if (score === total)
+            return '🏆 Score parfait ! Vous êtes un vrai expert de ' + DESTINATION + ' !';
+        if (score >= total - 1)
+            return '🌟 Excellent ! Presque parfait, bravo !';
+        if (score >= Math.ceil(total / 2))
+            return '👍 Bien joué ! Continuez à explorer ' + DESTINATION + ' !';
+        return '📚 Bonne tentative ! Ce voyage sera l\'occasion de tout découvrir !';
+    }
+
+    function showError(message) {
+        document.getElementById('quiz-content').innerHTML = `
+            <div class="error-message">
+                <div style="font-size:48px;">⚠️</div>
+                <p style="margin-top:16px; font-size:1rem;"><strong>❌ ${message}</strong></p>
+                <p style="margin-top:8px; font-size:12px; color:#999;">
+                    Veuillez vérifier que votre clé API Groq est correctement configurée.
+                </p>
+                <a href="${CONFIRMATION_URL}" class="btn-back">← Retour à la confirmation</a>
+            </div>
+        `;
+        document.getElementById('q-nav').style.display  = 'none';
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    loadQuestions();
+</script>
+{% endblock %}

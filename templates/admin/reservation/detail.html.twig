@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/layout.html.twig' %}
 {% block title %}Détail réservation #{{ reservation.id }}{% endblock %}
 
 {% block stylesheets %}
@@ -191,8 +191,26 @@
                     </div>
                     <div class="info-label">Nombre de personnes</div>
                     <div class="info-value">{{ reservation.nombrePersonnes }}</div>
-                    <div class="info-label">Montant total</div>
-                    <div class="info-value" style="font-size:1.3rem; font-family:'Playfair Display',serif; color:#8B2C2C;">{{ reservation.montantTotal|number_format(2, ',', ' ') }} €</div>
+
+                    {% set montantPaye = paiements|first ? paiements|first.montant : null %}
+                    <div class="info-label">Montant payé</div>
+                    <div class="info-value" style="font-size:1.3rem; font-family:'Playfair Display',serif; color:#8B2C2C;">
+                        {% if montantPaye %}
+                            {{ montantPaye|number_format(2, ',', ' ') }} €
+                            {% if montantPaye != reservation.montantTotal %}
+                                <span style="font-size: 11px; color: #28a745; margin-left: 8px;">
+                                    (réduction de {{ ((reservation.montantTotal - montantPaye) / reservation.montantTotal * 100)|round }}%)
+                                </span>
+                                <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                    Prix initial : {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                            <small style="display: block; color: #999;">(non payé)</small>
+                        {% endif %}
+                    </div>
+
                     <div class="info-label">Statut</div>
                     <div>
                         {% if reservation.statut == 'payé' %}
@@ -205,6 +223,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Paiements -->
             {% if paiements|length > 0 %}
             <div class="col-12">
@@ -223,7 +242,7 @@
                             {% for paiement in paiements %}
                             <tr>
                                 <td><strong style="color:#8B2C2C;">{{ paiement.referencePaiement }}</strong></td>
-                                <td><strong>{{ paiement.montant }} €</strong></td>
+                                <td><strong>{{ paiement.montant|number_format(2, ',', ' ') }} €</strong></td>
                                 <td>{{ paiement.modePaiement }}</td>
                                 <td>{{ paiement.datePaiement|date('d/m/Y H:i') }}</td>
                             </tr>
@@ -234,6 +253,7 @@
             </div>
             {% endif %}
         </div>
+
         <!-- Actions -->
         <div class="d-flex gap-2 mt-2">
             <a href="{{ path('admin_reservations') }}" class="btn-or">← Retour</a>

@@ -2,15 +2,115 @@
 
 {% block title %}Paiement de la réservation{% endblock %}
 
+{% block stylesheets %}
+<style>
+    .promo-code-section {
+        background: rgba(255,255,255,0.6);
+        border-radius: 10px;
+        padding: 18px;
+        border: 1px solid rgba(212,184,150,0.5);
+        margin-bottom: 20px;
+    }
+    .promo-input-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .promo-input-group input {
+        flex: 1;
+        border: 1px solid rgba(232,221,208,0.8);
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 13px;
+        color: #3f2c24;
+        background: rgba(253,250,245,0.9);
+    }
+    .btn-validate-promo {
+        background: linear-gradient(135deg, #9B7240, #7A5630);
+        border: none;
+        padding: 10px 20px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-validate-promo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(155,114,64,0.3);
+    }
+    .btn-validate-promo:active {
+        transform: translateY(1px);
+    }
+    .promo-message {
+        margin-top: 10px;
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: none;
+    }
+    .promo-message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+    .promo-message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+    }
+    .price-breakdown {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(212,184,150,0.5);
+    }
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    .discounted-price {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .discount-badge {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-left: 8px;
+    }
+    @keyframes discountFlash {
+        0%, 100% { background-color: transparent; }
+        50% { background-color: #ffd700; }
+    }
+    .discount-flash {
+        animation: discountFlash 0.5s ease-in-out;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 
-<!-- Hero Banner -->
+{# ===== ÉLÉMENTS AUDIO MP3 ===== #}
+<audio id="sound-success" src="{{ asset('sounds/Money_Counter.mp3') }}" preload="auto"></audio>
+<audio id="sound-error"   src="{{ asset('sounds/losing.mp3') }}"        preload="auto"></audio>
+<audio id="sound-pay"     src="{{ asset('sounds/Cash_Register.mp3') }}"  preload="auto"></audio>
+
 <div style="background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%); padding: 35px 20px; text-align: center; color: white;">
     <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0; letter-spacing: 2px;">💳 Paiement de votre voyage</h2>
     <p style="font-family: 'Montserrat', sans-serif; font-size: 12px; letter-spacing: 3px; margin: 8px 0 0; opacity: 0.85; text-transform: uppercase;">Finalisez votre réservation en toute sécurité</p>
 </div>
 
-<!-- Contenu -->
 <div style="background: linear-gradient(rgba(254,246,232,0.75), rgba(250,240,220,0.80)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; padding: 40px 20px; min-height: 60vh;">
     <div class="container">
         <div style="max-width: 960px; margin: 0 auto; background: rgba(255,255,255,0.15); border-radius: 16px; overflow: hidden; border: 1px solid rgba(212,184,150,0.4); backdrop-filter: blur(4px);">
@@ -26,9 +126,7 @@
 
                 <div class="row g-0">
 
-                    <!-- ===== Colonne gauche : Récapitulatif ===== -->
                     <div class="col-md-6" style="padding: 30px; border-right: 1px solid rgba(240,232,216,0.5); background: transparent;">
-
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid rgba(240,232,216,0.6);">
                             <div style="width:36px; height:36px; background:#8B2C2C; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <i class="bi bi-journal-text" style="color:white; font-size:16px;"></i>
@@ -37,7 +135,6 @@
                         </div>
 
                         <div style="background: rgba(255,255,255,0.7); border-radius: 10px; padding: 20px; border: 1px solid rgba(212,184,150,0.5);">
-
                             <div style="display:flex; align-items:center; gap:8px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(212,184,150,0.3);">
                                 <i class="fa fa-map-marker-alt" style="color:#8B2C2C; width:16px;"></i>
                                 <span style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240;">Destination</span>
@@ -58,10 +155,27 @@
                                 </span>
                             </div>
 
-                            <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); border-radius: 8px; padding: 16px; margin-top: 16px; text-align: center;">
-                                <div style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(232,221,201,0.8); margin-bottom:4px;">Montant total</div>
-                                <div style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#E8DDC9; font-weight:600;">
-                                    {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                            <div class="price-breakdown">
+                                {% if discount > 0 %}
+                                    <div style="margin-bottom: 8px;">
+                                        <span style="font-family:'Montserrat',sans-serif; font-size:11px; color:#666;">Prix initial :</span>
+                                        <span class="original-price">{{ original_amount|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                    <div style="margin-bottom: 8px;">
+                                        <span style="font-family:'Montserrat',sans-serif; font-size:11px; color:#28a745;">Réduction {{ discount }}% :</span>
+                                        <span style="color:#28a745; font-weight:bold;">-{{ (original_amount - discounted_amount)|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                {% endif %}
+                                <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); border-radius: 8px; padding: 16px; text-align: center; margin-top: {% if discount > 0 %}8px{% else %}0{% endif %};">
+                                    <div style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(232,221,201,0.8); margin-bottom:4px;">
+                                        {% if discount > 0 %}Montant après réduction{% else %}Montant total{% endif %}
+                                    </div>
+                                    <div style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#E8DDC9; font-weight:600;">
+                                        {{ discounted_amount|number_format(2, ',', ' ') }} €
+                                        {% if discount > 0 %}
+                                            <span class="discount-badge">-{{ discount }}%</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
 
@@ -72,8 +186,19 @@
                         </div>
                     </div>
 
-                    <!-- ===== Colonne droite : Paiement ===== -->
                     <div class="col-md-6" style="padding: 30px; background: transparent;">
+
+                        <div class="promo-code-section" id="promoSection">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom: 12px;">
+                                <i class="fa fa-ticket-alt" style="color:#8B2C2C; font-size:16px;"></i>
+                                <span style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240;">Code promo</span>
+                            </div>
+                            <div class="promo-input-group">
+                                <input type="text" id="promo-code-input" placeholder="Entrez votre code promo" value="{{ promo_code_applied }}">
+                                <button type="button" class="btn-validate-promo" id="applyPromoBtn" onclick="validatePromoCode()">Appliquer</button>
+                            </div>
+                            <div id="promo-message" class="promo-message"></div>
+                        </div>
 
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid rgba(240,232,216,0.6);">
                             <div style="width:36px; height:36px; background:#8B2C2C; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -82,16 +207,13 @@
                             <h3 style="font-family:'Playfair Display',serif; color:#6B1E1E; font-size:1.05rem; margin:0;">Mode de paiement</h3>
                         </div>
 
-                        <!-- Radio buttons : Carte Bancaire / PayPal -->
                         <div style="margin-bottom: 20px;">
                             <label style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:10px;">Choisissez votre mode</label>
                             {{ form_widget(form.modePaiement) }}
                             {{ form_errors(form.modePaiement) }}
                         </div>
 
-                        <!-- Champs carte : cachés par défaut, affichés par JS -->
                         <div id="card-fields" style="display:none; background:rgba(255,255,255,0.6); border-radius:10px; padding:18px; border:1px solid rgba(212,184,150,0.5); margin-bottom:16px;">
-
                             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(212,184,150,0.3);">
                                 <i class="bi bi-credit-card-2-front" style="color:#8B2C2C; font-size:16px;"></i>
                                 <span style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240;">Informations de carte</span>
@@ -99,59 +221,41 @@
 
                             <div style="margin-bottom:12px;">
                                 <label style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;">Numéro de carte</label>
-                                {{ form_widget(form.numeroCarte, {
-                                    'attr': {
-                                        'class': 'form-control',
-                                        'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;',
-                                        'placeholder': '1234 5678 9012 3456'
-                                    }
-                                }) }}
+                                {{ form_widget(form.numeroCarte, {'attr': {'class': 'form-control', 'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;', 'placeholder': '1234 5678 9012 3456'}}) }}
                                 {{ form_errors(form.numeroCarte) }}
                             </div>
 
                             <div style="margin-bottom:12px;">
                                 <label style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;">Nom du titulaire</label>
-                                {{ form_widget(form.nomTitulaire, {
-                                    'attr': {
-                                        'class': 'form-control',
-                                        'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;',
-                                        'placeholder': 'NOM Prénom'
-                                    }
-                                }) }}
+                                {{ form_widget(form.nomTitulaire, {'attr': {'class': 'form-control', 'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;', 'placeholder': 'NOM Prénom'}}) }}
                                 {{ form_errors(form.nomTitulaire) }}
                             </div>
 
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;">Expiration</label>
-                                    {{ form_widget(form.expiration, {
-                                        'attr': {
-                                            'class': 'form-control',
-                                            'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;',
-                                            'placeholder': 'MM/AA'
-                                        }
-                                    }) }}
+                                    {{ form_widget(form.expiration, {'attr': {'class': 'form-control', 'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;', 'placeholder': 'MM/AA'}}) }}
                                     {{ form_errors(form.expiration) }}
                                 </div>
                                 <div class="col-6">
                                     <label style="font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#9B7240; display:block; margin-bottom:6px;">CVV</label>
-                                    {{ form_widget(form.cvv, {
-                                        'attr': {
-                                            'class': 'form-control',
-                                            'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;',
-                                            'placeholder': '***'
-                                        }
-                                    }) }}
+                                    {{ form_widget(form.cvv, {'attr': {'class': 'form-control', 'style': 'border:1px solid rgba(232,221,208,0.8); border-radius:6px; padding:10px 14px; font-family:Montserrat,sans-serif; font-size:13px; color:#3f2c24; background:rgba(253,250,245,0.9); width:100%;', 'placeholder': '***'}}) }}
                                     {{ form_errors(form.cvv) }}
                                 </div>
                             </div>
-
                         </div>
 
-                        <!-- Bouton payer + annuler -->
-                        <div style="margin-top: 24px;">
-                            <button type="submit" style="width:100%; background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 40px; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:6px; color:white; cursor:pointer; box-shadow: 0 4px 15px rgba(139,44,44,0.4); margin-bottom:10px;">
-                                💳 Payer {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                        <div id="paypal-fields" style="display:none; background:rgba(255,255,255,0.6); border-radius:10px; padding:18px; border:1px solid rgba(212,184,150,0.5); margin-bottom:16px; text-align:center;">
+                            <div style="margin-bottom:15px;">
+                                <i class="fab fa-paypal" style="font-size:40px; color:#003087;"></i>
+                                <p style="font-family:'Montserrat',sans-serif; font-size:12px; color:#3f2c24;">Vous allez payer via PayPal en toute sécurité.</p>
+                            </div>
+                            <div id="paypal-button-container"></div>
+                        </div>
+
+                        <div id="card-submit" style="margin-top: 24px;">
+                            <button type="submit" id="pay-btn" style="width:100%; background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 40px; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:6px; color:white; cursor:pointer; box-shadow: 0 4px 15px rgba(139,44,44,0.4); margin-bottom:10px;">
+                                💳 Payer {{ discounted_amount|number_format(2, ',', ' ') }} €
                             </button>
                             <a href="{{ path('app_confirmation', {'id': reservation.id}) }}" style="display:block; text-align:center; font-family:'Montserrat',sans-serif; font-size:11px; color:rgba(63,44,36,0.6); text-decoration:none; padding:8px; letter-spacing:1px;">
                                 ← Annuler et revenir
@@ -169,56 +273,205 @@
     </div>
 </div>
 
-<!-- Script JavaScript placé APRÈS le formulaire pour garantir l'exécution -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=EUR"></script>
+
 <script>
-    (function() {
-        console.log('Script de paiement chargé');
-        
-        // Fonction pour afficher/masquer les champs carte
-        function toggleCardFields() {
-            var cardFields = document.getElementById('card-fields');
-            if (!cardFields) {
-                console.log('card-fields non trouvé');
-                return;
-            }
-            
-            // Chercher le radio "Carte Bancaire" qui est coché
-            var carteRadio = document.querySelector('input[value="Carte Bancaire"]:checked');
-            
-            if (carteRadio) {
-                cardFields.style.display = 'block';
-                console.log('✅ Champs carte affichés');
-            } else {
-                cardFields.style.display = 'none';
-                console.log('❌ Champs carte masqués');
-            }
-        }
-        
-        // Attendre que le DOM soit complètement chargé
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                initPaymentForm();
-            });
+// ===================== SONS MP3 =====================
+
+function playSound(id) {
+    const audio = document.getElementById(id);
+    if (!audio) return;
+    audio.currentTime = 0; // rewind si déjà joué
+    audio.play().catch(function(e) {
+        console.log('Lecture audio impossible :', e);
+    });
+}
+
+// Raccourcis
+function playSuccessSound()  { playSound('sound-success'); } // Money_Counter.mp3
+function playErrorSound()    { playSound('sound-error');   } // losing.mp3
+function playPaySound()      { playSound('sound-pay');     } // Cash_Register.mp3
+
+// ===================== EFFET VISUEL FLASH =====================
+
+function addFlashEffect() {
+    const promoSection = document.getElementById('promoSection');
+    if (promoSection) {
+        promoSection.classList.add('discount-flash');
+        setTimeout(function() {
+            promoSection.classList.remove('discount-flash');
+        }, 500);
+    }
+}
+
+// ===================== BOUTON PAYER — son Cash Register =====================
+
+document.addEventListener('DOMContentLoaded', function () {
+    var payBtn = document.getElementById('pay-btn');
+    if (payBtn) {
+        payBtn.addEventListener('click', function () {
+            playSuccessSound();
+            // Le formulaire se soumet normalement après le son
+        });
+    }
+});
+
+// ===================== VALIDATION CODE PROMO =====================
+
+async function validatePromoCode() {
+    const promoCode = document.getElementById('promo-code-input').value.trim();
+
+    if (!promoCode) {
+        playErrorSound();
+        showMessage('Veuillez entrer un code promo', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('applyPromoBtn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Vérification...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('{{ path('validate_promo') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reservation_id: {{ reservation.id }},
+                promo_code: promoCode
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            playPaySound();   // Money_Counter.mp3
+            addFlashEffect();
+            showMessage(data.message, 'success');
+            setTimeout(function() {
+                window.location.reload();
+            }, 1500);
         } else {
-            initPaymentForm();
+            playErrorSound();     // losing.mp3
+            showMessage(data.error, 'error');
         }
-        
-        function initPaymentForm() {
-            console.log('Initialisation du formulaire de paiement');
-            
-            // Exécuter la fonction une première fois
-            toggleCardFields();
-            
-            // Ajouter les écouteurs d'événements sur tous les radios
-            var radios = document.querySelectorAll('input[type="radio"]');
-            console.log('Radios trouvés:', radios.length);
-            
-            for (var i = 0; i < radios.length; i++) {
-                radios[i].addEventListener('change', toggleCardFields);
-                console.log('Écouteur ajouté sur:', radios[i].value);
-            }
+    } catch (error) {
+        playErrorSound();
+        showMessage('Erreur lors de la validation du code', 'error');
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+function showMessage(message, type) {
+    const messageDiv = document.getElementById('promo-message');
+    messageDiv.textContent = message;
+    messageDiv.className = 'promo-message ' + type;
+
+    setTimeout(function() {
+        if (messageDiv.className.includes(type)) {
+            messageDiv.style.display = 'none';
+            setTimeout(function() {
+                messageDiv.className = 'promo-message';
+                messageDiv.textContent = '';
+            }, 300);
         }
-    })();
+    }, 5000);
+}
+
+// ===================== TOGGLE PAIEMENT =====================
+
+function togglePaymentFields() {
+    var cardFields  = document.getElementById('card-fields');
+    var paypalFields = document.getElementById('paypal-fields');
+    var cardSubmit  = document.getElementById('card-submit');
+    var carteRadio  = document.querySelector('input[value="Carte Bancaire"]:checked');
+    var paypalRadio = document.querySelector('input[value="PayPal"]:checked');
+
+    if (carteRadio) {
+        if (cardFields)  cardFields.style.display  = 'block';
+        if (paypalFields) paypalFields.style.display = 'none';
+        if (cardSubmit)  cardSubmit.style.display  = 'block';
+    } else if (paypalRadio) {
+        if (cardFields)  cardFields.style.display  = 'none';
+        if (paypalFields) paypalFields.style.display = 'block';
+        if (cardSubmit)  cardSubmit.style.display  = 'none';
+        initPayPalButtons();
+    } else {
+        if (cardFields)  cardFields.style.display  = 'none';
+        if (paypalFields) paypalFields.style.display = 'none';
+        if (cardSubmit)  cardSubmit.style.display  = 'block';
+    }
+}
+
+// ===================== PAYPAL =====================
+
+var paypalInitialized = false;
+function initPayPalButtons() {
+    if (paypalInitialized) return;
+    if (typeof paypal === 'undefined') { console.log('PayPal SDK pas encore chargé'); return; }
+    var container = document.getElementById('paypal-button-container');
+    if (!container || container.children.length > 0) return;
+
+    paypal.Buttons({
+        fundingSource: paypal.FUNDING.PAYPAL,
+        createOrder: function(data, actions) {
+            return fetch('{{ path('create_paypal_order') }}', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservation_id: {{ reservation.id }} })
+            }).then(function(r) { return r.json(); })
+              .then(function(orderData) {
+                  if (orderData.error) throw new Error(orderData.error);
+                  return orderData.id;
+              });
+        },
+        onApprove: function(data, actions) {
+            return fetch('{{ path('capture_paypal_order') }}', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderID: data.orderID })
+            }).then(function(r) { return r.json(); })
+              .then(function(captureData) {
+                  if (captureData.success) {
+                      playPaySound(); // Cash_Register.mp3 aussi pour PayPal
+                      setTimeout(function() {
+                          window.location.href = "{{ path('app_confirmation', {'id': reservation.id}) }}";
+                      }, 800);
+                  } else {
+                      alert('Erreur lors du paiement : ' + (captureData.error || 'Inconnue'));
+                  }
+              });
+        },
+        onError: function(err) {
+            console.error(err);
+            playErrorSound();
+            alert('Une erreur est survenue avec PayPal. Veuillez réessayer.');
+        }
+    }).render('#paypal-button-container');
+    paypalInitialized = true;
+}
+
+// ===================== INIT =====================
+
+function attachRadioListeners() {
+    document.querySelectorAll('input[type="radio"]').forEach(function(r) {
+        r.addEventListener('change', togglePaymentFields);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        attachRadioListeners();
+        togglePaymentFields();
+        setTimeout(initPayPalButtons, 1000);
+    });
+} else {
+    attachRadioListeners();
+    togglePaymentFields();
+    setTimeout(initPayPalButtons, 1000);
+}
 </script>
 
 {% endblock %}
