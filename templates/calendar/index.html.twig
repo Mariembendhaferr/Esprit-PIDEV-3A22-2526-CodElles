@@ -1,0 +1,71 @@
+{% extends 'clientActivite/base_client.html.twig' %}
+
+{% block title %}Mon calendrier - Doura Mondo{% endblock %}
+
+{% block body %}
+<div class="client-container-detail">
+    <h1 style="font-family:'Playfair Display',serif; color:#2d1810;">Mes réservations</h1>
+    <div class="gold-line"></div>
+
+    <div id="calendar"></div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
+    <style>
+        /* Personnalisation additionnelle */
+        .fc-toolbar-title {
+            font-family: 'Playfair Display', serif;
+            color: #2d1810;
+        }
+        .fc-button {
+            background-color: #8B0000 !important;
+            border-color: #3D0000 !important;
+        }
+        .client-container-detail {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .gold-line {
+            height: 2px;
+            background: linear-gradient(to right, #C9A84C, transparent);
+            margin: 15px 0 30px 0;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales/fr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'fr',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                events: function(info, successCallback, failureCallback) {
+                    // Fetch events from calendar bundle route
+                    fetch('{{ path('tattali_calendar_load_events') }}')
+                        .then(response => response.json())
+                        .then(data => successCallback(data))
+                        .catch(error => failureCallback(error));
+                },
+                eventClick: function(info) {
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                    }
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
