@@ -52,15 +52,31 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,listMonth'
                 },
+                // ══ FORCE PARAMETERS MANUALLY ════════════════════════
                 events: function(info, successCallback, failureCallback) {
-                    // Fetch events from calendar bundle route
-                    fetch('{{ path('tattali_calendar_load_events') }}')
-                        .then(response => response.json())
+                    // 1. Prepare parameters
+                    const params = new URLSearchParams({
+                        start: info.start.toISOString(),
+                        end: info.end.toISOString(),
+                        filters: JSON.stringify({})
+                    });
+
+                    // 2. Fetch with explicit query string
+                    fetch("{{ path('fc_load_events') }}?" + params.toString())
+                        .then(response => {
+                            if (!response.ok) throw new Error('Server error');
+                            return response.json();
+                        })
                         .then(data => successCallback(data))
-                        .catch(error => failureCallback(error));
+                        .catch(error => {
+                            console.error("Calendar Error:", error);
+                            failureCallback(error);
+                        });
                 },
+                // ═════════════════════════════════════════════════════
                 eventClick: function(info) {
                     if (info.event.url) {
+                        info.jsEvent.preventDefault();
                         window.location.href = info.event.url;
                     }
                 }

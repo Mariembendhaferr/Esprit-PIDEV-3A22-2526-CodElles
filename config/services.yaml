@@ -20,6 +20,3 @@ services:
     App\Service\OpenAIService:
         arguments:
             $apiKey: '%env(GROQ_API_KEY)%'   
-
-    App\Calendar\EventProvider:
-        autowire: true     
