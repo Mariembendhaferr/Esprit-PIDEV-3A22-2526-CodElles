@@ -93,32 +93,34 @@ final class ClientActiviteController extends AbstractController
         ]);
     }
     
-    #[Route('/match-ai', name: 'app_client_match_ai', methods: ['POST'])]
-    public function matchAI(Request $request, OpenAIService $ai): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-    
-        $nom         = $data['nom']         ?? '';
-        $localisation = $data['localisation'] ?? '';
-        $categorie   = $data['categorie']   ?? '';
-        $duree       = $data['duree']       ?? '';
-        $prix        = $data['prix']        ?? '';
-        $description = $data['description'] ?? '';
-    
-        $prompt = "L'utilisateur vient de terminer un tournoi de sélection d'activités touristiques et a choisi \"$nom\" comme son activité parfaite. 
-    Cette activité est de catégorie \"$categorie\", située à \"$localisation\", dure $duree minutes et coûte $prix DT.
-    Description : $description
-    
-    Rédige un message court (3-4 phrases max) et enthousiaste en français qui explique pourquoi cette activité est un match parfait pour cet utilisateur. 
-    Sois personnel, chaleureux et inspirant. Commence par 'Excellent choix !' ou similaire.";
-    
-        try {
-            $message = $ai->generateDescription($nom, $localisation, $prompt);
-            return new JsonResponse(['message' => $message]);
-        } catch (\Exception $e) {
-            return new JsonResponse(['message' => 'Cette activité correspond parfaitement à votre profil !']);
-        }
+  #[Route('/match-ai', name: 'app_client_match_ai', methods: ['POST'])]
+public function matchAI(Request $request, OpenAIService $ai): JsonResponse
+{
+    // Get the data from JavaScript
+    $data = json_decode($request->getContent(), true);
+ 
+    // Prepare the data array for the service
+    $aiData = [
+        'nom' => $data['nom'] ?? 'cette activité',
+        'localisation' => $data['localisation'] ?? 'Tunisie',
+        'categorie' => $data['categorie'] ?? 'Découverte',
+        'prix' => $data['prix'] ?? '0',
+        'description' => $data['description'] ?? ''
+    ];
+ 
+    try {
+        // Call the service with the data array
+        $message = $ai->generateMatchMessage($aiData);
+ 
+        return new JsonResponse(['message' => $message]);
+    } catch (\Exception $e) {
+        // Fallback if AI fails
+        error_log('Match AI Error: ' . $e->getMessage());
+        return new JsonResponse([
+            'message' => "Excellent choix ! Vous avez une vraie passion pour les expériences authentiques. Préparez-vous à vivre un moment inoubliable !"
+        ]);
     }
+}
 
     #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
     public function show(int $id, ActiviteRepository $repo): Response

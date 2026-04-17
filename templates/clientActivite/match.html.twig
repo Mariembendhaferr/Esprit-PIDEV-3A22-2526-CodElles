@@ -8,6 +8,8 @@
 
 {% block body %}
 <div class="match-page">
+{# Add this line at the top of your body block #}
+<div id="match-config" data-url="{{ path('app_client_match_ai') }}"></div>
 
     <div id="setupView">
         <div style="font-size:60px; margin-bottom:16px;">🎯</div>
@@ -86,6 +88,7 @@
 
 {% block javascripts %}
 <script>
+window.MATCH_AI_URL = "{{ path('app_client_match_ai') }}";
 const ALL = {{ activites|json_encode|raw }};
 </script>
 

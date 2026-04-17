@@ -103,66 +103,103 @@ function choose(side) {
 // ══ RESULT ═══════════════════════════════════════════════
 function showResult() {
     const a = winner;
+    if (!a) return;
 
+    // 1. Hide the game view
     document.getElementById('gameView').style.display = 'none';
 
-    // Build the entire result card HTML
+    // 2. Build the result card HTML manually (no external function needed)
     const tags = (a.vibe_tags || [a.categorieActivite]).filter(Boolean).slice(0, 3);
-    document.getElementById('resultCard').innerHTML = `
-        ${a.imageActivite
-            ? `<img class="result-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" loading="eager" decoding="async" fetchpriority="high" style="display:block;" onerror="this.outerHTML='<div class=result-card-img-placeholder>🏆</div>'">`
-            : `<div class="result-card-img-placeholder">🏆</div>`
-        }
-        <div class="result-card-body">
-            <div class="result-card-name">${esc(a.nomActivite)}</div>
-            <div class="result-card-meta">
-                ${a.localisationActivite ? `<span>📍 ${esc(a.localisationActivite)}</span>` : ''}
-                ${a.coutActivite        ? `<span>💰 ${esc(String(a.coutActivite))} DT</span>` : ''}
-                ${a.dureeActivite       ? `<span>⏱ ${esc(String(a.dureeActivite))} min</span>` : ''}
+    const resultCard = document.getElementById('resultCard');
+    
+    if (resultCard) {
+        resultCard.innerHTML = `
+            ${a.imageActivite
+                ? `<img class="result-card-img" src="${a.imageActivite}" alt="${esc(a.nomActivite)}" onerror="this.outerHTML='<div class=result-card-img-placeholder>🏆</div>'">`
+                : `<div class="result-card-img-placeholder">🏆</div>`
+            }
+            <div class="result-card-body">
+                <div class="result-card-name">${esc(a.nomActivite)}</div>
+                <div class="result-card-meta">
+                    ${a.localisationActivite ? `<span>📍 ${esc(a.localisationActivite)}</span>` : ''}
+                    ${a.coutActivite ? `<span>💰 ${esc(String(a.coutActivite))} DT</span>` : ''}
+                </div>
+                ${tags.length ? `<div class="result-tags">${tags.map(t => `<span class="result-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+                ${a.descriptionActivite ? `<p style="color:#5D4037;font-size:14px;line-height:1.7;margin:0 0 16px;">${esc(a.descriptionActivite)}</p>` : ''}
+                <div class="ai-message" id="aiMessage">
+                    <div class="ai-message-header">✨ Pourquoi ce choix ?</div>
+                    <span class="ai-loading">Génération de votre recommandation…</span>
+                </div>
             </div>
-            ${tags.length ? `<div class="result-tags">${tags.map(t => `<span class="result-tag">${esc(t)}</span>`).join('')}</div>` : ''}
-            ${a.descriptionActivite ? `<p style="color:#5D4037;font-size:14px;line-height:1.7;margin:0 0 16px;">${esc(a.descriptionActivite)}</p>` : ''}
-            <div class="ai-message" id="aiMessage">
-                <div class="ai-message-header">✨ Pourquoi ce choix ?</div>
-                <span class="ai-loading">Génération de votre recommandation…</span>
-            </div>
-        </div>
-    `;
+        `;
+    }
 
-    // Set the "Voir l'activité" link
-    document.getElementById('resultViewBtn').href = '/activities/' + a.id;
+    // 3. Update the button link (Check your actual route prefix)
+    const btn = document.getElementById('resultViewBtn');
+    if (btn) btn.href = '/activities/' + a.id;
 
-    // Show result view with animation
+    // 4. Show result view and trigger CSS animation
     const rv = document.getElementById('resultView');
-    rv.style.display = 'block';
-    rv.classList.remove('result-visible');
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+    if (rv) {
+        rv.style.display = 'block';
+        rv.classList.remove('result-visible');
+        
+        // Force reflow and add animation class
+        setTimeout(() => {
             rv.classList.add('result-visible');
-        });
-    });
+        }, 50);
+    }
 
-    // Confetti + AI
-    setTimeout(launchConfetti, 300);
+    // 5. Fire confetti
+    if (typeof launchConfetti === 'function') launchConfetti();
+
+    // 6. Request AI message last
     fetchAIMessage(a);
 }
 
 // ══ AI INTEGRATION ════════════════════════════════════════
 async function fetchAIMessage(a) {
     try {
-        const res = await fetch('/activities/ai-message/' + a.id);
-        if (!res.ok) throw new Error('API error');
+        const configEl = document.getElementById('match-config');
+        const url = configEl ? configEl.dataset.url : '/match-ai';
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nom: a.nomActivite,
+                localisation: a.localisationActivite,
+                categorie: a.categorieActivite,
+                prix: a.coutActivite,
+                description: a.descriptionActivite
+            })
+        });
+
         const data = await res.json();
-        const msg = data.message || 'Cette activité correspond parfaitement à vos préférences !';
-        const el = document.querySelector('#aiMessage .ai-loading');
-        if (el) el.outerHTML = `<p class="ai-message-text">${msg}</p>`;
+        const msg = data.message;
+
+        const container = document.querySelector('#aiMessage');
+        if (container) {
+            // Remove the loading spinner
+            container.innerHTML = `<div class="ai-message-header">✨ L'avis de votre Coach IA</div><p class="ai-message-text" id="typewriter"></p>`;
+            
+            // 🔥 TYPING EFFECT LOGIC
+            let i = 0;
+            const speed = 30; // ms per character
+            const txt = msg;
+            function typeWriter() {
+                if (i < txt.length) {
+                    document.getElementById("typewriter").innerHTML += txt.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, speed);
+                }
+            }
+            typeWriter();
+        }
     } catch(e) {
-        const el = document.querySelector('#aiMessage .ai-loading');
-        if (el) el.outerHTML = `<p class="ai-message-text">Cette activité correspond parfaitement à vos préférences — lancez-vous dans l'aventure !</p>`;
+        console.error("AI Error:", e);
     }
 }
-
 // ══ CONFETTI ══════════════════════════════════════════════
 function launchConfetti() {
     const colors = ['#C9A84C','#E8C070','#8B0000','#ffffff','#F5E8C0'];
