@@ -63,7 +63,6 @@
     color: var(--gold);
 }
 
-/* Quick cards */
 .quick-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -98,7 +97,6 @@
 }
 .quick-card .qc-sub { font-size: .72rem; color: var(--text-light); }
 
-/* Info card */
 .info-card {
     background: white;
     border-radius: 16px;
@@ -135,7 +133,6 @@
 }
 .info-val { color: var(--text-main); }
 
-/* Weather widget */
 .weather-search {
     background: white;
     border-radius: 12px;
@@ -151,12 +148,50 @@
     padding: 1.25rem;
     margin-bottom: 1.5rem;
 }
+.carbon-widget {
+    margin-bottom: 1.5rem;
+}
+.carbon-widget .card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+.city-search-container {
+    position: relative;
+}
+.city-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.city-suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.city-suggestion-item:hover {
+    background-color: #f5f5f5;
+}
+.city-suggestion-item .city-name {
+    font-weight: 600;
+}
+.city-suggestion-item .country-name {
+    font-size: 0.75rem;
+    color: #666;
+}
 </style>
 {% endblock %}
 
 {% block body %}
 
-{# Profile banner #}
 <div class="profile-banner">
     <div class="pb-avatar">
         {% if user.photoProfil and user.photoProfil != 'default.jpg' %}
@@ -186,7 +221,6 @@
     </div>
 </div>
 
-{# 👇 WEATHER SEARCH FORM #}
 <div class="weather-search">
     <form method="GET" action="{{ path('user_dashboard') }}" class="d-flex gap-2">
         <input type="text" 
@@ -203,12 +237,10 @@
     </small>
 </div>
 
-{# 👇 WEATHER WIDGET #}
 {% if weather %}
 <div class="weather-widget">
     <div class="d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
-            {# Weather Icon #}
             <div style="font-size: 3rem;">
                 {% if weather.demo %}
                     🌤️
@@ -227,18 +259,102 @@
             <div class="display-6 fw-bold" style="color: #C9A84C;">{{ weather.temp }}°C</div>
             <div class="small text-muted">Ressenti {{ weather.feels_like }}°C</div>
             {% if weather.demo %}
-                <span class="badge bg-warning text-dark">🧪 Mode Démo (Données aléatoires)</span>
+                <span class="badge bg-warning text-dark">🧪 Mode Démo</span>
             {% endif %}
         </div>
     </div>
 </div>
 {% elseif current_city %}
 <div class="alert alert-warning">
-    ❌ Impossible de récupérer la météo pour "{{ current_city }}". Veuillez vérifier le nom de la ville.
+    ❌ Impossible de récupérer la météo pour "{{ current_city }}".
 </div>
 {% endif %}
 
-{# Quick action cards - ONLY ONE QR CODE CARD! #}
+<div class="carbon-widget">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0">
+                    <span style="font-size:1.2rem;">🌍</span> Empreinte carbone
+                </h6>
+                <span class="badge bg-success">Éco-conseil</span>
+            </div>
+            
+            {% if carbonEstimate %}
+            <div class="row align-items-center mb-3">
+                <div class="col-4 text-center">
+                    <div class="display-6 fw-bold" style="color: #2E7D32;">
+                        {{ carbonEstimate.co2_kg }}
+                    </div>
+                    <small class="text-muted">kg CO₂</small>
+                </div>
+                <div class="col-8">
+                    <div class="progress mb-2" style="height: 8px;">
+                        {% set percent = (carbonEstimate.co2_kg / 500 * 100) %}
+                        {% if percent > 100 %}{% set percent = 100 %}{% endif %}
+                        <div class="progress-bar bg-success" style="width: {{ percent }}%">
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        🌳 {{ carbonEstimate.trees_to_offset }} arbre(s) à planter
+                    </div>
+                    <div class="small text-muted">
+                        💡 {{ carbonEstimate.eco_tip }}
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            {% else %}
+            <div class="alert alert-info text-center small mb-3">
+                🌍 Sélectionnez une ville de départ et d'arrivée pour calculer votre empreinte carbone
+            </div>
+            {% endif %}
+
+            <form method="GET" action="{{ path('user_dashboard') }}" id="carbonForm">
+                <input type="hidden" name="weather_city" value="{{ current_city ?? 'Tunis' }}">
+                <div class="row g-2">
+                    <div class="col-12 mb-2">
+                        <label class="small text-muted">📍 Départ</label>
+                        <div class="city-search-container">
+                            <input type="text" 
+                                   id="fromCityInput" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Ex: Paris, Tunis, London..."
+                                   value="{{ app.request.query.get('from_city', '') }}">
+                            <input type="hidden" name="from_lat" id="fromLat" value="{{ app.request.query.get('from_lat', '') }}">
+                            <input type="hidden" name="from_lon" id="fromLon" value="{{ app.request.query.get('from_lon', '') }}">
+                            <input type="hidden" name="from_city" id="fromCity" value="{{ app.request.query.get('from_city', '') }}">
+                            <div id="fromSuggestions" class="city-suggestions"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="small text-muted">📍 Arrivée</label>
+                        <div class="city-search-container">
+                            <input type="text" 
+                                   id="toCityInput" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Ex: Paris, Tunis, London..."
+                                   value="{{ app.request.query.get('to_city', '') }}">
+                            <input type="hidden" name="to_lat" id="toLat" value="{{ app.request.query.get('to_lat', '') }}">
+                            <input type="hidden" name="to_lon" id="toLon" value="{{ app.request.query.get('to_lon', '') }}">
+                            <input type="hidden" name="to_city" id="toCity" value="{{ app.request.query.get('to_city', '') }}">
+                            <div id="toSuggestions" class="city-suggestions"></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-sm btn-outline-success w-100">
+                            ✈️ Calculer l'empreinte carbone
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="small text-muted mt-2 text-center">
+                <i class="fas fa-leaf text-success"></i> Entrez n'importe quelle ville dans le monde
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="quick-grid">
     <a href="{{ path('user_qr_code') }}" class="quick-card">
         <div class="qc-ico">📱</div>
@@ -262,7 +378,6 @@
     </a>
 </div>
 
-{# Account info #}
 <div class="info-card">
     <h6>👤 Informations du compte</h6>
     <div class="info-row">
@@ -297,4 +412,71 @@
     {% endif %}
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function setupCityAutocomplete(inputId, hiddenLatId, hiddenLonId, hiddenCityId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    const suggestionsDiv = document.getElementById(suggestionsId);
+    let timeoutId = null;
+
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+
+        timeoutId = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        suggestionsDiv.style.display = 'none';
+                        return;
+                    }
+                    
+                    suggestionsDiv.innerHTML = '';
+                    data.forEach(place => {
+                        const div = document.createElement('div');
+                        div.className = 'city-suggestion-item';
+                        const cityName = place.display_name.split(',')[0];
+                        const countryName = place.address?.country || '';
+                        div.innerHTML = `
+                            <div class="city-name">${cityName}</div>
+                            <div class="country-name">${countryName}</div>
+                        `;
+                        div.onclick = () => {
+                            input.value = cityName;
+                            document.getElementById(hiddenLatId).value = place.lat;
+                            document.getElementById(hiddenLonId).value = place.lon;
+                            document.getElementById(hiddenCityId).value = cityName;
+                            suggestionsDiv.style.display = 'none';
+                        };
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    suggestionsDiv.style.display = 'none';
+                });
+        }, 500);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+}
+
+setupCityAutocomplete('fromCityInput', 'fromLat', 'fromLon', 'fromCity', 'fromSuggestions');
+setupCityAutocomplete('toCityInput', 'toLat', 'toLon', 'toCity', 'toSuggestions');
+</script>
 {% endblock %}
