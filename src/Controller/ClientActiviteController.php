@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Activite;
 use App\Repository\ActiviteRepository;
+use App\Repository\ReservationActiviteRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,7 +68,6 @@ final class ClientActiviteController extends AbstractController
             ->getQuery()
             ->getResult();
     
-        // Get distinct locations for setup dropdown
         $locations = $repo->createQueryBuilder('a')
             ->select('DISTINCT a.localisationActivite as lieu')
             ->where('a.disponibiliteActivite = true')
@@ -74,7 +75,6 @@ final class ClientActiviteController extends AbstractController
             ->getQuery()
             ->getResult();
     
-        // Serialize activites for JS
         $activitesData = array_map(fn($a) => [
             'id'                   => $a->getId(),
             'nomActivite'          => $a->getNomActivite(),
@@ -94,38 +94,33 @@ final class ClientActiviteController extends AbstractController
     }
     
   #[Route('/match-ai', name: 'app_client_match_ai', methods: ['POST'])]
-public function matchAI(Request $request, OpenAIService $ai): JsonResponse
-{
-    // Get the data from JavaScript
-    $data = json_decode($request->getContent(), true);
- 
-    // Prepare the data array for the service
-    $aiData = [
-        'nom' => $data['nom'] ?? 'cette activité',
-        'localisation' => $data['localisation'] ?? 'Tunisie',
-        'categorie' => $data['categorie'] ?? 'Découverte',
-        'prix' => $data['prix'] ?? '0',
-        'description' => $data['description'] ?? ''
-    ];
- 
-    try {
-        // Call the service with the data array
-        $message = $ai->generateMatchMessage($aiData);
- 
-        return new JsonResponse(['message' => $message]);
-    } catch (\Exception $e) {
-        // Fallback if AI fails
-        error_log('Match AI Error: ' . $e->getMessage());
-        return new JsonResponse([
-            'message' => "Excellent choix ! Vous avez une vraie passion pour les expériences authentiques. Préparez-vous à vivre un moment inoubliable !"
-        ]);
+    public function matchAI(Request $request, OpenAIService $ai): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+    
+        $aiData = [
+            'nom' => $data['nom'] ?? 'cette activité',
+            'localisation' => $data['localisation'] ?? 'Tunisie',
+            'categorie' => $data['categorie'] ?? 'Découverte',
+            'prix' => $data['prix'] ?? '0',
+            'description' => $data['description'] ?? ''
+        ];
+    
+        try {
+            $message = $ai->generateMatchMessage($aiData);
+    
+            return new JsonResponse(['message' => $message]);
+        } catch (\Exception $e) {
+            error_log('Match AI Error: ' . $e->getMessage());
+            return new JsonResponse([
+                'message' => "Excellent choix ! Vous avez une vraie passion pour les expériences authentiques. Préparez-vous à vivre un moment inoubliable !"
+            ]);
+        }
     }
-}
 
     #[Route('/{id}', name: 'app_client_activity_show', methods: ['GET'])]
     public function show(int $id, ActiviteRepository $repo): Response
     {
-        // Eager load everything in ONE query
         $activite = $repo->createQueryBuilder('a')
             ->leftJoin('a.fournisseurs', 'f')
             ->addSelect('f')
@@ -166,4 +161,28 @@ public function matchAI(Request $request, OpenAIService $ai): JsonResponse
         return new JsonResponse(['message' => $message]);
     }
    
+    #[Route('/client/reservation/{id}/delete', name: 'app_client_reservation_delete', methods: ['POST'])]
+    public function deleteReservation(
+        int $id, 
+        ReservationActiviteRepository $repo, 
+        EntityManagerInterface $em
+    ): JsonResponse {
+        // 1. Find the reservation
+        $reservation = $repo->find($id);
+
+        if (!$reservation) {
+            return new JsonResponse(['success' => false, 'message' => 'Réservation introuvable.'], 404);
+        }
+
+        try {
+            // 2. Remove it from the database
+            $em->remove($reservation);
+            $em->flush();
+
+            // 3. Return success to the JavaScript
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => 'Erreur technique : ' . $e->getMessage()], 500);
+        }
+    }
 }

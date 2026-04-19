@@ -6,16 +6,14 @@ use App\Repository\ReservationActiviteRepository;
 use CalendarBundle\CalendarEvents;
 use CalendarBundle\Entity\Event;
 use CalendarBundle\Event\CalendarEvent;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class CalendarEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private ReservationActiviteRepository $reservationRepo,
-        private Security $security,
-        private UrlGeneratorInterface $router
+        private RequestStack $requestStack
     ) {}
 
     public static function getSubscribedEvents(): array
@@ -25,74 +23,58 @@ class CalendarEventSubscriber implements EventSubscriberInterface
         ];
     }
 
-    /*public function onCalendarLoad(CalendarEvent $event): void
+    public function onCalendarLoad(CalendarEvent $event): void
     {
-        $user = $this->security->getUser();
-        if (!$user) return;
+        $request = $this->requestStack->getCurrentRequest();
+        // On récupère l'ID en session, ou 18 par défaut pour le test
+        $userId = $request ? $request->getSession()->get('user_id') : 18;
+        if (!$userId) {
+            $userId = 18; 
+        }
 
         $start = $event->getStart();
         $end   = $event->getEnd();
 
-        $reservations = $this->reservationRepo->findByUserAndPeriod($user, $start, $end);
+        // REQUÊTE CORRIGÉE (Flèches -> partout)
+        $reservations = $this->reservationRepo->createQueryBuilder('r')
+            ->where('r.user = :userId')
+            ->andWhere('r.statut = :statut')
+            ->andWhere('r.dateActivite BETWEEN :start AND :end')
+            ->setParameter('userId', $userId)
+            ->setParameter('statut', 'confirmee')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
 
-            foreach ($reservations as $reservation) {
-                $activite = $reservation->getActivite();
-                if (!$activite) continue;
-
-                // Create the event
-                $calEvent = new Event(
-                    $activite->getNomActivite() . ' (' . $reservation->getNombreParticipants() . ' pers.)',
-                    $reservation->getDateActivite() // Must be a DateTime object
-                );
-
-                $calEvent->setOptions([
-                    'backgroundColor' => '#8B0000',
-                    'borderColor'     => '#C9A84C',
-                    'textColor'       => '#ffffff',
-                    'url'             => $this->router->generate('app_client_activity_show', [
-                        'id' => $activite->getId()
-                    ])
-                ]);
-
-                $event->addEvent($calEvent);
-            }
-    }*/
-
-
-
-
-public function onCalendarLoad(\CalendarBundle\Event\CalendarEvent $event): void
-{
-    $start = $event->getStart();
-    $end   = $event->getEnd();
-
-    // Query for user ID 18
-    $reservations = $this->reservationRepo->findByStaticUserAndPeriod(18, $start, $end);
-
-    foreach ($reservations as $res) {
-        $date = $res->getDateActivite();
-        if (!$date) continue; // Skip if no date
-
-        // Get activity name or fallback
-        $title = "Réservation";
-        if ($res->getActivite()) {
-            $title = $res->getActivite()->getNomActivite();
+        // Vérification de sécurité pour Intelephense
+        if (!is_iterable($reservations)) {
+            return;
         }
 
-        $calEvent = new \CalendarBundle\Entity\Event(
-            $title . ' (' . $res->getNombreParticipants() . ' pers.)',
-            $date
-        );
+        foreach ($reservations as $res) {
+            $act = $res->getActivite();
+            
+            $calEvent = new Event(
+                $act ? $act->getNomActivite() : "Réservation #" . $res->getId(),
+                $res->getDateActivite()
+            );
 
-        $calEvent->setOptions([
-            'backgroundColor' => '#8B0000',
-            'borderColor'     => '#C9A84C',
-            'textColor'       => '#ffffff',
-            // If you have a show route, uncomment this:
-            // 'url' => $this->router->generate('app_client_activity_show', ['id' => $res->getActivite()->getId()])
-        ]);
+            // Options graphiques
+            $calEvent->setOptions([
+                'backgroundColor' => '#8B0000',
+                'borderColor'     => '#3D0000',
+                'textColor'       => '#ffffff',
+            ]);
 
-        $event->addEvent($calEvent);
+            // Propriétés pour la Modal (extendedProps)
+            $calEvent->addOption('reservationId', $res->getId());
+            $calEvent->addOption('activityId', $act ? $act->getId() : null);
+            $calEvent->addOption('participants', $res->getNombreParticipants());
+            $calEvent->addOption('location', $act ? $act->getLocalisationActivite() : 'Non spécifié');
+            $calEvent->addOption('price', $act ? $act->getCoutActivite() : 0);
+
+            $event->addEvent($calEvent);
+        }
     }
-}
 }
