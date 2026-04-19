@@ -1,0 +1,142 @@
+{# templates/public_profile/show.html.twig #}
+{% extends 'base_client.html.twig' %}
+{% block title %}Profil de {{ user.prenom }} {{ user.nom }}{% endblock %}
+{% block page_title %}👤 Profil Public{% endblock %}
+
+{% block stylesheets %}
+<style>
+.profile-card {
+    max-width: 500px;
+    margin: 3rem auto;
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(92,0,0,0.12);
+    text-align: center;
+}
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010;
+    font-size: 3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border: 4px solid rgba(201,168,76,0.3);
+    overflow: hidden;
+}
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #5C0000;
+    margin-bottom: 0.5rem;
+}
+.profile-username {
+    color: #7A6050;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(201,168,76,0.15);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.stat-item {
+    text-align: center;
+}
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #C9A84C;
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: #7A6050;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.profile-bio {
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 1.5rem 0;
+}
+.btn-connect {
+    background: linear-gradient(135deg, #5C0000, #8B0000);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 1rem;
+    transition: transform 0.2s;
+}
+.btn-connect:hover {
+    transform: translateY(-2px);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="profile-card">
+    <div class="profile-avatar">
+        {% if user.photoProfil %}
+            <img src="/{{ user.photoProfil }}" alt="{{ user.prenom }}">
+        {% else %}
+            {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+        {% endif %}
+    </div>
+    
+    <h1 class="profile-name">{{ user.prenom }} {{ user.nom }}</h1>
+    <div class="profile-username">@{{ user.username }}</div>
+    
+    <div class="profile-stats">
+        <div class="stat-item">
+            <div class="stat-value">{{ user.averageRating|default(0)|number_format(1) }}</div>
+            <div class="stat-label">⭐ Note</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.totalRatings|default(0) }}</div>
+            <div class="stat-label">📝 Avis</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ user.dateInscription|date('Y') }}</div>
+            <div class="stat-label">📅 Membre</div>
+        </div>
+    </div>
+    
+    <div class="profile-bio">
+        <p>🌍 Voyageur passionné sur Doura Mondo</p>
+        <p>✈️ Prêt à explorer le monde avec vous!</p>
+    </div>
+    
+    {% if app.user %}
+        <a href="{{ path('community_index') }}" class="btn-connect">
+            🔗 Se connecter
+        </a>
+    {% else %}
+        <a href="{{ path('register') }}" class="btn-connect">
+            ✨ Rejoindre Doura Mondo
+        </a>
+    {% endif %}
+    
+    <div class="mt-4 text-muted small">
+        <p>📱 Scanné via QR Code Doura Mondo</p>
+    </div>
+</div>
+{% endblock %}

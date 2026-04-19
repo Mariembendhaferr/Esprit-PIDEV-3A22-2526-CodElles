@@ -1,0 +1,609 @@
+{# templates/home/index.html.twig #}
+{% extends 'base_client.html.twig' %}
+
+{% block title %}Bienvenue - Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --gold:       #C9A84C;
+    --gold-light: #E8C97A;
+    --crimson:    #7A0000;
+    --deep:       #060101;
+    --text-main:  #F2E6CC;
+    --text-muted: rgba(242,230,204,0.50);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    min-height: 100vh;
+    font-family: 'Outfit', sans-serif;
+    background: var(--deep);
+    overflow-x: hidden;
+}
+
+/* Disable base layout */
+.sidebar  { display: none !important; }
+.main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+
+/* ── CANVAS BG ── */
+#hero-canvas {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+
+/* ── OVERLAYS ── */
+.noise {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+}
+
+.scanline {
+    position: fixed; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,.08) 20%, rgba(201,168,76,.22) 50%, rgba(201,168,76,.08) 80%, transparent);
+    animation: scan 7s linear infinite; pointer-events: none; z-index: 2;
+}
+@keyframes scan { 0%{top:-1px;opacity:0} 5%{opacity:1} 95%{opacity:.2} 100%{top:100vh;opacity:0} }
+
+/* ── CORNER DECO ── */
+.cdeco { position: fixed; pointer-events: none; z-index: 3; opacity: 0; animation: cdeco-in 1.4s ease forwards; }
+.cdeco--tl{top:18px;left:18px;animation-delay:.8s}
+.cdeco--tr{top:18px;right:18px;animation-delay:1s}
+.cdeco--bl{bottom:18px;left:18px;animation-delay:1.2s}
+.cdeco--br{bottom:18px;right:18px;animation-delay:1.4s}
+@keyframes cdeco-in { from{opacity:0;transform:scale(.2)} to{opacity:1;transform:scale(1)} }
+
+/* ── PARTICLE FIELD ── */
+.pfield { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.pdot {
+    position: absolute; border-radius: 50%;
+    background: var(--gold); opacity: 0;
+    animation: pdot-rise linear infinite;
+}
+@keyframes pdot-rise {
+    0%   { opacity: 0; }
+    8%   { opacity: .45; }
+    92%  { opacity: .08; }
+    100% { opacity: 0; transform: translateY(-115vh) translateX(16px); }
+}
+
+/* ── CURSOR GLOW ── */
+.cursor-glow {
+    position: fixed; width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,.035) 0%, transparent 68%);
+    pointer-events: none; z-index: 1;
+    transform: translate(-50%, -50%); opacity: 0; transition: opacity .3s;
+}
+
+/* ════════════════════════════════════
+   PAGE LAYOUT
+════════════════════════════════════ */
+.page {
+    position: relative; z-index: 3;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+}
+
+/* ── NAV ── */
+.top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 1.2rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(6,1,1,.85) 0%, transparent 100%);
+    opacity: 0; animation: nav-in .8s ease .3s forwards;
+}
+@keyframes nav-in { to { opacity: 1; } }
+
+.nav-brand {
+    display: flex; align-items: center; gap: .7rem;
+    text-decoration: none;
+}
+.nav-brand-ring {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid rgba(201,168,76,.30);
+    background: rgba(201,168,76,.07);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    animation: bob 5s ease-in-out infinite;
+}
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.nav-brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--gold);
+}
+
+.nav-links {
+    display: flex; align-items: center; gap: .5rem;
+}
+.nav-btn {
+    padding: .55rem 1.3rem;
+    border-radius: 50px;
+    font-family: 'Outfit', sans-serif;
+    font-size: .83rem; font-weight: 600;
+    letter-spacing: .5px;
+    text-decoration: none;
+    transition: all .3s cubic-bezier(.22,1,.36,1);
+    cursor: pointer;
+}
+.nav-btn-ghost {
+    background: transparent;
+    border: 1.5px solid rgba(201,168,76,.28);
+    color: rgba(242,230,204,.75);
+}
+.nav-btn-ghost:hover {
+    border-color: rgba(201,168,76,.6);
+    color: var(--gold);
+    background: rgba(201,168,76,.06);
+    transform: translateY(-2px);
+}
+.nav-btn-solid {
+    background: linear-gradient(135deg, #9A1A1A, var(--gold));
+    border: none;
+    color: #0D0303;
+}
+.nav-btn-solid:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 8px 26px rgba(201,168,76,.32);
+    color: #0D0303;
+}
+
+/* ════════════════════════════════════
+   HERO
+════════════════════════════════════ */
+.hero {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 8rem 1.5rem 4rem;
+    position: relative;
+}
+
+/* Eyebrow tag */
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .38rem 1rem;
+    background: rgba(201,168,76,.08);
+    border: 1px solid rgba(201,168,76,.20);
+    border-radius: 50px;
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(201,168,76,.70);
+    margin-bottom: 2rem;
+    opacity: 0; animation: fu .7s ease .6s both;
+}
+.hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.5)} }
+
+/* Main title */
+.hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.06;
+    color: var(--text-main);
+    letter-spacing: -1px;
+    margin-bottom: 1.6rem;
+    opacity: 0; animation: fu .9s ease .8s both;
+}
+.hero-title em {
+    font-style: italic;
+    color: var(--gold);
+    position: relative;
+    display: inline-block;
+}
+.hero-title em::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: line-grow 1s ease 1.8s both;
+    transform-origin: left;
+    transform: scaleX(0);
+}
+@keyframes line-grow { to { transform: scaleX(1); } }
+
+/* Subtitle */
+.hero-sub {
+    font-size: clamp(.9rem, 2vw, 1.1rem);
+    color: var(--text-muted);
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0; animation: fu .7s ease 1.1s both;
+}
+
+/* CTA Buttons */
+.cta-group {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: .9rem;
+    margin-bottom: 4.5rem;
+    opacity: 0; animation: fu .7s ease 1.3s both;
+}
+
+.btn-cta {
+    display: inline-flex; align-items: center; gap: .55rem;
+    padding: .9rem 2rem;
+    border-radius: 50px;
+    font-family: 'Outfit', sans-serif;
+    font-size: .92rem; font-weight: 700;
+    letter-spacing: .5px;
+    text-decoration: none;
+    transition: all .35s cubic-bezier(.22,1,.36,1);
+    position: relative; overflow: hidden;
+    cursor: pointer;
+}
+
+.btn-cta::before {
+    content: '';
+    position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent);
+    transition: left .5s ease;
+}
+.btn-cta:hover::before { left: 100%; }
+
+.btn-primary-cta {
+    background: linear-gradient(135deg, #9A1A1A 0%, var(--gold) 55%, #9A1A1A 100%);
+    background-size: 220% 220%;
+    border: none;
+    color: #0D0303;
+    box-shadow: 0 8px 30px rgba(201,168,76,.24), inset 0 1px 0 rgba(255,255,255,.18);
+    animation: btn-sh 5s ease infinite;
+}
+@keyframes btn-sh { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.btn-primary-cta:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 16px 44px rgba(201,168,76,.38);
+    color: #0D0303;
+}
+
+.btn-outline-cta {
+    background: transparent;
+    border: 1.5px solid rgba(201,168,76,.30);
+    color: rgba(242,230,204,.80);
+}
+.btn-outline-cta:hover {
+    border-color: rgba(201,168,76,.65);
+    color: var(--gold);
+    background: rgba(201,168,76,.06);
+    transform: translateY(-3px);
+}
+
+/* ── Feature Pills ── */
+.features-row {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: .75rem;
+    opacity: 0; animation: fu .7s ease 1.6s both;
+}
+
+.feat-pill {
+    display: flex; align-items: center; gap: .55rem;
+    padding: .6rem 1.1rem;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(201,168,76,.10);
+    border-radius: 50px;
+    font-size: .8rem; color: var(--text-muted);
+    transition: all .3s ease;
+}
+.feat-pill:hover {
+    background: rgba(201,168,76,.07);
+    border-color: rgba(201,168,76,.28);
+    color: rgba(242,230,204,.85);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.22);
+}
+.feat-pill-ico {
+    font-size: 1rem;
+    width: 26px; height: 26px;
+    background: rgba(201,168,76,.09);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Scroll hint ── */
+.scroll-hint {
+    position: absolute;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: .4rem;
+    opacity: 0; animation: fu .7s ease 2.2s both;
+    cursor: pointer;
+}
+.scroll-hint span { font-size: .62rem; color: rgba(201,168,76,.28); letter-spacing: 2px; text-transform: uppercase; }
+.scroll-arrow {
+    width: 24px; height: 24px;
+    border-right: 1.5px solid rgba(201,168,76,.28);
+    border-bottom: 1.5px solid rgba(201,168,76,.28);
+    transform: rotate(45deg);
+    animation: bounce-down 1.8s ease-in-out infinite;
+}
+@keyframes bounce-down { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
+
+/* ── Stats Section ── */
+.stats-section {
+    position: relative; z-index: 3;
+    padding: 3rem 2rem 4rem;
+    display: flex; justify-content: center;
+}
+.stats-inner {
+    display: flex; flex-wrap: wrap; gap: 0;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(201,168,76,.12);
+    border-radius: 24px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    opacity: 0; animation: fu .8s ease 1.9s both;
+}
+.stat-item {
+    padding: 1.75rem 2.8rem;
+    text-align: center;
+    border-right: 1px solid rgba(201,168,76,.10);
+    transition: background .3s;
+}
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: rgba(201,168,76,.04); }
+.stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem; font-weight: 700;
+    color: var(--gold); line-height: 1;
+    margin-bottom: .25rem;
+}
+.stat-lbl {
+    font-size: .72rem; color: var(--text-muted);
+    letter-spacing: 1.2px; text-transform: uppercase;
+}
+
+@keyframes fu { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:640px) {
+    .top-nav { padding: 1rem 1.2rem; }
+    .nav-brand-name { font-size: 1.1rem; }
+    .hero { padding: 7rem 1.2rem 3rem; }
+    .stat-item { padding: 1.2rem 1.6rem; border-right: none; border-bottom: 1px solid rgba(201,168,76,.10); }
+    .stat-item:last-child { border-bottom: none; }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    *,*::before,*::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+    .hero-tag,.hero-title,.hero-sub,.cta-group,.features-row,.stats-inner,.scroll-hint,
+    .top-nav { opacity:1 !important; transform:none !important; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{# ── Background ── #}
+<canvas id="hero-canvas"></canvas>
+<div class="noise"></div>
+<div class="scanline"></div>
+<div class="cursor-glow" id="cglow"></div>
+<div class="pfield" id="pfield"></div>
+
+{# Corner decorations #}
+<div class="cdeco cdeco--tl"><svg width="52" height="52" fill="none"><path d="M2 52V2H52" stroke="rgba(201,168,76,0.22)" stroke-width="1"/><circle cx="2" cy="2" r="2.5" fill="rgba(201,168,76,0.40)"/></svg></div>
+<div class="cdeco cdeco--tr"><svg width="52" height="52" fill="none" style="transform:scaleX(-1)"><path d="M2 52V2H52" stroke="rgba(201,168,76,0.22)" stroke-width="1"/><circle cx="2" cy="2" r="2.5" fill="rgba(201,168,76,0.40)"/></svg></div>
+<div class="cdeco cdeco--bl"><svg width="52" height="52" fill="none" style="transform:scaleY(-1)"><path d="M2 52V2H52" stroke="rgba(201,168,76,0.13)" stroke-width="1"/></svg></div>
+<div class="cdeco cdeco--br"><svg width="52" height="52" fill="none" style="transform:scale(-1,-1)"><path d="M2 52V2H52" stroke="rgba(201,168,76,0.13)" stroke-width="1"/></svg></div>
+
+<div class="page">
+
+    {# ── Top Nav ── #}
+    <nav class="top-nav">
+        <a href="{{ path('home') }}" class="nav-brand" style="text-decoration:none;">
+            <div class="nav-brand-ring">🌍</div>
+            <div class="nav-brand-name">Doura Mondo</div>
+        </a>
+        <div class="nav-links">
+            <a href="{{ path('login') }}" class="nav-btn nav-btn-ghost">🔑 Connexion</a>
+            <a href="{{ path('register') }}" class="nav-btn nav-btn-solid">✨ S'inscrire</a>
+        </div>
+    </nav>
+
+    {# ── Hero ── #}
+    <section class="hero">
+
+        <div class="hero-tag">
+            <div class="hero-tag-dot"></div>
+            Plateforme de voyage & aventure
+        </div>
+
+        <h1 class="hero-title">
+            {% if user %}
+                Bon retour,<br><em>{{ user.prenom }}</em> !
+            {% else %}
+                Voyagez<br><em>Autrement</em>
+            {% endif %}
+        </h1>
+
+        <p class="hero-sub">
+            {% if user %}
+                Bienvenue sur <strong style="color:var(--gold);">Doura Mondo</strong>,
+                {{ user.prenom }} {{ user.nom }}.
+                Votre aventure reprend ici — découvrez des destinations
+                extraordinaires et vivez des expériences inoubliables.
+            {% else %}
+                Découvrez des destinations extraordinaires, rejoignez une communauté de voyageurs passionnés
+                et vivez des expériences qui transforment votre regard sur le monde.
+            {% endif %}
+        </p>
+
+        <div class="cta-group">
+            {% if user %}
+                {% if user.role == 'admin' %}
+                    <a href="{{ path('admin_dashboard') }}" class="btn-cta btn-primary-cta">
+                        📊 Dashboard Admin
+                    </a>
+                    <a href="{{ path('community_index') }}" class="btn-cta btn-outline-cta">
+                        🌍 Communauté
+                    </a>
+                {% else %}
+                    <a href="{{ path('user_dashboard') }}" class="btn-cta btn-primary-cta">
+                        📊 Mon Dashboard
+                    </a>
+                    <a href="{{ path('community_index') }}" class="btn-cta btn-outline-cta">
+                        🌍 Communauté
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{{ path('register') }}" class="btn-cta btn-primary-cta">
+                    ✨ Créer un compte
+                </a>
+                <a href="{{ path('login') }}" class="btn-cta btn-outline-cta">
+                    🔑 Se connecter
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="features-row">
+            <div class="feat-pill"><div class="feat-pill-ico">🗺️</div> Destinations exclusives</div>
+            <div class="feat-pill"><div class="feat-pill-ico">👥</div> Communauté active</div>
+            <div class="feat-pill"><div class="feat-pill-ico">⭐</div> Avis & recommandations</div>
+            <div class="feat-pill"><div class="feat-pill-ico">🔒</div> 100% sécurisé</div>
+        </div>
+
+        <div class="scroll-hint" onclick="document.querySelector('.stats-section').scrollIntoView({behavior:'smooth'})">
+            <span>Découvrir</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    {# ── Stats Strip ── #}
+    <div class="stats-section">
+        <div class="stats-inner">
+            <div class="stat-item">
+                <div class="stat-num">2k+</div>
+                <div class="stat-lbl">Voyageurs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">124</div>
+                <div class="stat-lbl">Destinations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">48</div>
+                <div class="stat-lbl">Offres actives</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">4.8⭐</div>
+                <div class="stat-lbl">Note moyenne</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+/* ── Star Canvas ── */
+(function(){
+    const cvs = document.getElementById('hero-canvas');
+    const ctx = cvs.getContext('2d');
+    let W, H, stars = [], nebs = [];
+
+    function resize(){ W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
+
+    function initStars(){
+        stars = Array.from({length:200}, ()=>({
+            x:Math.random()*W, y:Math.random()*H,
+            r:.2+Math.random()*1.1, speed:.03+Math.random()*.12,
+            op:.1+Math.random()*.65, fl:Math.random()*Math.PI*2, fs:.006+Math.random()*.022
+        }));
+    }
+
+    nebs = [
+        {x:.18,y:.22,rx:420,ry:310,c:'rgba(122,0,0,'},
+        {x:.80,y:.75,rx:350,ry:250,c:'rgba(201,168,76,'},
+        {x:.50,y:.50,rx:500,ry:400,c:'rgba(40,0,0,'},
+    ];
+
+    function draw(t){
+        ctx.clearRect(0,0,W,H);
+        const bg=ctx.createLinearGradient(0,0,W,H);
+        bg.addColorStop(0,'#030000'); bg.addColorStop(.5,'#080101'); bg.addColorStop(1,'#050000');
+        ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+        nebs.forEach(n=>{
+            const p=.018+Math.sin(t*.00028+n.rx)*.008;
+            const g=ctx.createRadialGradient(n.x*W,n.y*H,0,n.x*W,n.y*H,Math.max(n.rx,n.ry));
+            g.addColorStop(0,n.c+p+')'); g.addColorStop(.5,n.c+(p*.28)+')'); g.addColorStop(1,n.c+'0)');
+            ctx.save(); ctx.translate(n.x*W,n.y*H);
+            ctx.scale(n.rx/Math.max(n.rx,n.ry),n.ry/Math.max(n.rx,n.ry));
+            ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,Math.max(n.rx,n.ry),0,Math.PI*2); ctx.fill();
+            ctx.restore();
+        });
+
+        stars.forEach(s=>{
+            s.fl+=s.fs;
+            const op=s.op*(.6+.4*Math.sin(s.fl));
+            ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+            ctx.fillStyle=`rgba(242,230,204,${op.toFixed(2)})`; ctx.fill();
+            s.y+=s.speed;
+            if(s.y>H+2){s.y=-2; s.x=Math.random()*W;}
+        });
+
+        requestAnimationFrame(draw);
+    }
+
+    addEventListener('resize',()=>{resize();initStars();});
+    resize(); initStars();
+    requestAnimationFrame(draw);
+})();
+
+/* ── Particles ── */
+(function(){
+    const f=document.getElementById('pfield');
+    for(let i=0;i<18;i++){
+        const d=document.createElement('div');
+        d.className='pdot';
+        const sz=.4+Math.random()*2;
+        d.style.cssText=`left:${4+Math.random()*92}%;bottom:-4%;width:${sz}px;height:${sz}px;animation-duration:${9+Math.random()*12}s;animation-delay:${Math.random()*14}s;`;
+        f.appendChild(d);
+    }
+})();
+
+/* ── Cursor Glow ── */
+(function(){
+    const g=document.getElementById('cglow');
+    if(!matchMedia('(pointer:fine)').matches) return;
+    addEventListener('mousemove',e=>{
+        g.style.left=e.clientX+'px';
+        g.style.top=e.clientY+'px';
+        g.style.opacity='1';
+    });
+    addEventListener('mouseleave',()=>g.style.opacity='0');
+})();
+
+/* ── Counter animation ── */
+(function(){
+    const observer = new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+            if(!entry.isIntersecting) return;
+            entry.target.querySelectorAll('.stat-num').forEach(el=>{
+                // Just a subtle pop-in effect
+                el.style.transition='transform .6s cubic-bezier(.22,1,.36,1)';
+                el.style.transform='scale(1.08)';
+                setTimeout(()=>el.style.transform='scale(1)',600);
+            });
+            observer.unobserve(entry.target);
+        });
+    },{threshold:.5});
+    const statsEl=document.querySelector('.stats-inner');
+    if(statsEl) observer.observe(statsEl);
+})();
+</script>
+{% endblock %}

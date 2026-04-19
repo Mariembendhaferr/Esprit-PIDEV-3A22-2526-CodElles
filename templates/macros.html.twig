@@ -1,0 +1,47 @@
+{% macro photo(photoProfil, prenom, nom, size) %}
+    {% set size = size ?? 48 %}
+
+    {% set dicebear_styles = ['adventurer', 'bottts', 'pixel-art', 'fun-emoji', 'avataaars', 'micah', 'lorelei', 'croodles'] %}
+
+    {# Check if it's any DiceBear style (style/seed format) #}
+    {% set is_dicebear = false %}
+    {% if photoProfil %}
+        {% for style in dicebear_styles %}
+            {% if photoProfil starts with style ~ '/' %}
+                {% set is_dicebear = true %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if photoProfil and is_dicebear %}
+        {# DiceBear API avatar — any style #}
+        {% set parts = photoProfil|split('/') %}
+        <img src="https://api.dicebear.com/7.x/{{ parts[0] }}/svg?seed={{ parts[1] }}"
+             style="width:{{ size }}px;height:{{ size }}px;border-radius:50%;
+                    object-fit:cover;background:white;padding:2px;flex-shrink:0;"
+             alt="avatar">
+
+    {% elseif photoProfil and photoProfil != 'default.jpg' %}
+        {# Real uploaded photo #}
+        {% if photoProfil starts with 'http' %}
+            {% set src = photoProfil %}
+        {% elseif photoProfil starts with 'avatars/' or photoProfil starts with 'photos/' or photoProfil starts with 'uploads/' %}
+            {% set src = '/' ~ photoProfil %}
+        {% else %}
+            {% set src = '/photos/' ~ photoProfil %}
+        {% endif %}
+        <img src="{{ src }}"
+             style="width:{{ size }}px;height:{{ size }}px;border-radius:50%;
+                    object-fit:cover;flex-shrink:0;"
+             alt="">
+
+    {% else %}
+        {# Initials fallback #}
+        <div style="width:{{ size }}px;height:{{ size }}px;border-radius:50%;
+                    background:#C9A84C;color:#2E1010;
+                    display:flex;align-items:center;justify-content:center;
+                    font-weight:700;font-size:{{ (size/2.8)|round }}px;flex-shrink:0;">
+            {{ prenom|first|upper }}{{ nom|first|upper }}
+        </div>
+    {% endif %}
+{% endmacro %}

@@ -1,0 +1,12 @@
+knpu_oauth2_client:
+    clients:
+        google:
+            type: google
+            client_id: '%env(OAUTH_GOOGLE_ID)%'
+            client_secret: '%env(OAUTH_GOOGLE_SECRET)%'
+            redirect_route: google_callback
+            redirect_params: {}
+            # Important : Ajoutez ces options
+            use_oidc_mode: true
+            # Pour les URLs de redirection
+            # use_state: true

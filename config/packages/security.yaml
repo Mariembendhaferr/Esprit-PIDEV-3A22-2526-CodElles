@@ -1,0 +1,40 @@
+# config/packages/security.yaml
+security:
+    # 👇 Hash passwords for YOUR User entity (this is what you NEED)
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+            cost: 12
+
+    # 👇 Load users from YOUR database (for password verification)
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            # 👇 CRITICAL: Disable Symfony's auth enforcement
+            # Your custom session auth will handle everything
+            security: false  # 👈 THIS IS THE KEY FIX!
+            
+            # 👇 Optional: Logout helper (if you want Symfony to clear its token)
+            logout:
+                path: logout
+                target: /
+
+    # 👇 DISABLE access_control - your custom checks handle this
+    # access_control:
+    #   - { path: ^/admin, roles: ROLE_ADMIN }  # ← COMMENTED OUT!
+
+when@test:
+    security:
+        password_hashers:
+            App\Entity\User:
+                algorithm: auto
+                cost: 4

@@ -1,0 +1,204 @@
+{# templates/rating/rate.html.twig #}
+{% extends 'base_client.html.twig' %}
+
+{% block title %}Évaluer {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header-gold text-center">
+                    <h3 class="mb-0">⭐ Évaluer {{ user.prenom }} {{ user.nom }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ path('rate_user', {'id': user.idUser}) }}" id="ratingForm">
+                        
+                        <div class="text-center mb-4">
+                            {% if user.photoProfil %}
+                                <img src="{{ asset('uploads/' ~ user.photoProfil) }}" alt="Photo" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                            {% else %}
+                                <div class="avatar-circle mx-auto" style="width: 100px; height: 100px; font-size: 3rem;">
+                                    {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+                                </div>
+                            {% endif %}
+                            <h4 class="mt-3">{{ user.prenom }} {{ user.nom }}</h4>
+                            <p class="text-muted">@{{ user.username }}</p>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold d-block text-center">⭐ Note (1 à 5 étoiles)</label>
+                            
+                            <div class="star-rating text-center" id="starRating">
+                                <button type="button" class="star-btn" data-value="1">★</button>
+                                <button type="button" class="star-btn" data-value="2">★</button>
+                                <button type="button" class="star-btn" data-value="3">★</button>
+                                <button type="button" class="star-btn" data-value="4">★</button>
+                                <button type="button" class="star-btn" data-value="5">★</button>
+                            </div>
+                            <input type="hidden" name="stars" id="stars" required>
+                            <div id="star-error" class="text-danger text-center mt-2" style="display: none;">Veuillez sélectionner une note</div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label">💬 Commentaire (optionnel)</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="Partagez votre expérience avec cet utilisateur..."></textarea>
+                            <small class="text-muted">Maximum 500 caractères</small>
+                        </div>
+
+                        <div id="live-ai-analysis" style="display: none; margin-bottom: 1rem; padding: 12px; border-radius: 8px; text-align: center; font-weight: 500;"></div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                ✨ Envoyer mon évaluation
+                            </button>
+                            <a href="{{ path('community_index') }}" class="btn btn-outline-secondary">
+                                ← Retour à la communauté
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 2.5rem;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    font-size: 3rem;
+    cursor: pointer;
+    color: #ddd;
+    transition: all 0.2s ease;
+    padding: 0 5px;
+}
+
+.star-btn:hover {
+    transform: scale(1.2);
+    color: #FFD700;
+}
+
+.star-btn.active {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+</style>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star rating system
+    const starBtns = document.querySelectorAll('.star-btn');
+    const starsInput = document.getElementById('stars');
+    const starError = document.getElementById('star-error');
+    let selectedRating = 0;
+    
+    starBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.value);
+            starsInput.value = selectedRating;
+            
+            starBtns.forEach((b, index) => {
+                if (index < selectedRating) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+            
+            if (starError) starError.style.display = 'none';
+        });
+    });
+    
+    // Live AI sentiment analysis - CALLING THE REAL BACKEND API
+    const commentInput = document.getElementById('comment');
+    const liveAiDiv = document.getElementById('live-ai-analysis');
+    let typingTimer;
+    
+    if (commentInput) {
+        commentInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            const text = this.value.trim();
+            
+            if (text.length > 5) {
+                typingTimer = setTimeout(() => {
+                    callRealAPI(text);
+                }, 1000);
+            } else if (text.length === 0) {
+                liveAiDiv.style.display = 'none';
+            }
+        });
+    }
+    
+    function callRealAPI(text) {
+        liveAiDiv.style.display = 'block';
+        liveAiDiv.innerHTML = '🤖 Appel API Hugging Face en cours...';
+        liveAiDiv.style.background = 'rgba(201,168,76,0.1)';
+        liveAiDiv.style.color = '#C9A84C';
+        
+        // Call the backend API endpoint
+        fetch('/api/sentiment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: text })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                liveAiDiv.innerHTML = '🟡 API temporairement indisponible';
+                liveAiDiv.style.background = 'rgba(249,168,37,0.1)';
+                liveAiDiv.style.color = '#F9A825';
+            } else {
+                liveAiDiv.innerHTML = `${data.emoji} ${data.label}<br><small style="font-size: 11px;">${data.message}</small>`;
+                liveAiDiv.style.background = `${data.color}20`;
+                liveAiDiv.style.color = data.color;
+                liveAiDiv.style.border = `1px solid ${data.color}30`;
+            }
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            liveAiDiv.innerHTML = '🟡 API temporairement indisponible - Vérifiez votre connexion';
+            liveAiDiv.style.background = 'rgba(249,168,37,0.1)';
+            liveAiDiv.style.color = '#F9A825';
+        });
+    }
+    
+    // Form validation
+    const form = document.getElementById('ratingForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (selectedRating === 0) {
+                e.preventDefault();
+                if (starError) starError.style.display = 'block';
+                starError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

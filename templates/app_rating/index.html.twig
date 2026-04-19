@@ -1,0 +1,131 @@
+{% extends 'base_client.html.twig' %}
+
+{% block title %}Évaluer l'application{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rating-card {
+        max-width: 520px;
+        margin: 3rem auto;
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    }
+    .stars {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        font-size: 2rem;
+        cursor: pointer;
+        margin: 1rem 0;
+    }
+    .star { color: #C9A84C; cursor: pointer; transition: transform 0.1s; }
+    .star:hover { transform: scale(1.2); }
+    .rating-value {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #C9A84C;
+        margin-bottom: 1rem;
+    }
+    .slider-wrapper input[type=range] {
+        width: 100%;
+        accent-color: #C9A84C;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="rating-card">
+    <h4 class="text-center fw-bold mb-1">⭐ Évaluer l'application</h4>
+
+    {% if currentUser %}
+        <p class="text-center text-muted mb-3">
+            Bonjour <strong>{{ currentUser.prenom }}</strong>, donnez votre avis !
+        </p>
+    {% endif %}
+
+    {% if success %}
+        <div class="alert alert-success text-center">
+            ✅ Merci ! Votre évaluation a été enregistrée.
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger text-center">{{ error }}</div>
+    {% endif %}
+
+    {% if alreadyRated %}
+        <div class="alert alert-warning text-center">
+            Vous avez déjà évalué l'application. Merci !
+        </div>
+    {% else %}
+        <form method="POST" action="{{ path('app_rating') }}">
+
+            {# Star buttons (visual only) #}
+            <div class="stars" id="starsContainer">
+                {% for i in 1..5 %}
+                    <span class="star" data-value="{{ i * 20 }}">☆</span>
+                {% endfor %}
+            </div>
+
+            {# Slider #}
+            <div class="slider-wrapper mb-2">
+                <input
+                    type="range"
+                    name="rating"
+                    id="ratingSlider"
+                    min="0"
+                    max="100"
+                    value="50"
+                >
+            </div>
+            <div class="rating-value" id="ratingDisplay">50%</div>
+
+            {# Comment #}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Commentaire (optionnel)</label>
+                <textarea
+                    name="comment"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Partagez votre expérience..."
+                ></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">✅ Soumettre</button>
+                <a href="{{ path('community_index') }}" class="btn btn-outline-secondary w-100">Annuler</a>
+            </div>
+
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    const slider = document.getElementById('ratingSlider');
+    const display = document.getElementById('ratingDisplay');
+    const stars = document.querySelectorAll('.star');
+
+    slider.addEventListener('input', () => {
+        display.textContent = slider.value + '%';
+        updateStars(slider.value);
+    });
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            slider.value = star.dataset.value;
+            display.textContent = star.dataset.value + '%';
+            updateStars(star.dataset.value);
+        });
+    });
+
+    function updateStars(value) {
+        const filled = Math.round(value / 20);
+        stars.forEach((star, i) => {
+            star.textContent = i < filled ? '⭐' : '☆';
+        });
+    }
+</script>
+{% endblock %}

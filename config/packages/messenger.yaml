@@ -1,0 +1,35 @@
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        # Define the default bus explicitly
+        default_bus: messenger.bus.default
+
+        buses:
+            messenger.bus.default:
+                # 👇 CRITICAL: Use 'allow_no_handlers' to prevent errors if no handler exists for a message
+                # Do NOT manually list 'middleware' here unless you know exactly what you are doing.
+                default_middleware: allow_no_handlers
+
+        transports:
+            # Async transport (for production)
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+            
+            # Failed messages storage
+            failed: 'doctrine://default?queue_name=failed'
+            
+            # 👇 SYNC TRANSPORT: Handles emails immediately (Perfect for Dev!)
+            sync: 'sync://'
+
+        routing:
+            # 👇 Route emails to SYNC so they send instantly
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
+            
+            # Keep notifications async if you want (or change to sync too)
+            Symfony\Component\Notifier\Message\ChatMessage: async
+            Symfony\Component\Notifier\Message\SmsMessage: async
+
+        failure_transport: failed

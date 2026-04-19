@@ -1,0 +1,300 @@
+{# templates/user/dashboard.html.twig #}
+{% extends 'base_client.html.twig' %}
+{% block title %}Mon Dashboard - Doura Mondo{% endblock %}
+{% block page_title %}Mon Dashboard{% endblock %}
+
+{% block stylesheets %}
+<style>
+.profile-banner {
+    background: linear-gradient(135deg, #1c0404 0%, #3a0000 50%, #5C0000 100%);
+    border-radius: 18px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(92,0,0,0.22);
+}
+.profile-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+.pb-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010;
+    font-size: 1.6rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid rgba(201,168,76,0.40);
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+    overflow: hidden;
+}
+.pb-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.pb-info { position: relative; z-index: 1; flex: 1; }
+.pb-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--gold);
+    margin-bottom: .15rem;
+}
+.pb-user { font-size: .82rem; color: rgba(242,230,204,.45); margin-bottom: .4rem; }
+.pb-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: 3px 12px;
+    background: rgba(201,168,76,.12);
+    border: 1px solid rgba(201,168,76,.22);
+    border-radius: 20px;
+    font-size: .72rem; font-weight: 600;
+    color: var(--gold);
+}
+
+/* Quick cards */
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.quick-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: var(--transition);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .55rem;
+}
+.quick-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(201,168,76,.35);
+    color: var(--text-main);
+}
+.quick-card .qc-ico { font-size: 2.2rem; }
+.quick-card .qc-label {
+    font-weight: 600; font-size: .88rem;
+    color: var(--crimson-deep);
+}
+.quick-card .qc-sub { font-size: .72rem; color: var(--text-light); }
+
+/* Info card */
+.info-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+}
+.info-card h6 {
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+}
+.info-row {
+    display: flex;
+    gap: .5rem;
+    padding: .6rem 0;
+    border-bottom: 1px solid rgba(201,168,76,.06);
+    font-size: .88rem;
+}
+.info-row:last-child { border-bottom: none; }
+.info-key {
+    color: var(--text-light);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .3px;
+    width: 120px;
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+.info-val { color: var(--text-main); }
+
+/* Weather widget */
+.weather-search {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(201,168,76,0.15);
+}
+.weather-widget {
+    background: linear-gradient(135deg, #fff9e8 0%, #fff2df 100%);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# Profile banner #}
+<div class="profile-banner">
+    <div class="pb-avatar">
+        {% if user.photoProfil and user.photoProfil != 'default.jpg' %}
+            <img src="/{{ user.photoProfil }}" alt="avatar">
+        {% else %}
+            {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+        {% endif %}
+    </div>
+    <div class="pb-info">
+        <div class="pb-name">{{ user.prenom }} {{ user.nom }}</div>
+        <div class="pb-user">@{{ user.username }}</div>
+        <div class="pb-badge">✈️ Voyageur</div>
+        {% if user.averageRating > 0 %}
+            <div style="margin-top:.5rem; position:relative; z-index:1;">
+                {% for i in 1..5 %}{{ i <= user.averageRating|round ? '⭐' : '☆' }}{% endfor %}
+                <span style="color:var(--gold); font-weight:700; font-size:.85rem;">
+                    {{ user.averageRating|number_format(1) }}
+                </span>
+            </div>
+        {% endif %}
+    </div>
+    <div style="position:relative;z-index:1;text-align:right;">
+        <div style="font-size:.7rem;color:rgba(201,168,76,.35);letter-spacing:1px;">AUJOURD'HUI</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);">
+            {{ "now"|date("d M Y") }}
+        </div>
+    </div>
+</div>
+
+{# 👇 WEATHER SEARCH FORM #}
+<div class="weather-search">
+    <form method="GET" action="{{ path('user_dashboard') }}" class="d-flex gap-2">
+        <input type="text" 
+               name="weather_city" 
+               value="{{ current_city ?? 'Tunis' }}" 
+               class="form-control" 
+               placeholder="🌍 Entrez une ville (ex: Paris, New York, Dubai)...">
+        <button type="submit" class="btn btn-primary">
+            🔍 Voir Météo
+        </button>
+    </form>
+    <small class="text-muted mt-2 d-block">
+        💡 Astuce: Pour plus de précision, utilisez "Ville,Pays" (ex: Paris,FR)
+    </small>
+</div>
+
+{# 👇 WEATHER WIDGET #}
+{% if weather %}
+<div class="weather-widget">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            {# Weather Icon #}
+            <div style="font-size: 3rem;">
+                {% if weather.demo %}
+                    🌤️
+                {% else %}
+                    <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="{{ weather.description }}" width="60">
+                {% endif %}
+            </div>
+            <div>
+                <h5 class="mb-0" style="color: #5C0000; font-family: 'Cormorant Garamond', serif;">
+                    Météo à {{ weather.city }}
+                </h5>
+                <div class="text-muted small">{{ weather.description }}</div>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="display-6 fw-bold" style="color: #C9A84C;">{{ weather.temp }}°C</div>
+            <div class="small text-muted">Ressenti {{ weather.feels_like }}°C</div>
+            {% if weather.demo %}
+                <span class="badge bg-warning text-dark">🧪 Mode Démo (Données aléatoires)</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% elseif current_city %}
+<div class="alert alert-warning">
+    ❌ Impossible de récupérer la météo pour "{{ current_city }}". Veuillez vérifier le nom de la ville.
+</div>
+{% endif %}
+
+{# Quick action cards - ONLY ONE QR CODE CARD! #}
+<div class="quick-grid">
+    <a href="{{ path('user_qr_code') }}" class="quick-card">
+        <div class="qc-ico">📱</div>
+        <div class="qc-label">QR Code</div>
+        <div class="qc-sub">Ma carte de profil</div>
+    </a>
+    <a href="{{ path('app_rating') }}" class="quick-card">
+        <div class="qc-ico">⭐</div>
+        <div class="qc-label">Évaluer</div>
+        <div class="qc-sub">Notez l'application</div>
+    </a>
+    <a href="{{ path('profile') }}" class="quick-card">
+        <div class="qc-ico">👤</div>
+        <div class="qc-label">Mon Profil</div>
+        <div class="qc-sub">Modifier mes infos</div>
+    </a>
+    <a href="{{ path('community_index') }}" class="quick-card">
+        <div class="qc-ico">🌍</div>
+        <div class="qc-label">Communauté</div>
+        <div class="qc-sub">Découvrez les membres</div>
+    </a>
+</div>
+
+{# Account info #}
+<div class="info-card">
+    <h6>👤 Informations du compte</h6>
+    <div class="info-row">
+        <div class="info-key">Email</div>
+        <div class="info-val">{{ user.email }}</div>
+    </div>
+    <div class="info-row">
+        <div class="info-key">Statut</div>
+        <div class="info-val">
+            <span style="color:{{ user.statut == 'actif' ? '#059669' : '#9ca3af' }}; font-weight:600;">
+                ● {{ user.statut|capitalize }}
+            </span>
+        </div>
+    </div>
+    {% if user.dateInscription %}
+    <div class="info-row">
+        <div class="info-key">Membre depuis</div>
+        <div class="info-val">{{ user.dateInscription|date('d/m/Y') }}</div>
+    </div>
+    {% endif %}
+    {% if user.telephone %}
+    <div class="info-row">
+        <div class="info-key">Téléphone</div>
+        <div class="info-val">+216 {{ user.telephone }}</div>
+    </div>
+    {% endif %}
+    {% if user.derniereConnexion %}
+    <div class="info-row">
+        <div class="info-key">Dernière connexion</div>
+        <div class="info-val">{{ user.derniereConnexion|date('d/m/Y H:i') }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

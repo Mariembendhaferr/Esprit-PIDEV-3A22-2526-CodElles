@@ -1,0 +1,332 @@
+{# templates/admin/dashboard.html.twig #}
+{% extends 'base_admin.html.twig' %}
+{% block title %}Dashboard Admin - Doura Mondo{% endblock %}
+{% block page_title %}📊 Dashboard{% endblock %}
+
+{% block stylesheets %}
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.dash-stat {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.4rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    box-shadow: var(--shadow-card);
+}
+.dash-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+}
+.dash-stat.crimson::before  { background: linear-gradient(90deg, #5C0000, #8B0000); }
+.dash-stat.emerald::before  { background: linear-gradient(90deg, #059669, #10b981); }
+.dash-stat.gold::before     { background: linear-gradient(90deg, #C9A84C, #E8C97A); }
+.dash-stat.blue::before     { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+.dash-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+.dash-stat .ds-icon {
+    position: absolute;
+    top: 1.2rem; right: 1.2rem;
+    font-size: 1.6rem;
+    opacity: 0.14;
+}
+.dash-stat .ds-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: .3rem;
+}
+.dash-stat.crimson .ds-value { color: #5C0000; }
+.dash-stat.emerald .ds-value { color: #059669; }
+.dash-stat.gold    .ds-value { color: #C9A84C; }
+.dash-stat.blue    .ds-value { color: #2563eb; }
+
+.dash-stat .ds-label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+}
+
+.quick-actions {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+}
+.quick-actions h6 {
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--text-muted);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+.qa-btn {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .75rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-bottom: .5rem;
+    width: 100%;
+}
+.qa-btn:hover {
+    border-color: rgba(201,168,76,.4);
+    background: #FFF9EE;
+    color: var(--text-main);
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(201,168,76,.12);
+}
+.qa-btn .qa-ico {
+    font-size: 1.1rem;
+    width: 32px; height: 32px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+.qa-btn:hover .qa-ico {
+    background: rgba(201,168,76,.12);
+    transform: scale(1.12);
+}
+
+.chart-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+}
+.chart-card h6 {
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--text-muted);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #1c0404 0%, #3a0000 50%, #5C0000 100%);
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(92,0,0,0.22);
+}
+.welcome-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+.welcome-banner::after {
+    content: '🌍';
+    position: absolute;
+    right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 5rem;
+    opacity: .07;
+    pointer-events: none;
+}
+.wb-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: .2rem;
+    position: relative; z-index: 1;
+}
+.wb-sub {
+    font-size: .82rem;
+    color: rgba(242,230,204,.5);
+    position: relative; z-index: 1;
+}
+
+@media(max-width:860px) {
+    .dash-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# Welcome banner with avatar #}
+<div class="welcome-banner">
+    <div class="d-flex align-items-center gap-3">
+        {# Avatar with DiceBear support #}
+        {% if user.photoProfil and user.photoProfil != 'default.jpg' %}
+            {% if user.photoProfil starts with 'http' %}
+                <img src="{{ user.photoProfil }}" 
+                     style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,0.3);"
+                     alt="avatar">
+            {% elseif user.photoProfil starts with 'adventurer/' or user.photoProfil starts with 'bottts/' or user.photoProfil starts with 'pixel-art/' or user.photoProfil starts with 'avataaars/' %}
+                {% set parts = user.photoProfil|split('/') %}
+                <img src="https://api.dicebear.com/7.x/{{ parts[0] }}/svg?seed={{ parts[1] }}"
+                     style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:white;padding:3px;border:2px solid rgba(201,168,76,0.3);"
+                     alt="avatar">
+            {% else %}
+                <img src="/{{ user.photoProfil }}"
+                     style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(201,168,76,0.3);"
+                     alt="avatar">
+            {% endif %}
+        {% else %}
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, #C9A84C, #E8C97A);color:#2E1010;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;border:2px solid rgba(201,168,76,0.3);">
+                {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+            </div>
+        {% endif %}
+        <div>
+            <div class="wb-title">Bon retour, {{ user.prenom }} 👋</div>
+            <div class="wb-sub">{{ "now"|date("d MMMM Y") }} · Tableau de bord administrateur</div>
+        </div>
+    </div>
+    <div style="position:relative;z-index:1;font-size:.8rem;color:rgba(201,168,76,.55);">
+        {{ "now"|date("H:i") }}
+    </div>
+</div>
+
+{# Stats #}
+<div class="stats-grid">
+    <div class="dash-stat crimson">
+        <div class="ds-icon">👥</div>
+        <div class="ds-value">{{ totalUsers }}</div>
+        <div class="ds-label">Total utilisateurs</div>
+    </div>
+    <div class="dash-stat emerald">
+        <div class="ds-icon">✅</div>
+        <div class="ds-value">{{ activeUsers }}</div>
+        <div class="ds-label">Utilisateurs actifs</div>
+    </div>
+    <div class="dash-stat gold">
+        <div class="ds-icon">✈️</div>
+        <div class="ds-value">124</div>
+        <div class="ds-label">Total voyages</div>
+    </div>
+    <div class="dash-stat blue">
+        <div class="ds-icon">🎯</div>
+        <div class="ds-value">48</div>
+        <div class="ds-label">Offres actives</div>
+    </div>
+</div>
+
+{# Lower grid #}
+<div class="dash-grid">
+
+    {# Quick actions #}
+    <div class="quick-actions">
+        <h6>⚡ Actions rapides</h6>
+        <a href="{{ path('admin_users') }}" class="qa-btn">
+            <div class="qa-ico">👥</div>
+            <div>Gérer les utilisateurs</div>
+        </a>
+        <a href="{{ path('admin_statistics') }}" class="qa-btn">
+            <div class="qa-ico">📈</div>
+            <div>Voir les statistiques</div>
+        </a>
+        <a href="{{ path('community_index') }}" class="qa-btn">
+            <div class="qa-ico">🌍</div>
+            <div>Voir la communauté</div>
+        </a>
+        <a href="{{ path('admin_user_add') }}" class="qa-btn">
+            <div class="qa-ico">➕</div>
+            <div>Ajouter un utilisateur</div>
+        </a>
+    </div>
+
+    {# Chart #}
+    <div class="chart-card">
+        <h6>📊 Inscriptions — 7 derniers jours</h6>
+        <canvas id="dashChart" height="120"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('dashChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [{
+            label: 'Inscriptions',
+            data: [3, 7, 4, 9, 5, 8, 6],
+            borderColor: '#C9A84C',
+            backgroundColor: 'rgba(201,168,76,0.07)',
+            pointBackgroundColor: '#C9A84C',
+            pointBorderColor: '#fff',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2.5,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1c0404',
+                titleColor: '#C9A84C',
+                bodyColor: '#F2E6CC',
+                borderColor: 'rgba(201,168,76,0.28)',
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 10,
+            }
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(201,168,76,0.06)' },
+                ticks: { color: '#A89080', font: { size: 11 } }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(201,168,76,0.06)' },
+                ticks: { color: '#A89080', font: { size: 11 }, stepSize: 2 }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

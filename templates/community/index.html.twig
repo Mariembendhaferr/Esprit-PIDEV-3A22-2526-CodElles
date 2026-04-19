@@ -1,0 +1,274 @@
+{% extends 'base_client.html.twig' %}
+{% import 'macros.html.twig' as m %}
+
+{% block title %}Communauté{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .community-header {
+        background: linear-gradient(135deg, #2E1010 0%, #5C0000 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+    }
+    .stat-badge {
+        background: rgba(255,255,255,0.15);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        text-align: center;
+    }
+    .stat-badge .value { font-size: 1.8rem; font-weight: 700; }
+    .stat-badge .label { font-size: 0.8rem; opacity: 0.8; }
+    .user-card {
+        background: #FDFCF9;
+        border: 1px solid rgba(201,168,76,0.15);
+        border-radius: 16px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+    }
+    .user-card:hover {
+        background: #FFF9EE;
+        border-color: rgba(201,168,76,0.4);
+        box-shadow: 0 4px 12px rgba(201,168,76,0.15);
+    }
+    .role-badge {
+        font-size: 0.7rem;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+    .status-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+    .search-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+    .results-label {
+        color: #9A8060;
+        font-style: italic;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    {# Header #}
+    <div class="community-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">🌍 Communauté</h2>
+                <p class="mb-0 opacity-75">Découvrez les membres de la plateforme</p>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="stat-badge">
+                    <div class="value">{{ totalCount }}</div>
+                    <div class="label">Membres</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="value">{{ activeCount }}</div>
+                    <div class="label">Actifs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Search & Filter #}
+    <div class="search-bar">
+        <form method="GET" action="{{ path('community_index') }}" id="searchForm">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <input type="text" name="search" value="{{ search }}"
+                           class="form-control" id="searchInput"
+                           placeholder="🔍 Rechercher par nom, email, username...">
+                </div>
+                <div class="col-md-4">
+                    <select name="filter" class="form-select" id="filterSelect">
+                        {% for f in filters %}
+                            <option value="{{ f }}" {% if f == filter %}selected{% endif %}>
+                                {{ f }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                    <a href="{{ path('community_index') }}" class="btn btn-outline-secondary w-100">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {# Results label #}
+    <div class="results-label" id="resultsLabel">
+        {% if search %}
+            {{ totalCount }} résultat{{ totalCount > 1 ? 's' : '' }} pour "{{ search }}"
+        {% elseif filter != 'Tous les membres' %}
+            {{ totalCount }} membre{{ totalCount > 1 ? 's' : '' }} — {{ filter }}
+        {% else %}
+            Membres de la communauté ({{ totalCount }})
+        {% endif %}
+    </div>
+
+    {# User list #}
+    <div id="userListContainer">
+        {% if users is empty %}
+            <div class="text-center py-5 text-muted fst-italic">
+                Aucun membre trouvé
+            </div>
+        {% else %}
+            {% for user in users %}
+                {% set isAdmin  = user.role   == 'admin' %}
+                {% set isActive = user.statut == 'actif'  %}
+
+                <div class="user-card" data-user-card>
+                    {# ── Avatar using macro ── #}
+                    {{ m.photo(user.photoProfil, user.prenom, user.nom, 48) }}
+
+                    {# ── Info ── #}
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <strong>{{ user.prenom }} {{ user.nom }}</strong>
+                            <span class="role-badge"
+                                  style="background:{{ isAdmin ? 'rgba(92,0,0,0.08)' : 'rgba(201,168,76,0.15)' }};
+                                         color:{{ isAdmin ? '#5C0000' : '#7A6030' }};">
+                                {{ isAdmin ? '👑 Admin' : '✈️ Voyageur' }}
+                            </span>
+                        </div>
+                        <div class="text-muted small">
+                            @{{ user.username }} · {{ user.email }}
+                        </div>
+                        {% if user.dateInscription %}
+                            <div class="text-muted" style="font-size:0.8rem;font-style:italic;">
+                                📅 Inscrit le {{ user.dateInscription|ago }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Right: rating + status ── #}
+                    <div class="text-end" style="flex-shrink:0;">
+                        {% if user.averageRating > 0 %}
+                            <div class="mb-1">
+                                {% for i in 1..5 %}
+                                    {{ i <= user.averageRating|round ? '⭐' : '☆' }}
+                                {% endfor %}
+                                <span class="fw-bold" style="color:#C9A84C;">
+                                    {{ user.averageRating|number_format(1) }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="status-dot"
+                                  style="background:{{ isActive ? '#4CAF50' : '#BDBDBD' }};"></span>
+                            <span style="color:{{ isActive ? '#4CAF50' : '#BDBDBD' }};
+                                         font-size:0.85rem;font-weight:600;">
+                                {{ isActive ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </div>
+                        {% if user.idUser != app.session.get('user_id') %}
+                        <div class="mt-2">
+                            <a href="{{ path('rate_user', {id: user.idUser}) }}"
+                               class="btn btn-sm"
+                               style="background:rgba(201,168,76,0.12);
+                                      color:#7A6030;border:1px solid rgba(201,168,76,0.25);
+                                      border-radius:20px;font-size:0.75rem;padding:2px 10px;">
+                                ⭐ Évaluer
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Debounce function to limit filter calls
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Dynamic client-side search for community page
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterSelect = document.getElementById('filterSelect');
+    const userCards = document.querySelectorAll('[data-user-card]');
+    const resultsLabel = document.getElementById('resultsLabel');
+    const noResultsMsg = document.querySelector('.text-center.py-5.text-muted.fst-italic');
+
+    if (!searchInput || !filterSelect) return;
+
+    const filterUsers = debounce(function() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const filterValue = filterSelect.value;
+
+        let visibleCount = 0;
+
+        userCards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+            
+            // Add simple filter logic here (you can expand this)
+            let matchesFilter = true;
+            if (filterValue === 'Actifs uniquement') {
+                matchesFilter = card.querySelector('.status-dot')?.style.backgroundColor.includes('4CAF50') || false;
+            } else if (filterValue === 'Inactifs uniquement') {
+                matchesFilter = card.querySelector('.status-dot')?.style.backgroundColor.includes('BDBDBD') || false;
+            } else if (filterValue === 'Voyageurs') {
+                matchesFilter = card.querySelector('.role-badge')?.textContent.includes('Voyageur') || false;
+            } else if (filterValue === 'Administrateurs') {
+                matchesFilter = card.querySelector('.role-badge')?.textContent.includes('Admin') || false;
+            }
+            // Add more filter cases as needed
+
+            card.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+            if (matchesSearch && matchesFilter) visibleCount++;
+        });
+
+        // Update results label
+        if (resultsLabel) {
+            if (searchTerm !== '') {
+                resultsLabel.textContent = `${visibleCount} résultat${visibleCount > 1 ? 's' : ''} pour "${searchTerm}"`;
+            } else if (filterValue !== 'Tous les membres') {
+                resultsLabel.textContent = `${visibleCount} membre${visibleCount > 1 ? 's' : ''} — ${filterValue}`;
+            } else {
+                resultsLabel.textContent = `Membres de la communauté (${visibleCount})`;
+            }
+        }
+
+        // Show/hide "no results" message
+        if (noResultsMsg) {
+            noResultsMsg.style.display = visibleCount === 0 ? '' : 'none';
+        }
+    }, 300); // 300ms debounce
+
+    searchInput.addEventListener('input', filterUsers);
+    filterSelect.addEventListener('change', filterUsers);
+});
+</script>
+{% endblock %}

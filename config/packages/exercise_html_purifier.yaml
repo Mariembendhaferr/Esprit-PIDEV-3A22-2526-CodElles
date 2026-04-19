@@ -1,0 +1,15 @@
+# config/packages/exercice_html_purifier.yaml
+exercise_html_purifier:
+    default_cache_serializer_path: '%kernel.cache_dir%/htmlpurifier'
+
+    html_profiles:
+        default:
+            config:
+                Core.Encoding: 'UTF-8'
+                # Allow safe HTML tags for user content (bios, reviews, etc.)
+                HTML.Allowed: 'p,br,strong,em,u,ul,ol,li,a[href|title|target],img[src|alt|title],span[class]'
+                Attr.AllowedFrameTargets: '_blank'
+                HTML.TargetBlank: true
+                # Safe iframes for YouTube/Vimeo (regex escaped for Symfony YAML)
+                HTML.SafeIframe: true
+                URI.SafeIframeRegexp: '%%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/)%%'

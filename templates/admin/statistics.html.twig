@@ -1,0 +1,206 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Statistiques Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-top: 4px solid #4f46e5;
+    }
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4f46e5;
+    }
+    .stat-card .label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .chart-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .chart-card h5 {
+        margin-bottom: 1rem;
+        color: #374151;
+        font-weight: 600;
+    }
+    .export-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .btn-export {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.2s;
+    }
+    .btn-export:hover { opacity: 0.85; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    {# Header #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">📊 Statistiques Utilisateurs</h2>
+        <a href="{{ path('admin_statistics') }}" class="btn btn-outline-primary">
+            🔄 Actualiser
+        </a>
+    </div>
+
+    {# Stats Cards #}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value">{{ stats.total }}</div>
+            <div class="label">Total utilisateurs</div>
+        </div>
+        <div class="stat-card" style="border-color: #10b981;">
+            <div class="value" style="color: #10b981;">{{ stats.active }}</div>
+            <div class="label">Actifs</div>
+        </div>
+        <div class="stat-card" style="border-color: #ef4444;">
+            <div class="value" style="color: #ef4444;">{{ stats.inactive }}</div>
+            <div class="label">Inactifs</div>
+        </div>
+        <div class="stat-card" style="border-color: #f59e0b;">
+            <div class="value" style="color: #f59e0b;">{{ stats.admins }}</div>
+            <div class="label">Administrateurs</div>
+        </div>
+        <div class="stat-card" style="border-color: #3b82f6;">
+            <div class="value" style="color: #3b82f6;">{{ stats.voyageurs }}</div>
+            <div class="label">Voyageurs</div>
+        </div>
+        <div class="stat-card" style="border-color: #8b5cf6;">
+            <div class="value" style="color: #8b5cf6;">{{ stats.monthly }}</div>
+            <div class="label">Nouveaux ce mois</div>
+        </div>
+        <div class="stat-card" style="border-color: #ec4899;">
+            <div class="value" style="color: #ec4899;">{{ stats.weekly }}</div>
+            <div class="label">Nouveaux cette semaine</div>
+        </div>
+    </div>
+
+    {# Charts #}
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h5>Statut des utilisateurs</h5>
+            <canvas id="statutChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h5>Rôles des utilisateurs</h5>
+            <canvas id="roleChart"></canvas>
+        </div>
+        <div class="chart-card" style="grid-column: span 2;">
+            <h5>Inscriptions (7 derniers jours)</h5>
+            <canvas id="registrationChart"></canvas>
+        </div>
+    </div>
+
+    {# Export Buttons #}
+    <div class="chart-card">
+        <h5 class="mb-3">📥 Exporter les données</h5>
+        <div class="export-grid">
+            <a href="{{ path('admin_statistics_export', {type: 'active'}) }}" class="btn-export btn btn-success">
+                ✅ Utilisateurs actifs
+            </a>
+            <a href="{{ path('admin_statistics_export', {type: 'inactive'}) }}" class="btn-export btn btn-danger">
+                ❌ Utilisateurs inactifs
+            </a>
+            <a href="{{ path('admin_statistics_export', {type: 'admin'}) }}" class="btn-export btn btn-warning">
+                👑 Administrateurs
+            </a>
+            <a href="{{ path('admin_statistics_export', {type: 'voyageur'}) }}" class="btn-export btn btn-info">
+                ✈️ Voyageurs
+            </a>
+            <a href="{{ path('admin_statistics_export', {type: 'monthly'}) }}" class="btn-export btn btn-primary">
+                📅 Nouveaux ce mois
+            </a>
+            <a href="{{ path('admin_statistics_export', {type: 'weekly'}) }}" class="btn-export btn btn-secondary">
+                📆 Nouveaux cette semaine
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Statut Pie Chart
+    new Chart(document.getElementById('statutChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Actifs', 'Inactifs'],
+            datasets: [{
+                data: [{{ stats.active }}, {{ stats.inactive }}],
+                backgroundColor: ['#10b981', '#ef4444']
+            }]
+        }
+    });
+
+    // Role Pie Chart
+    new Chart(document.getElementById('roleChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Administrateurs', 'Voyageurs'],
+            datasets: [{
+                data: [{{ stats.admins }}, {{ stats.voyageurs }}],
+                backgroundColor: ['#f59e0b', '#3b82f6']
+            }]
+        }
+    });
+// Registration Bar Chart
+    {% set reg_labels = [] %}
+    {% set reg_data = [] %}
+    {% for date, count in registrations %}
+        {% set reg_labels = reg_labels|merge([date]) %}
+        {% set reg_data = reg_data|merge([count]) %}
+    {% endfor %}
+
+    new Chart(document.getElementById('registrationChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ reg_labels|json_encode|raw }},
+            datasets: [{
+                label: 'Inscriptions',
+                data: {{ reg_data|json_encode|raw }},
+                backgroundColor: '#4f46e5'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+</script>
+{% endblock %}

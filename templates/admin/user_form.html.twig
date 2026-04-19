@@ -1,0 +1,223 @@
+{% extends 'base_admin.html.twig' %}
+{% block title %}{{ isEdit ? 'Modifier' : 'Ajouter' }} un utilisateur{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .form-card { max-width: 700px; margin: 0 auto; }
+    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 2px; display: block; }
+    .duplicate-alert {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .duplicate-alert strong {
+        color: #856404;
+    }
+    .btn-warning-custom {
+        background-color: #ffc107;
+        border: none;
+        color: #856404;
+        font-weight: 600;
+    }
+    .btn-warning-custom:hover {
+        background-color: #e0a800;
+        color: #856404;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="topbar">
+    <h1>{{ isEdit ? '✏️ Modifier' : '➕ Ajouter' }} un utilisateur</h1>
+    <a href="{{ path('admin_users') }}" class="btn btn-outline-secondary">← Retour</a>
+</div>
+
+<div class="form-card">
+    <div class="card p-4">
+        <form method="POST"
+              action="{{ isEdit ? path('admin_user_edit', {id: user.idUser}) : path('admin_user_add') }}"
+              enctype="multipart/form-data"
+              id="userForm">
+
+            {# Display duplicate warning if exists (only for ADD, not EDIT) #}
+            {% if duplicateWarning is defined and duplicateWarning and not isEdit %}
+            <div class="duplicate-alert">
+                <strong>⚠️ ATTENTION - DOUBLON DÉTECTÉ !</strong><br>
+                {{ duplicateWarning|raw }}
+                <hr style="margin: 10px 0;">
+                <p style="margin-bottom: 10px;"><strong>Voulez-vous vraiment créer cet utilisateur quand même ?</strong></p>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="force" value="1" class="btn btn-warning-custom">
+                        ⚠️ Oui, créer quand même (doublon)
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='{{ path('admin_users') }}'">
+                        ❌ Non, annuler
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Display validation errors if any #}
+            {% if errors is defined and errors|length > 0 %}
+            <div class="alert alert-danger">
+                <strong>❌ Veuillez corriger les erreurs suivantes :</strong>
+                <ul class="mb-0 mt-2">
+                    {% for field, error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                {# 👇 LIMITED EDIT MODE: Show read-only fields for edit action #}
+                {% if isEdit and limitedEdit|default(false) %}
+                    {# Nom - READ ONLY #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom</label>
+                        <input type="text" class="form-control" value="{{ user.nom }}" disabled style="background:#f8f9fa;cursor:not-allowed;">
+                        <input type="hidden" name="nom" value="{{ user.nom }}">
+                    </div>
+                    {# Prénom - READ ONLY #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom</label>
+                        <input type="text" class="form-control" value="{{ user.prenom }}" disabled style="background:#f8f9fa;cursor:not-allowed;">
+                        <input type="hidden" name="prenom" value="{{ user.prenom }}">
+                    </div>
+                    {# Username - READ ONLY #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled style="background:#f8f9fa;cursor:not-allowed;">
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                    </div>
+                    {# Email - READ ONLY #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled style="background:#f8f9fa;cursor:not-allowed;">
+                        <input type="hidden" name="email" value="{{ user.email }}">
+                    </div>
+                    {# Téléphone - READ ONLY #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Téléphone</label>
+                        <input type="text" class="form-control" value="{{ user.telephone ?? '' }}" disabled style="background:#f8f9fa;cursor:not-allowed;">
+                        <input type="hidden" name="telephone" value="{{ user.telephone ?? '' }}">
+                    </div>
+                    {# Password - HIDDEN in limited edit #}
+                    {# Photo - HIDDEN in limited edit #}
+                {% else %}
+                    {# 👇 NORMAL MODE: Show editable fields for ADD or full EDIT #}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom *</label>
+                        <input type="text" name="nom" class="form-control"
+                               value="{{ isEdit ? user.nom : (old.nom ?? '') }}">
+                        {% if errors.nom is defined %}
+                            <span class="error-msg">{{ errors.nom }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom *</label>
+                        <input type="text" name="prenom" class="form-control"
+                               value="{{ isEdit ? user.prenom : (old.prenom ?? '') }}">
+                        {% if errors.prenom is defined %}
+                            <span class="error-msg">{{ errors.prenom }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username *</label>
+                        <input type="text" name="username" class="form-control"
+                               value="{{ isEdit ? user.username : (old.username ?? '') }}">
+                        {% if errors.username is defined %}
+                            <span class="error-msg">{{ errors.username }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email *</label>
+                        <input type="text" name="email" class="form-control"
+                               value="{{ isEdit ? user.email : (old.email ?? '') }}">
+                        {% if errors.email is defined %}
+                            <span class="error-msg">{{ errors.email }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Téléphone</label>
+                        <input type="text" name="telephone" class="form-control"
+                               value="{{ isEdit ? user.telephone : (old.phone ?? '') }}"
+                               placeholder="8 chiffres">
+                        {% if errors.telephone is defined %}
+                            <span class="error-msg">{{ errors.telephone }}</span>
+                        {% endif %}
+                    </div>
+                    {% if not isEdit %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mot de passe *</label>
+                            <input type="password" name="password" class="form-control"
+                                   placeholder="Min 6 caractères">
+                            {% if errors.password is defined %}
+                                <span class="error-msg">{{ errors.password }}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {# 👇 Role - ALWAYS EDITABLE #}
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Rôle</label>
+                    <select name="role" class="form-select">
+                        <option value="voyageur" {{ (isEdit ? user.role : (old.role ?? '')) == 'voyageur' ? 'selected' : '' }}>✈️ Voyageur</option>
+                        <option value="admin"    {{ (isEdit ? user.role : (old.role ?? '')) == 'admin'    ? 'selected' : '' }}>👑 Admin</option>
+                    </select>
+                </div>
+
+                {# 👇 Statut - ALWAYS EDITABLE #}
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Statut</label>
+                    <select name="statut" class="form-select">
+                        <option value="actif"   {{ (isEdit ? user.statut : (old.statut ?? '')) == 'actif'   ? 'selected' : '' }}>✓ Actif</option>
+                        <option value="inactif" {{ (isEdit ? user.statut : (old.statut ?? '')) == 'inactif' ? 'selected' : '' }}>✗ Inactif</option>
+                    </select>
+                </div>
+
+                {# 👇 Photo upload - ONLY for ADD or full EDIT (not limited) #}
+                {% if not (isEdit and limitedEdit|default(false)) %}
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Photo de profil</label>
+                    {% if isEdit and user.photoProfil %}
+                        <div class="mb-2">
+                            <img src="/{{ user.photoProfil }}"
+                                 style="width:60px;height:60px;border-radius:50%;object-fit:cover;">
+                        </div>
+                    {% endif %}
+                    <input type="file" name="photo" class="form-control" accept="image/*">
+                </div>
+                {% endif %}
+            </div>
+
+            {# Only show normal submit button if there's no duplicate warning #}
+            {% if not (duplicateWarning is defined and duplicateWarning and not isEdit) %}
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    {{ isEdit ? '💾 Modifier' : '➕ Ajouter' }}
+                </button>
+                <a href="{{ path('admin_users') }}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-hide alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

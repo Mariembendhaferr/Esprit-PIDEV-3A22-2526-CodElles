@@ -1,0 +1,176 @@
+{# templates/user/qr_code.html.twig #}
+{% extends 'base_client.html.twig' %}
+{% block title %}Mon QR Code - Doura Mondo{% endblock %}
+{% block page_title %}📱 Mon QR Code{% endblock %}
+
+{% block stylesheets %}
+<style>
+.qr-card {
+    max-width: 450px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(92,0,0,0.12);
+    text-align: center;
+}
+.qr-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #5C0000;
+    margin-bottom: 1rem;
+}
+.qr-subtitle {
+    color: #7A6050;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+.qr-container {
+    border: 4px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 1rem;
+    background: white;
+    margin: 1.5rem 0;
+    display: inline-block;
+}
+#qrcode {
+    margin: 0 auto;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #fff9e8 0%, #fff2df 100%);
+    border-radius: 16px;
+    margin: 1.5rem 0;
+}
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.btn-download {
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010 !important;
+    padding: 12px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 1rem;
+    transition: transform 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-download:hover {
+    transform: translateY(-2px);
+    color: #2E1010 !important;
+}
+.instructions {
+    background: #f8f7f4;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    text-align: left;
+}
+.instructions h4 {
+    color: #5C0000;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+.instructions ol {
+    color: #4a5568;
+    line-height: 1.8;
+    padding-left: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="qr-card">
+    <h2 class="qr-title">📱 Ton QR Code Personnel</h2>
+    <p class="qr-subtitle">Partage-le pour que les autres voyageurs puissent te découvrir!</p>
+    
+    <div class="user-info">
+        <div class="user-avatar">
+            {% if user.photoProfil %}
+                <img src="/{{ user.photoProfil }}" alt="{{ user.prenom }}">
+            {% else %}
+                {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+            {% endif %}
+        </div>
+        <div style="text-align: left;">
+            <div style="font-weight: 700; color: #5C0000;">{{ user.prenom }} {{ user.nom }}</div>
+            <div style="color: #7A6050; font-size: 0.85rem;">@{{ user.username }}</div>
+        </div>
+    </div>
+    
+    <div class="qr-container">
+        <div id="qrcode"></div>
+    </div>
+    
+    <button class="btn-download" onclick="downloadQR()">
+        💾 Télécharger mon QR Code
+    </button>
+    
+    <div class="instructions">
+        <h4>🎯 Comment ça marche ?</h4>
+        <ol>
+            <li>Partage ton QR code avec d'autres voyageurs</li>
+            <li>Ils le scannent avec leur téléphone</li>
+            <li>Ils voient ton profil public Doura Mondo</li>
+            <li>Vous pouvez vous connecter et voyager ensemble! ✈️</li>
+        </ol>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ path('user_dashboard') }}" class="btn btn-outline-secondary">
+            ← Retour au dashboard
+        </a>
+    </div>
+</div>
+
+{# QR Code Library - CDN #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Generate QR code using qrcode.js
+    const profileUrl = '{{ url('public_profile', {username: user.username}) }}';
+    
+    new QRCode(document.getElementById('qrcode'), {
+        text: profileUrl,
+        width: 256,
+        height: 256,
+        colorDark: '#5C0000',  // Your brand color
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+});
+
+function downloadQR() {
+    const qrCanvas = document.querySelector('#qrcode canvas');
+    if (qrCanvas) {
+        const link = document.createElement('a');
+        link.download = 'mon-qr-code-doura-mondo.png';
+        link.href = qrCanvas.toDataURL('image/png');
+        link.click();
+    }
+}
+</script>
+{% endblock %}
