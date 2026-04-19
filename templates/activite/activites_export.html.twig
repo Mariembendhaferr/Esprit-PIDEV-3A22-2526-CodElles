@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export Activités</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.4; }
+        .header { 
+            background-color: #8B0000; 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header p { font-size: 12px; opacity: 0.9; }
+        .filters {
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 11px;
+            border-left: 3px solid #C9A84C;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        thead {
+            background-color: #3D0000;
+            color: white;
+        }
+        th {
+            padding: 10px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 8px;
+            font-size: 10px;
+            border: 1px solid #ddd;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tbody tr:hover {
+            background-color: #f0e8e0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+        .price { color: #8B0000; font-weight: bold; }
+        .available { color: #43A047; }
+        .unavailable { color: #E53935; }
+        .suppliers { font-size: 9px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Export Activités - Doura Mondo</h1>
+        <p>Généré le {{ generatedAt|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    {% if filters.search or filters.categorie or filters.sortPrix %}
+    <div class="filters">
+        <strong>Filtres appliqués :</strong>
+        {% if filters.search %}<span>Recherche: "<strong>{{ filters.search }}</strong>"</span> | {% endif %}
+        {% if filters.categorie %}<span>Catégorie: <strong>{{ filters.categorie }}</strong></span> | {% endif %}
+        {% if filters.sortPrix %}<span>Tri prix: <strong>{{ filters.sortPrix == 'asc' ? 'Croissant' : 'Décroissant' }}</strong></span>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if activites|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Prix (DT)</th>
+                <th>Durée (min)</th>
+                <th>Destination</th>
+                <th>Fournisseurs</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activite in activites %}
+            <tr>
+                <td><strong>{{ activite.nomActivite }}</strong></td>
+                <td>{{ activite.categorieActivite }}</td>
+                <td class="price">{{ activite.coutActivite }}</td>
+                <td>{{ activite.dureeActivite }}</td>
+                <td>{{ activite.localisationActivite ?? '—' }}</td>
+                <td class="suppliers">
+                    {% if activite.fournisseurs|length > 0 %}
+                        {% for f in activite.fournisseurs %}
+                            • {{ f.nomFournisseur }}<br>
+                        {% endfor %}
+                    {% else %}
+                        <em>Aucun</em>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activite.disponibiliteActivite %}
+                        <span class="available">✓ Disponible</span>
+                    {% else %}
+                        <span class="unavailable">✗ Indisponible</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p><strong>Total:</strong> {{ activites|length }} activité(s) | <strong>Doura Mondo</strong> © 2026</p>
+    </div>
+
+    {% else %}
+    <div class="no-data">
+        <p>❌ Aucune activité ne correspond à vos critères de recherche.</p>
+    </div>
+    {% endif %}
+</body>
+</html>
