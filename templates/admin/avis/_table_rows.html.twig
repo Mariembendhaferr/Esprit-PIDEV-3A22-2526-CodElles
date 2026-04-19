@@ -1,5 +1,8 @@
 {% for avis in avis_list %}
-    <tr>
+    <tr data-historique-row="1"
+        data-auteur-prenom="{{ avis.user.prenom|e('html_attr') }}"
+        data-auteur-nom="{{ avis.user.nom|e('html_attr') }}"
+        data-date-ajout="{{ avis.dateAvis ? avis.dateAvis|date('d/m/Y H:i') : '—' }}">
         <td data-label="Date">{{ avis.dateAvis ? avis.dateAvis|date('d/m/Y H:i') : '—' }}</td>
         <td data-label="Voyageur">{{ avis.user.prenom }} {{ avis.user.nom }}</td>
         <td data-label="Activité">{{ avis.activite.nomActivite }}</td>

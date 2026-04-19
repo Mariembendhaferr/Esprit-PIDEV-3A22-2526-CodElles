@@ -4,8 +4,168 @@
 {% block admin_heading %}Tableau de bord{% endblock %}
 
 {% block admin_body %}
-<p class="admin-page-heading">Vue d’ensemble</p>
-<div class="admin-card">
-    <p>Bienvenue dans l’espace d’administration Doura Mondo. Les statistiques et raccourcis seront ajoutés ici.</p>
+<p class="admin-page-heading">Vue d’ensemble analytique</p>
+
+<div class="admin-kpis-grid">
+    <article class="admin-kpi-card">
+        <p class="admin-kpi-label">Avis total</p>
+        <p class="admin-kpi-value">{{ avis_total }}</p>
+    </article>
+    <article class="admin-kpi-card">
+        <p class="admin-kpi-label">Réclamations</p>
+        <p class="admin-kpi-value">{{ reclamation_total }}</p>
+    </article>
+    <article class="admin-kpi-card">
+        <p class="admin-kpi-label">Réponses admin</p>
+        <p class="admin-kpi-value">{{ response_total }}</p>
+    </article>
+    <article class="admin-kpi-card">
+        <p class="admin-kpi-label">Taux de réponse</p>
+        <p class="admin-kpi-value">{{ response_rate|number_format(1, '.', ' ') }}%</p>
+    </article>
 </div>
+
+<div class="admin-dashboard-grid">
+    <section class="admin-card admin-analytics-card">
+        <h3 class="admin-analytics-title">Sentiment global des avis</h3>
+        <div class="admin-sentiment-row">
+            <div class="admin-sentiment-pill admin-sentiment-pill--positive">Positifs: {{ sentiment.positive }}</div>
+            <div class="admin-sentiment-pill admin-sentiment-pill--neutral">Neutres: {{ sentiment.neutral }}</div>
+            <div class="admin-sentiment-pill admin-sentiment-pill--negative">Négatifs: {{ sentiment.negative }}</div>
+        </div>
+        <div class="admin-chart-wrap"><canvas id="chart-sentiment" height="190"></canvas></div>
+        <p class="admin-analytics-sub">
+            Score moyen:
+            <strong>{{ sentiment.avg|number_format(3, '.', ' ') }}</strong>
+            <span class="text-muted">({{ sentiment.scored }} avis analysés)</span>
+        </p>
+    </section>
+
+    <section class="admin-card admin-analytics-card">
+        <h3 class="admin-analytics-title">Statut des réclamations</h3>
+        <div class="admin-chart-wrap"><canvas id="chart-status" height="220"></canvas></div>
+    </section>
+
+    <section class="admin-card admin-analytics-card">
+        <h3 class="admin-analytics-title">Répartition des notes (avis)</h3>
+        <div class="admin-chart-wrap"><canvas id="chart-notes" height="220"></canvas></div>
+    </section>
+
+    <section class="admin-card admin-analytics-card">
+        <h3 class="admin-analytics-title">Avis les plus négatifs</h3>
+        {% if worst_avis is empty %}
+            <p class="text-muted mb-0">Aucun avis analysé pour le moment.</p>
+        {% else %}
+            <ul class="admin-worst-list">
+                {% for row in worst_avis %}
+                    <li>
+                        <div class="admin-worst-head">
+                            <strong>{{ row.avis.user.prenom }} {{ row.avis.user.nom }}</strong>
+                            <span class="admin-worst-score">{{ row.score|number_format(3, '.', ' ') }}</span>
+                        </div>
+                        <p class="mb-0">{{ row.avis.commentaire|length > 140 ? row.avis.commentaire|slice(0, 140) ~ '…' : row.avis.commentaire }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.admin-kpis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+.admin-kpi-card{background:#fff;border:1px solid rgba(139,44,44,.1);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(63,44,36,.05)}
+.admin-kpi-label{margin:0;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:#9b7240;font-weight:600}
+.admin-kpi-value{margin:6px 0 0;font-family:'Cinzel',serif;font-size:1.5rem;color:#6b1e1e}
+.admin-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.admin-analytics-card{padding:16px 18px}
+.admin-analytics-title{margin:0 0 12px;font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.08em;text-transform:uppercase;color:#6b1e1e}
+.admin-analytics-sub{margin:10px 0 0;font-size:.86rem}
+.admin-sentiment-row{display:flex;gap:8px;flex-wrap:wrap}
+.admin-sentiment-pill{padding:6px 10px;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.04em}
+.admin-sentiment-pill--positive{background:rgba(76,140,90,.14);color:#2d5a36}
+.admin-sentiment-pill--neutral{background:rgba(100,100,100,.12);color:#555}
+.admin-sentiment-pill--negative{background:rgba(139,44,44,.14);color:#8b2c2c}
+.admin-bars-wrap{display:flex;flex-direction:column;gap:10px}
+.admin-bar-meta{display:flex;justify-content:space-between;font-size:.78rem;color:#4a3d36;margin-bottom:4px}
+.admin-bar-track{height:10px;background:#f3ece4;border-radius:999px;overflow:hidden}
+.admin-bar-fill{height:100%;background:linear-gradient(135deg,#8b2c2c,#6b1e1e)}
+.admin-bar-fill--gold{background:linear-gradient(135deg,#c4a574,#9b7240)}
+.admin-worst-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.admin-worst-list li{border:1px solid rgba(139,44,44,.12);border-radius:10px;padding:10px 12px;background:#fffaf6}
+.admin-worst-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:.82rem}
+.admin-worst-score{font-family:monospace;color:#8b2c2c}
+.admin-chart-wrap{margin-top:12px;padding:10px;border:1px solid rgba(139,44,44,.09);border-radius:12px;background:#fff}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    if (typeof Chart === 'undefined') return;
+    var charts = {{ charts|json_encode|raw }};
+
+    var sentimentCtx = document.getElementById('chart-sentiment');
+    if (sentimentCtx) {
+        new Chart(sentimentCtx, {
+            type: 'pie',
+            data: {
+                labels: charts.sentiment_labels,
+                datasets: [{
+                    data: charts.sentiment_values,
+                    backgroundColor: ['#4c8c5a', '#8a8a8a', '#8b2c2c'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    var statusCtx = document.getElementById('chart-status');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: charts.status_labels,
+                datasets: [{
+                    data: charts.status_values,
+                    backgroundColor: ['#9b7240', '#8b2c2c', '#4c8c5a'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                cutout: '58%',
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    var notesCtx = document.getElementById('chart-notes');
+    if (notesCtx) {
+        new Chart(notesCtx, {
+            type: 'bar',
+            data: {
+                labels: charts.note_labels,
+                datasets: [{
+                    label: 'Nombre d’avis',
+                    data: charts.note_values,
+                    backgroundColor: '#9b7240'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

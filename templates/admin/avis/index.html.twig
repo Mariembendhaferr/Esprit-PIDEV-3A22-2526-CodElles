@@ -6,7 +6,51 @@
 {% block admin_body %}
 <div class="admin-crud-head">
     <p class="admin-crud-title mb-0">Liste des avis laissés sur les activités</p>
-    <a href="{{ path('app_admin_avis_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvel avis</a>
+    <div class="admin-crud-head-actions">
+        <button type="button" class="admin-btn-primary" data-bs-toggle="modal" data-bs-target="#modalHistoriqueAvis" id="btn-historique-avis">
+            <i class="fas fa-history" aria-hidden="true"></i> Historique
+        </button>
+        <a href="{{ path('app_admin_avis_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvel avis</a>
+    </div>
+</div>
+
+<div class="modal fade admin-historique-root" id="modalHistoriqueAvis" tabindex="-1" aria-labelledby="modalHistoriqueAvisLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable admin-modal-dialog">
+        <div class="modal-content admin-modal-card">
+            <div class="modal-header admin-modal-card__header">
+                <div class="admin-modal-card__title-row">
+                    <span class="admin-modal-card__icon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                    <div>
+                        <h2 class="admin-modal-card__heading" id="modalHistoriqueAvisLabel">Historique des ajouts</h2>
+                        <p class="admin-modal-card__subheading">Avis clients — auteur &amp; date</p>
+                    </div>
+                </div>
+                <button type="button" class="admin-modal-card__close" data-bs-dismiss="modal" aria-label="Fermer">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body admin-modal-card__body">
+                <p class="admin-modal-card__notice"><i class="fas fa-info-circle" aria-hidden="true"></i> Entrées correspondant aux <strong>filtres actuels</strong> de la liste.</p>
+                <div class="admin-historique-table-shell">
+                    <div class="table-responsive">
+                        <table class="admin-historique-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Prénom</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col">Date d’ajout</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-historique-avis-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer admin-modal-card__footer">
+                <button type="button" class="admin-btn-primary admin-modal-card__footer-btn" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <form method="get" id="admin-avis-filters" class="admin-filter-bar" action="{{ path('app_admin_avis') }}">
@@ -66,6 +110,32 @@
 {% block javascripts %}
 <script>
 (function () {
+    var modalEl = document.getElementById('modalHistoriqueAvis');
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', function () {
+            var out = document.getElementById('modal-historique-avis-tbody');
+            var rows = document.querySelectorAll('#admin-avis-tbody tr[data-historique-row]');
+            if (!out) return;
+            if (!rows.length) {
+                out.innerHTML = '<tr><td colspan="3" class="admin-historique-table-empty">Aucun avis ne correspond à la liste actuelle.</td></tr>';
+                return;
+            }
+            var html = '';
+            rows.forEach(function (tr) {
+                var p = tr.getAttribute('data-auteur-prenom') || '';
+                var n = tr.getAttribute('data-auteur-nom') || '';
+                var d = tr.getAttribute('data-date-ajout') || '—';
+                html += '<tr><td>' + escapeHtml(p) + '</td><td>' + escapeHtml(n) + '</td><td>' + escapeHtml(d) + '</td></tr>';
+            });
+            out.innerHTML = html;
+        });
+    }
+    function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+
     var form = document.getElementById('admin-avis-filters');
     var tbody = document.getElementById('admin-avis-tbody');
     if (!form || !tbody) return;

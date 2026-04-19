@@ -7,8 +7,10 @@ use App\Entity\Avis;
 use App\Form\AvisPublicType;
 use App\Repository\ActiviteRepository;
 use App\Repository\AvisRepository;
+use App\Service\SightengineModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,6 +35,7 @@ class ActiviteFrontController extends AbstractController
         ActiviteRepository $activiteRepository,
         AvisRepository $avisRepository,
         EntityManagerInterface $em,
+        SightengineModerationService $moderation,
     ): Response {
         $activite = $activiteRepository->find($activiteId);
         $avis = $avisRepository->find($avisId);
@@ -50,6 +53,23 @@ class ActiviteFrontController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $commentaire = (string) $avis->getCommentaire();
+            if ($moderation->textHasIssues($commentaire)) {
+                $this->addFlash(
+                    'error',
+                    'Votre commentaire contient des termes inappropriés. Modifiez-le pour retirer le langage grossier ou offensant.'
+                );
+                $form->get('commentaire')->addError(new FormError(
+                    'Texte non accepté : modération automatique (langage inapproprié).'
+                ));
+
+                return $this->render('activite/avis_edit.html.twig', [
+                    'activite' => $activite,
+                    'avis' => $avis,
+                    'form' => $form,
+                ]);
+            }
+
             $em->flush();
             $this->addFlash('success', 'Votre avis a bien été mis à jour.');
 
@@ -101,6 +121,7 @@ class ActiviteFrontController extends AbstractController
         Activite $activite,
         AvisRepository $avisRepository,
         EntityManagerInterface $em,
+        SightengineModerationService $moderation,
     ): Response {
         $avis = new Avis();
         $avis->setActivite($activite);
@@ -110,6 +131,24 @@ class ActiviteFrontController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $commentaire = (string) $avis->getCommentaire();
+            if ($moderation->textHasIssues($commentaire)) {
+                $this->addFlash(
+                    'error',
+                    'Votre commentaire contient des termes inappropriés. Modifiez le texte pour un ton adapté au site public, puis réessayez.'
+                );
+                $form->get('commentaire')->addError(new FormError(
+                    'Texte non accepté : modération automatique (langage inapproprié).'
+                ));
+
+                return $this->render('activite/show.html.twig', [
+                    'activite' => $activite,
+                    'avis_list' => $avisRepository->findByActiviteOrdered($activite),
+                    'form' => $form,
+                    'visitor_user_id' => $request->getSession()->get(self::SESSION_VISITOR_USER_ID),
+                ]);
+            }
+
             if (null === $avis->getDateAvis()) {
                 $avis->setDateAvis(new \DateTime());
             }

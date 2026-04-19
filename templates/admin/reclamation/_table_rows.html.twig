@@ -9,7 +9,12 @@
     'Élevée': 'admin-badge--prio-high'
 } %}
 {% for r in reclamations %}
-    <tr>
+    <tr data-historique-row="1"
+        data-auteur-prenom="{{ r.user.prenom|e('html_attr') }}"
+        data-auteur-nom="{{ r.user.nom|e('html_attr') }}"
+        data-date-ajout="{{ r.dateCreation ? r.dateCreation|date('d/m/Y H:i') : '—' }}"
+        data-titre="{{ r.titre|e('html_attr') }}"
+        data-reponses-b64="{{ reponses_historique_b64[r.id]|default('')|e('html_attr') }}">
         <td data-label="Date">{{ r.dateCreation ? r.dateCreation|date('d/m/Y H:i') : '—' }}</td>
         <td data-label="Demandeur">{{ r.user.prenom }} {{ r.user.nom }}</td>
         <td data-label="Titre">{{ r.titre }}</td>
@@ -20,6 +25,16 @@
             <span class="admin-badge {{ prio_class[r.priorite]|default('admin-badge--prio-mid') }}">{{ r.priorite }}</span>
         </td>
         <td data-label="Actions" class="admin-table-actions">
+            {% if r.statut != 'Traité' %}
+                <button type="button"
+                        class="admin-btn-ghost js-open-repondre-modal"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalRepondreReclamation"
+                        data-repondre-url="{{ path('app_admin_reclamations_respond', {id: r.id}) }}"
+                        data-repondre-titre="{{ r.titre|e('html_attr') }}"
+                        data-repondre-token="{{ csrf_token('repondre' ~ r.id) }}"
+                ><i class="fas fa-reply"></i> Répondre</button>
+            {% endif %}
             <a href="{{ path('app_admin_reclamations_edit', {id: r.id}) }}" class="admin-btn-ghost"><i class="fas fa-pen"></i> Modifier</a>
             <form method="post" action="{{ path('app_admin_reclamations_delete', {id: r.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette réclamation ?');">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ r.id) }}">

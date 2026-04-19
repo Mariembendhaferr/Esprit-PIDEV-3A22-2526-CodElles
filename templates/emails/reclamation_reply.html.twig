@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Réponse à votre réclamation</title>
+</head>
+<body style="margin:0;padding:0;background:#faf7f2;font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#3f2c24;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf7f2;padding:32px 16px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fffefb;border-radius:14px;border:1px solid rgba(139,44,44,0.12);overflow:hidden;box-shadow:0 12px 40px rgba(63,44,36,0.08);">
+                <tr>
+                    <td style="padding:28px 32px 12px;background:linear-gradient(135deg,#8b2c2c,#6b1e1e);color:#fff;text-align:center;">
+                        <p style="margin:0;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;opacity:0.92;">Doura Mondo</p>
+                        <h1 style="margin:12px 0 0;font-size:20px;font-weight:600;">Réponse à votre réclamation</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:28px 32px 8px;font-size:15px;line-height:1.55;">
+                        <p style="margin:0 0 16px;">Bonjour {{ destinataire_prenom }},</p>
+                        <p style="margin:0 0 16px;">Voici la réponse de notre équipe concernant votre demande <strong style="color:#6b1e1e;">«&nbsp;{{ titre }}&nbsp;»</strong> :</p>
+                        <div style="margin:20px 0;padding:18px 20px;background:#fcf8f0;border-left:4px solid #9b7240;border-radius:0 10px 10px 0;font-size:14px;line-height:1.6;color:#4a3d36;">
+                            {{ contenu_html|raw }}
+                        </div>
+                        <p style="margin:24px 0 0;font-size:13px;color:#7a6558;">Cordialement,<br><strong style="color:#6b1e1e;">L’équipe Doura Mondo</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 32px 28px;font-size:11px;color:#9b8f84;text-align:center;border-top:1px solid rgba(139,44,44,0.08);">
+                        Ce message vous a été envoyé automatiquement suite au traitement de votre réclamation.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

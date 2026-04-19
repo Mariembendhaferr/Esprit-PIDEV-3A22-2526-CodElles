@@ -4,6 +4,15 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.mailer_from_email: '%env(MAILER_FROM_EMAIL)%'
+    app.mailer_from_name: '%env(MAILER_FROM_NAME)%'
+    app.textrazor_api_key: '%env(default::TEXTRAZOR_API_KEY)%'
+    app.laratranslate_api_id: '%env(default::LARATRANSLATE_API_ID)%'
+    app.laratranslate_api_secret: '%env(default::LARATRANSLATE_API_SECRET)%'
+    # Lara SDK expects API host root (https://api.laratranslate.com); service strips /translate if present.
+    app.laratranslate_endpoint: '%env(default::LARATRANSLATE_ENDPOINT)%'
+    app.sightengine_api_user: '%env(default::SIGHTENGINE_API_USER)%'
+    app.sightengine_api_secret: '%env(default::SIGHTENGINE_API_SECRET)%'
 
 services:
     # default configuration for services in *this* file
@@ -19,6 +28,22 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    App\Service\TextRazorSentimentAnalyzer:
+        arguments:
+            $apiKey: '%app.textrazor_api_key%'
+
+    App\Service\LaraTranslateService:
+        arguments:
+            $apiId: '%app.laratranslate_api_id%'
+            $apiSecret: '%app.laratranslate_api_secret%'
+            $serverBaseUrl: '%app.laratranslate_endpoint%'
+            $sslCaBundlePath: '%kernel.project_dir%/config/cacert.pem'
+
+    App\Service\SightengineModerationService:
+        arguments:
+            $apiUser: '%app.sightengine_api_user%'
+            $apiSecret: '%app.sightengine_api_secret%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

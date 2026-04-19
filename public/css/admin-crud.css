@@ -26,6 +26,12 @@
     color: #6b1e1e;
 }
 
+.admin-flash--warning {
+    background: rgba(180, 120, 20, 0.1);
+    border-color: rgba(165, 100, 20, 0.3);
+    color: #5c3d0a;
+}
+
 .admin-crud-head {
     display: flex;
     flex-wrap: wrap;
@@ -33,6 +39,390 @@
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 24px;
+}
+
+.admin-crud-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Secondaire = duo du bouton principal (contour bordeaux, même gabarit qu’Ajouter) */
+.admin-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--admin-bordeaux, #8b2c2c);
+    background: #fff;
+    border: 1px solid rgba(139, 44, 44, 0.38);
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(107, 30, 30, 0.1);
+    transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.15s, box-shadow 0.18s;
+}
+
+.admin-btn-secondary:hover {
+    background: rgba(139, 44, 44, 0.07);
+    color: var(--admin-bordeaux-fonce, #6b1e1e);
+    border-color: rgba(139, 44, 44, 0.52);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(107, 30, 30, 0.18);
+}
+
+.admin-btn-secondary .fa-history {
+    font-size: 0.82rem;
+    opacity: 0.92;
+}
+
+/* --- Modales admin (Historique + Répondre) : même carte que le thème CRUD --- */
+.admin-modal-dialog.modal-dialog {
+    max-width: 560px;
+    width: calc(100% - 2rem);
+    margin: 1.25rem auto;
+}
+
+.admin-modal-dialog--reply.modal-dialog {
+    max-width: 520px;
+}
+
+.admin-modal-dialog--historique.modal-dialog {
+    max-width: min(960px, calc(100vw - 2rem));
+}
+
+.admin-modal-card {
+    overflow: hidden;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(165deg, #fffefb 0%, var(--admin-creme, #fcf8f0) 45%, #faf6ee 100%);
+    box-shadow:
+        0 4px 0 rgba(155, 114, 64, 0.22),
+        0 28px 64px rgba(63, 44, 36, 0.18),
+        0 0 0 1px rgba(139, 44, 44, 0.08);
+    transform-origin: center center;
+}
+
+.modal.show .admin-modal-card {
+    animation: admin-modal-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes admin-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.admin-modal-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px 18px;
+    background: linear-gradient(180deg, rgba(252, 248, 240, 0.98), rgba(250, 247, 242, 0.92));
+    border-bottom: 1px solid rgba(139, 44, 44, 0.1);
+    position: relative;
+}
+
+.admin-modal-card__header::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, rgba(155, 114, 64, 0.55), rgba(139, 44, 44, 0.45), rgba(155, 114, 64, 0.45), transparent);
+    opacity: 0.85;
+}
+
+.admin-modal-card__title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.admin-modal-card__icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    color: #fff;
+    background: linear-gradient(145deg, var(--admin-bordeaux, #8b2c2c), var(--admin-bordeaux-fonce, #6b1e1e));
+    box-shadow: 0 8px 22px rgba(107, 30, 30, 0.35);
+}
+
+.admin-modal-card__heading {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--admin-bordeaux-fonce, #6b1e1e);
+    margin: 0 0 4px;
+    line-height: 1.25;
+}
+
+.admin-modal-card__subheading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.98rem;
+    font-style: italic;
+    color: #7a6558;
+    margin: 0;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.admin-modal-card__close {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(139, 44, 44, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--admin-bordeaux, #8b2c2c);
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, transform 0.15s, border-color 0.18s;
+}
+
+.admin-modal-card__close:hover {
+    background: rgba(139, 44, 44, 0.1);
+    border-color: rgba(139, 44, 44, 0.35);
+    color: var(--admin-bordeaux-fonce, #6b1e1e);
+    transform: scale(1.04);
+}
+
+.admin-modal-card__body {
+    padding: 20px 24px 22px;
+    background: rgba(255, 255, 255, 0.42);
+}
+
+.admin-modal-card__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: #5c4f46;
+    background: rgba(155, 114, 64, 0.1);
+    border: 1px solid rgba(155, 114, 64, 0.22);
+    border-radius: 12px;
+    border-left: 3px solid var(--admin-or, #9b7240);
+}
+
+.admin-modal-card__notice .fa-info-circle,
+.admin-modal-card__notice .fa-envelope {
+    margin-top: 2px;
+    color: var(--admin-or, #9b7240);
+    flex-shrink: 0;
+}
+
+.admin-modal-card__notice strong {
+    color: var(--admin-bordeaux-fonce, #6b1e1e);
+    font-weight: 600;
+}
+
+.admin-modal-card__field-label {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--admin-or, #9b7240);
+    margin-bottom: 8px;
+}
+
+.admin-modal-card__textarea {
+    border-radius: 12px !important;
+    border: 1px solid rgba(139, 44, 44, 0.22) !important;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 168px;
+    background: #fff;
+    color: #3f342c;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.admin-modal-card__textarea:focus {
+    border-color: rgba(139, 44, 44, 0.45) !important;
+    box-shadow: 0 0 0 3px rgba(139, 44, 44, 0.12);
+}
+
+.admin-modal-card__footer {
+    padding: 16px 24px 22px;
+    border-top: 1px solid rgba(139, 44, 44, 0.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(250, 247, 242, 0.96));
+}
+
+.admin-modal-card__footer--split {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-modal-card__footer:not(.admin-modal-card__footer--split) {
+    display: flex;
+    justify-content: center;
+}
+
+.admin-modal-card__footer .admin-btn-primary.admin-modal-card__footer-btn {
+    min-width: 220px;
+    justify-content: center;
+}
+
+.admin-modal-card__footer--split .admin-btn-primary,
+.admin-modal-card__footer--split .admin-btn-secondary {
+    letter-spacing: 0.12em;
+}
+
+.admin-modal-card__footer--split .admin-btn-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.admin-historique-table-shell {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(139, 44, 44, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    background: #fff;
+}
+
+.admin-historique-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+}
+
+.admin-historique-table thead {
+    background: linear-gradient(180deg, #fcf8f0, #faf7f2);
+}
+
+.admin-historique-table thead th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--admin-or, #9b7240);
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(139, 44, 44, 0.12);
+    white-space: nowrap;
+}
+
+.admin-historique-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.admin-historique-table tbody tr:nth-child(even) {
+    background: rgba(252, 248, 240, 0.45);
+}
+
+.admin-historique-table tbody tr:hover {
+    background: rgba(139, 44, 44, 0.05);
+}
+
+.admin-historique-table tbody td {
+    padding: 13px 18px;
+    vertical-align: middle;
+    color: #4a3d36;
+    border-bottom: 1px solid rgba(63, 44, 36, 0.06);
+}
+
+.admin-historique-table tbody td:first-child {
+    font-weight: 500;
+    color: #3f342c;
+}
+
+.admin-historique-table tbody td:last-child {
+    font-variant-numeric: tabular-nums;
+    color: #6b5a4c;
+    font-size: 0.8rem;
+}
+
+.admin-historique-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-historique-table-empty {
+    padding: 28px 18px !important;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: #8a7a6e !important;
+    background: rgba(252, 248, 240, 0.6);
+}
+
+.admin-historique-cell--responses {
+    vertical-align: top !important;
+    min-width: 200px;
+    max-width: 320px;
+    font-variant-numeric: normal !important;
+    font-size: 0.78rem !important;
+    line-height: 1.45;
+}
+
+.admin-historique-no-response {
+    color: #9a8b80;
+}
+
+.admin-historique-reponse {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(139, 44, 44, 0.12);
+}
+
+.admin-historique-reponse:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.admin-historique-reponse-meta {
+    margin: 0 0 4px 0;
+    font-size: 0.72rem;
+    color: #6b5a4c;
+}
+
+.admin-historique-reponse-body {
+    color: #4a3d36;
+}
+
+/* Fond derrière la modale (back-office uniquement : ce fichier) */
+.modal-backdrop.show {
+    background: rgba(32, 22, 18, 0.52);
+    backdrop-filter: blur(5px);
 }
 
 .admin-crud-title {
@@ -48,6 +438,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
+    cursor: pointer;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.68rem;
     font-weight: 600;
@@ -66,6 +457,10 @@
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 8px 24px rgba(107, 30, 30, 0.35);
+}
+
+.admin-btn-primary .fa-history {
+    font-size: 0.82rem;
 }
 
 .admin-btn-ghost {

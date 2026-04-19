@@ -9,24 +9,12 @@ use App\Entity\Avis;
 use App\Entity\Reclamation;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\Depends;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * Tests manuels CRUD (Doctrine) pour Avis et Réclamation — alignés sur la logique des contrôleurs admin.
- *
- * Utilisation :
- * 1. Environnement test : base `doura_mondo_test` (suffixe `_test` ajouté par config Doctrine en APP_ENV=test).
- *    Créez-la et migrez : `php bin/console doctrine:database:create --env=test` puis `doctrine:migrations:migrate --env=test`
- *    (ou réutilisez les mêmes identifiants qu’en dev si vous avez déjà les tables).
- * 2. Décommentez UNE méthode test… (enlevez le commentaire autour du bloc concerné) puis lancez :
- *    `php vendor/bin/phpunit tests/CrudManualTest.php --filter testAvisCrudCycle`
- *    ou sans filtre pour tout ce qui est décommenté.
- *
- * Le test factice ci-dessous évite une suite « vide » tant que tout est commenté.
- */
+
 class CrudManualTest extends KernelTestCase
 {
-    /** Garde la suite PHPUnit verte tant que les vrais tests CRUD restent commentés. */
     public function testPlaceholder(): void
     {
         self::assertTrue(true);
@@ -42,7 +30,21 @@ class CrudManualTest extends KernelTestCase
     private function firstUser(EntityManagerInterface $em): User
     {
         $user = $em->getRepository(User::class)->findOneBy([]);
-        self::assertNotNull($user, 'Ajoutez au moins un utilisateur en base pour ce test.');
+        if (null !== $user) {
+            return $user;
+        }
+
+        $suffix = uniqid('seed_', true);
+        $user = new User();
+        $user->setNom('Test');
+        $user->setPrenom('Seed');
+        $user->setUsername('seed_user_'.$suffix);
+        $user->setEmail('seed_'.$suffix.'@example.test');
+        $user->setMotDePasse('test');
+        $user->setRole('voyageur');
+        $user->setStatut('actif');
+        $em->persist($user);
+        $em->flush();
 
         return $user;
     }
@@ -50,92 +52,149 @@ class CrudManualTest extends KernelTestCase
     private function firstActivite(EntityManagerInterface $em): Activite
     {
         $activite = $em->getRepository(Activite::class)->findOneBy([]);
-        self::assertNotNull($activite, 'Ajoutez au moins une activité en base pour ce test.');
+        if (null !== $activite) {
+            return $activite;
+        }
+
+        $owner = $this->firstUser($em);
+        $activite = new Activite();
+        $activite->setNomActivite('Activité seed '.uniqid());
+        $activite->setCategorieActivite('test');
+        $activite->setCoutActivite('0.00');
+        $activite->setDisponibiliteActivite(true);
+        $activite->setUser($owner);
+        $em->persist($activite);
+        $em->flush();
 
         return $activite;
     }
 
-    /*
-    public function testAvisCrudCycle(): void
+    // --- Avis : étape 1 Create → 2 Read → 3 Update → 4 Delete (chaîne #[Depends]) ---
+
+    public function testAvisStep1_Create(): array
     {
         $em = $this->entityManager();
         $user = $this->firstUser($em);
         $activite = $this->firstActivite($em);
 
-        // Create (équivalent admin « nouveau » + persist)
-        $avis = new Avis();
         $suffix = uniqid('crud_', true);
-        $avis->setCommentaire('Commentaire de test CRUD manuel, au moins dix caractères. '.$suffix);
+        $avis = new Avis();
+        $avis->setCommentaire('Commentaire étape 1 CRUD, au moins dix caractères. '.$suffix);
         $avis->setNote(4);
-        $avis->setDateAvis(new \DateTimeImmutable());
+        $avis->setDateAvis(new \DateTime());
         $avis->setUser($user);
         $avis->setActivite($activite);
 
         $em->persist($avis);
         $em->flush();
+
         $id = $avis->getId();
         self::assertNotNull($id);
 
-        // Read
-        $em->clear();
-        $loaded = $em->find(Avis::class, $id);
-        self::assertInstanceOf(Avis::class, $loaded);
-        self::assertStringContainsString($suffix, $loaded->getCommentaire());
+        return ['id' => $id, 'suffix' => $suffix];
+    }
 
-        // Update (équivalent admin « modifier » + flush)
-        $loaded->setCommentaire('Mise à jour CRUD manuelle, dix chars min. '.$suffix);
-        $loaded->setNote(5);
+    #[Depends('testAvisStep1_Create')]
+    public function testAvisStep2_Read(array $ctx): array
+    {
+        $em = $this->entityManager();
+        $em->clear();
+        $loaded = $em->find(Avis::class, $ctx['id']);
+        self::assertInstanceOf(Avis::class, $loaded);
+        self::assertStringContainsString($ctx['suffix'], $loaded->getCommentaire());
+        self::assertSame(4, $loaded->getNote());
+
+        return $ctx;
+    }
+
+    #[Depends('testAvisStep2_Read')]
+    public function testAvisStep3_Update(array $ctx): array
+    {
+        $em = $this->entityManager();
+        $avis = $em->find(Avis::class, $ctx['id']);
+        self::assertInstanceOf(Avis::class, $avis);
+        $avis->setCommentaire('Mise à jour étape 3 CRUD, dix chars min. '.$ctx['suffix']);
+        $avis->setNote(5);
         $em->flush();
         $em->clear();
-        $again = $em->find(Avis::class, $id);
+        $again = $em->find(Avis::class, $ctx['id']);
         self::assertSame(5, $again->getNote());
 
-        // Delete (équivalent admin « supprimer »)
-        $em->remove($again);
-        $em->flush();
-        self::assertNull($em->find(Avis::class, $id));
+        return $ctx;
     }
-    */
 
-    /*
-    public function testReclamationCrudCycle(): void
+    #[Depends('testAvisStep3_Update')]
+    public function testAvisStep4_Delete(array $ctx): void
+    {
+        $em = $this->entityManager();
+        $avis = $em->find(Avis::class, $ctx['id']);
+        self::assertInstanceOf(Avis::class, $avis);
+        $em->remove($avis);
+        $em->flush();
+        self::assertNull($em->find(Avis::class, $ctx['id']));
+    }
+
+    // --- Réclamation : étapes 1–4 ---
+
+    public function testReclamationStep1_Create(): array
     {
         $em = $this->entityManager();
         $user = $this->firstUser($em);
 
-        // Create
-        $rec = new Reclamation();
         $suffix = uniqid('crud_', true);
-        $rec->setTitre('Titre test '.$suffix);
-        $rec->setDescription('Description de test réclamation, plus de dix caractères. '.$suffix);
-        $rec->setDateCreation(new \DateTimeImmutable());
+        $rec = new Reclamation();
+        $rec->setTitre('Titre étape 1 '.$suffix);
+        $rec->setDescription('Description étape 1 réclamation, plus de dix caractères. '.$suffix);
+        $rec->setDateCreation(new \DateTime());
         $rec->setStatut('En attente');
         $rec->setPriorite('Moyenne');
         $rec->setUser($user);
 
         $em->persist($rec);
         $em->flush();
+
         $id = $rec->getId();
         self::assertNotNull($id);
 
-        // Read
-        $em->clear();
-        $loaded = $em->find(Reclamation::class, $id);
-        self::assertInstanceOf(Reclamation::class, $loaded);
-        self::assertStringContainsString($suffix, $loaded->getTitre());
+        return ['id' => $id, 'suffix' => $suffix];
+    }
 
-        // Update
-        $loaded->setStatut('En cours');
-        $loaded->setPriorite('Élevée');
+    #[Depends('testReclamationStep1_Create')]
+    public function testReclamationStep2_Read(array $ctx): array
+    {
+        $em = $this->entityManager();
+        $em->clear();
+        $loaded = $em->find(Reclamation::class, $ctx['id']);
+        self::assertInstanceOf(Reclamation::class, $loaded);
+        self::assertStringContainsString($ctx['suffix'], $loaded->getTitre());
+
+        return $ctx;
+    }
+
+    #[Depends('testReclamationStep2_Read')]
+    public function testReclamationStep3_Update(array $ctx): array
+    {
+        $em = $this->entityManager();
+        $rec = $em->find(Reclamation::class, $ctx['id']);
+        self::assertInstanceOf(Reclamation::class, $rec);
+        $rec->setStatut('En cours');
+        $rec->setPriorite('Élevée');
         $em->flush();
         $em->clear();
-        $again = $em->find(Reclamation::class, $id);
+        $again = $em->find(Reclamation::class, $ctx['id']);
         self::assertSame('En cours', $again->getStatut());
 
-        // Delete
-        $em->remove($again);
-        $em->flush();
-        self::assertNull($em->find(Reclamation::class, $id));
+        return $ctx;
     }
-    */
+
+    #[Depends('testReclamationStep3_Update')]
+    public function testReclamationStep4_Delete(array $ctx): void
+    {
+        $em = $this->entityManager();
+        $rec = $em->find(Reclamation::class, $ctx['id']);
+        self::assertInstanceOf(Reclamation::class, $rec);
+        $em->remove($rec);
+        $em->flush();
+        self::assertNull($em->find(Reclamation::class, $ctx['id']));
+    }
 }

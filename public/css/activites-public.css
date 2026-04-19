@@ -290,6 +290,52 @@ a.activite-card-link:hover .activite-card {
     color: #4a423c;
 }
 
+.activite-translate-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b4f3e;
+    border: 1px solid rgba(139, 44, 44, 0.22);
+    background: #fffef9;
+    border-radius: 8px;
+    padding: 0.32rem 0.7rem;
+    margin-bottom: 0.4rem;
+}
+
+.activite-translate-btn:hover,
+.activite-translate-btn:focus {
+    color: #6b1e1e;
+    border-color: rgba(139, 44, 44, 0.45);
+    background: rgba(139, 44, 44, 0.08);
+}
+
+.activite-translate-controls {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.45rem;
+    margin-bottom: 0.4rem;
+}
+
+.activite-translate-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #7a6a5e;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.activite-translate-select {
+    min-width: 4.25rem;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 44, 44, 0.22);
+    font-size: 0.72rem;
+    color: #5c4a42;
+    background: #fffef9;
+}
+
 .activite-avis-actions {
     display: flex;
     flex-wrap: wrap;

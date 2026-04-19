@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 10pt; color: #222; }
+        h1 { font-size: 14pt; margin: 0 0 8px 0; color: #333; }
+        .meta { font-size: 8pt; color: #666; margin-bottom: 14px; }
+        .filters { font-size: 9pt; color: #555; margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px; }
+        .rec { page-break-inside: avoid; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #ddd; }
+        .rec-title { font-size: 11pt; font-weight: bold; margin: 0 0 4px 0; }
+        .rec-line { font-size: 9pt; margin: 2px 0; color: #444; }
+        .rec-desc-label { font-weight: bold; margin-top: 6px; font-size: 9pt; }
+        .rec-desc { font-size: 9pt; white-space: pre-wrap; margin: 4px 0 0 0; }
+        .resp-block { margin-top: 8px; padding-left: 8px; border-left: 2px solid #888; }
+        .resp-meta { font-size: 8pt; color: #555; margin-bottom: 4px; }
+        .resp-text { font-size: 9pt; white-space: pre-wrap; margin: 0; }
+        .none { font-style: italic; color: #777; font-size: 9pt; }
+    </style>
+</head>
+<body>
+    <h1>Historique des réclamations</h1>
+    <p class="meta">Document généré le {{ generated_at|date('d/m/Y à H:i') }} — Doura Mondo (administration)</p>
+
+    <div class="filters">
+        <strong>Filtres appliqués :</strong>
+        {% set parts = [] %}
+        {% if filter_q %}{% set parts = parts|merge(['Recherche : '~filter_q]) %}{% endif %}
+        {% if filter_statut %}{% set parts = parts|merge(['Statut : '~filter_statut]) %}{% endif %}
+        {% if filter_priorite %}{% set parts = parts|merge(['Priorité : '~filter_priorite]) %}{% endif %}
+        {% if parts is empty %}
+            Aucun filtre (toutes les réclamations correspondant à la liste par défaut).
+        {% else %}
+            {{ parts|join(' · ') }}
+        {% endif %}
+    </div>
+
+    {% if reclamations is empty %}
+        <p class="none">Aucune réclamation pour cette sélection.</p>
+    {% else %}
+        {% for r in reclamations %}
+            <div class="rec">
+                <p class="rec-title">{{ r.titre }}</p>
+                <p class="rec-line">
+                    <strong>Demandeur :</strong> {{ r.user.prenom }} {{ r.user.nom }}
+                    · <strong>Date d’ajout :</strong> {{ r.dateCreation ? r.dateCreation|date('d/m/Y H:i') : '—' }}
+                    · <strong>Statut :</strong> {{ r.statut }}
+                    · <strong>Priorité :</strong> {{ r.priorite }}
+                </p>
+                <p class="rec-desc-label">Description</p>
+                <p class="rec-desc">{{ r.description }}</p>
+
+                {% set responses = responses_by_reclamation[r.id]|default([]) %}
+                {% if responses is empty %}
+                    <p class="none" style="margin-top:8px;">Aucune réponse enregistrée.</p>
+                {% else %}
+                    <p class="rec-desc-label" style="margin-top:8px;">Réponses de l’administration</p>
+                    {% for rr in responses %}
+                        <div class="resp-block">
+                            <p class="resp-meta">
+                                {{ rr.dateResponse ? rr.dateResponse|date('d/m/Y à H:i') : '—' }}
+                                — {{ rr.admin.prenom }} {{ rr.admin.nom }}
+                            </p>
+                            <p class="resp-text">{{ rr.contenu }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

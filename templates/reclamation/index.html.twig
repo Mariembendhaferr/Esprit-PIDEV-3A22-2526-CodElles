@@ -4,24 +4,43 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link href="{{ asset('css/admin-crud.css') }}" rel="stylesheet">
     <link href="{{ asset('css/reclamation-public.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
 <main class="reclamation-page">
     <div class="container py-5">
-        <header class="reclamation-hero text-center mb-4">
-            <h1 class="reclamation-title">Réclamations</h1>
-            <p class="reclamation-lead text-muted mb-2">
-                Consultez les demandes en cours ou déposez une nouvelle réclamation.
-            </p>
-            <button type="button" class="btn btn-primary reclamation-btn-add" data-bs-toggle="modal" data-bs-target="#modalNouvelleReclamation">
-                <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Ajouter une réclamation
-            </button>
+        <header class="reclamation-hero mb-4">
+            <div class="reclamation-hero-copy text-center">
+                <div class="reclamation-hero-title-row">
+                    <h1 class="reclamation-title reclamation-title--hero">Réclamations</h1>
+                    <div class="reclamation-hero-visual" aria-hidden="true">
+                        <img
+                            class="reclamation-hero-img"
+                            src="{{ asset('images/reclamation-hero-letters.png') }}"
+                            alt=""
+                            width="300"
+                            height="200"
+                            loading="eager"
+                            decoding="async"
+                        >
+                    </div>
+                </div>
+                <p class="reclamation-lead text-muted mb-2">
+                    Consultez les demandes en cours ou déposez une nouvelle réclamation.
+                </p>
+                <button type="button" class="btn btn-primary reclamation-btn-add" data-bs-toggle="modal" data-bs-target="#modalNouvelleReclamation">
+                    <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Ajouter une réclamation
+                </button>
+            </div>
         </header>
 
         {% for message in app.flashes('success') %}
             <div class="alert alert-success reclamation-alert" role="alert">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger reclamation-alert" role="alert">{{ message }}</div>
         {% endfor %}
 
         {% set statut_badge = {
@@ -35,9 +54,52 @@
             {% if reclamations is empty %}
                 <p class="text-muted mb-0">Aucune réclamation pour le moment. Utilisez le bouton ci-dessus pour en créer une.</p>
             {% else %}
-                <div class="row g-4">
+                <div class="admin-filter-bar reclamation-public-filter-shell">
+                    <div class="admin-filter-bar-inner">
+                        <div class="admin-filter-field admin-filter-field--grow">
+                            <label class="admin-filter-label" for="reclamation-search">Recherche</label>
+                            <input type="search" id="reclamation-search" class="form-control admin-filter-input"
+                                placeholder="Titre, description, nom…" autocomplete="off"
+                                aria-controls="reclamations-grid">
+                        </div>
+                        <div class="admin-filter-field">
+                            <label class="admin-filter-label" for="reclamation-filter-statut">Statut</label>
+                            <select id="reclamation-filter-statut" class="form-select admin-filter-select">
+                                <option value="">Tous</option>
+                                <option value="En attente">En attente</option>
+                                <option value="En cours">En cours</option>
+                                <option value="Traité">Traité</option>
+                            </select>
+                        </div>
+                        <div class="admin-filter-field">
+                            <label class="admin-filter-label" for="reclamation-filter-prio">Priorité</label>
+                            <select id="reclamation-filter-prio" class="form-select admin-filter-select">
+                                <option value="">Toutes</option>
+                                <option value="Faible">Faible</option>
+                                <option value="Moyenne">Moyenne</option>
+                                <option value="Élevée">Élevée</option>
+                            </select>
+                        </div>
+                        <div class="admin-filter-field admin-filter-field--action">
+                            <span class="admin-filter-label admin-filter-label--spacer" aria-hidden="true">&nbsp;</span>
+                            <a href="#" id="reclamation-filter-reset" class="admin-filter-reset" role="button">Réinitialiser</a>
+                        </div>
+                    </div>
+                    <p class="admin-filter-hint mb-0">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        La recherche et les filtres s’appliquent instantanément à la liste ci-dessous.
+                        <span id="reclamation-filter-count" aria-live="polite"></span>
+                    </p>
+                </div>
+
+                <p id="reclamation-filter-empty" class="alert alert-light border text-muted mb-0 d-none" role="status">Aucune réclamation ne correspond à votre recherche.</p>
+
+                <div class="row g-4" id="reclamations-grid">
                     {% for r in reclamations %}
-                        <div class="col-md-6 col-xl-4">
+                        <div class="col-md-6 col-xl-4 reclamation-card-wrap"
+                            data-statut="{{ r.statut|e('html_attr') }}"
+                            data-priorite="{{ r.priorite|e('html_attr') }}"
+                            data-search="{{ (r.titre ~ ' ' ~ r.description ~ ' ' ~ r.user.prenom ~ ' ' ~ r.user.nom)|lower|e('html_attr') }}">
                             <div
                                 class="reclamation-card"
                                 data-bs-toggle="modal"
@@ -87,7 +149,43 @@
                                             <span class="badge reclamation-badge reclamation-badge--prio">{{ r.priorite }}</span>
                                         </div>
                                         <h3 class="reclamation-detail-heading">Description</h3>
-                                        <div class="reclamation-detail-text">{{ r.description|nl2br }}</div>
+                                        <div class="reclamation-detail-text js-translatable-text">{{ r.description|nl2br }}</div>
+                                        <div class="reclamation-translate-controls">
+                                            <label class="reclamation-translate-label" for="rec-lang-{{ r.id }}">Afficher</label>
+                                            <select id="rec-lang-{{ r.id }}" class="form-select form-select-sm reclamation-translate-select js-translate-display-lang" aria-label="Langue d’affichage">
+                                                <option value="" selected disabled>Afficher…</option>
+                                                <option value="fr">Français</option>
+                                                <option value="en">English</option>
+                                            </select>
+                                        </div>
+
+                                        <hr class="reclamation-detail-sep">
+                                        <h3 class="reclamation-detail-heading">Réponses de l’administration</h3>
+                                        {% set responses = responses_by_reclamation[r.id]|default([]) %}
+                                        {% if responses is empty %}
+                                            <p class="text-muted mb-0">Aucune réponse pour le moment.</p>
+                                        {% else %}
+                                            <ul class="list-unstyled reclamation-response-list mb-0">
+                                                {% for rr in responses %}
+                                                    <li class="reclamation-response-item">
+                                                        <p class="reclamation-response-meta mb-1">
+                                                            <i class="bi bi-clock-history me-1"></i>{{ rr.dateResponse ? rr.dateResponse|date('d/m/Y à H:i') : '—' }}
+                                                            ·
+                                                            <strong>{{ rr.admin.prenom }} {{ rr.admin.nom }}</strong>
+                                                        </p>
+                                                        <p class="reclamation-response-text mb-2 js-translatable-text">{{ rr.contenu|nl2br }}</p>
+                                                        <div class="reclamation-translate-controls">
+                                                            <label class="reclamation-translate-label" for="rec-resp-{{ r.id }}-{{ rr.id }}">Afficher</label>
+                                                            <select id="rec-resp-{{ r.id }}-{{ rr.id }}" class="form-select form-select-sm reclamation-translate-select js-translate-display-lang" aria-label="Langue d’affichage">
+                                                                <option value="" selected disabled>Afficher…</option>
+                                                                <option value="fr">Français</option>
+                                                                <option value="en">English</option>
+                                                            </select>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
                                     </div>
                                     <div class="modal-footer border-0 pt-0">
                                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
@@ -161,6 +259,128 @@
                     }
                 });
             });
+
+            (function () {
+                var searchEl = document.getElementById('reclamation-search');
+                var statutEl = document.getElementById('reclamation-filter-statut');
+                var prioEl = document.getElementById('reclamation-filter-prio');
+                var resetBtn = document.getElementById('reclamation-filter-reset');
+                var countEl = document.getElementById('reclamation-filter-count');
+                var emptyEl = document.getElementById('reclamation-filter-empty');
+                var wraps = document.querySelectorAll('.reclamation-card-wrap');
+                if (!searchEl || wraps.length === 0) return;
+
+                var debounceTimer = null;
+
+                function applyFilters() {
+                    var q = (searchEl.value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                    var st = statutEl ? statutEl.value : '';
+                    var pr = prioEl ? prioEl.value : '';
+                    var visible = 0;
+                    wraps.forEach(function (w) {
+                        var hay = (w.getAttribute('data-search') || '');
+                        var matchQ = !q || hay.indexOf(q) !== -1;
+                        var matchSt = !st || w.getAttribute('data-statut') === st;
+                        var matchPr = !pr || w.getAttribute('data-priorite') === pr;
+                        var show = matchQ && matchSt && matchPr;
+                        w.classList.toggle('d-none', !show);
+                        if (show) visible++;
+                    });
+                    if (countEl) {
+                        countEl.textContent = visible === 1
+                            ? ' — 1 réclamation affichée.'
+                            : ' — ' + visible + ' réclamations affichées.';
+                    }
+                    if (emptyEl) {
+                        emptyEl.classList.toggle('d-none', visible !== 0);
+                    }
+                }
+
+                function scheduleApply() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(applyFilters, 160);
+                }
+
+                searchEl.addEventListener('input', scheduleApply);
+                if (statutEl) statutEl.addEventListener('change', applyFilters);
+                if (prioEl) prioEl.addEventListener('change', applyFilters);
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        searchEl.value = '';
+                        if (statutEl) statutEl.value = '';
+                        if (prioEl) prioEl.value = '';
+                        applyFilters();
+                    });
+                }
+                applyFilters();
+            })();
+
+            function findTranslatableFromControls(wrap) {
+                if (!wrap) return null;
+                var prev = wrap.previousElementSibling;
+                if (prev && prev.classList.contains('js-translatable-text')) return prev;
+                var responseItem = wrap.closest('.reclamation-response-item');
+                if (responseItem) return responseItem.querySelector('.js-translatable-text');
+                var modalBody = wrap.closest('.modal-body');
+                return modalBody ? modalBody.querySelector('.reclamation-detail-text.js-translatable-text') : null;
+            }
+
+            function applyDisplayLanguage(selectEl) {
+                var wrap = selectEl.closest('.reclamation-translate-controls');
+                var textEl = findTranslatableFromControls(wrap);
+                if (!textEl) return;
+
+                var original = textEl.getAttribute('data-original-plain');
+                if (!original) {
+                    original = textEl.innerText.trim();
+                    textEl.setAttribute('data-original-plain', original);
+                }
+
+                var target = selectEl.value;
+                if (target !== 'fr' && target !== 'en') return;
+
+                var cacheAttr = 'data-cache-' + target;
+                if (selectEl.hasAttribute(cacheAttr)) {
+                    textEl.textContent = selectEl.getAttribute(cacheAttr);
+                    return;
+                }
+
+                selectEl.disabled = true;
+                fetch('{{ path('app_public_translate') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ text: original, target: target })
+                })
+                    .then(function (r) {
+                        return r.text().then(function (body) {
+                            try {
+                                return { okHttp: r.ok, payload: JSON.parse(body) };
+                            } catch (e) {
+                                return { okHttp: false, payload: null };
+                            }
+                        });
+                    })
+                    .then(function (ctx) {
+                        var payload = ctx.payload;
+                        if (!ctx.okHttp || !payload || !payload.ok || typeof payload.translated !== 'string') return;
+                        selectEl.setAttribute(cacheAttr, payload.translated);
+                        textEl.textContent = payload.translated;
+                    })
+                    .catch(function () {})
+                    .finally(function () { selectEl.disabled = false; });
+            }
+
+            function bindDisplayLangSelects(scope) {
+                scope.querySelectorAll('.js-translate-display-lang').forEach(function (sel) {
+                    if (sel.dataset.boundLang === '1') return;
+                    sel.dataset.boundLang = '1';
+                    sel.addEventListener('change', function () { applyDisplayLanguage(sel); });
+                });
+            }
+
+            bindDisplayLangSelects(document);
         });
     </script>
 {% endblock %}

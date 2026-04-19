@@ -6,7 +6,90 @@
 {% block admin_body %}
 <div class="admin-crud-head">
     <p class="admin-crud-title mb-0">Suivi des réclamations et demandes clients</p>
-    <a href="{{ path('app_admin_reclamations_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvelle réclamation</a>
+    <div class="admin-crud-head-actions">
+        <button type="button" class="admin-btn-primary" data-bs-toggle="modal" data-bs-target="#modalHistoriqueReclamation" id="btn-historique-reclamation">
+            <i class="fas fa-history" aria-hidden="true"></i> Historique
+        </button>
+        <a href="{{ path('app_admin_reclamations_new') }}" class="admin-btn-primary"><i class="fas fa-plus"></i> Nouvelle réclamation</a>
+    </div>
+</div>
+
+<div class="modal fade admin-historique-root" id="modalHistoriqueReclamation" tabindex="-1" aria-labelledby="modalHistoriqueReclamationLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable admin-modal-dialog admin-modal-dialog--historique">
+        <div class="modal-content admin-modal-card">
+            <div class="modal-header admin-modal-card__header">
+                <div class="admin-modal-card__title-row">
+                    <span class="admin-modal-card__icon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                    <div>
+                        <h2 class="admin-modal-card__heading" id="modalHistoriqueReclamationLabel">Historique des ajouts</h2>
+                        <p class="admin-modal-card__subheading">Demandeur, titre, réponses administration</p>
+                    </div>
+                </div>
+                <button type="button" class="admin-modal-card__close" data-bs-dismiss="modal" aria-label="Fermer">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body admin-modal-card__body">
+                <p class="admin-modal-card__notice"><i class="fas fa-info-circle" aria-hidden="true"></i> Entrées correspondant aux <strong>filtres actuels</strong> de la liste.</p>
+                <div class="admin-historique-table-shell">
+                    <div class="table-responsive">
+                        <table class="admin-historique-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Prénom</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col">Date d’ajout</th>
+                                    <th scope="col">Titre</th>
+                                    <th scope="col">Réponses</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-historique-reclamation-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer admin-modal-card__footer admin-modal-card__footer--split">
+                <a href="{{ path('app_admin_reclamations_historique_pdf') }}"
+                   class="admin-btn-secondary admin-modal-card__footer-btn"
+                   id="btn-historique-pdf-export"
+                   data-pdf-base="{{ path('app_admin_reclamations_historique_pdf') }}">
+                    <i class="fas fa-file-pdf" aria-hidden="true"></i> Exporter en PDF
+                </a>
+                <button type="button" class="admin-btn-primary admin-modal-card__footer-btn" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade admin-repondre-root" id="modalRepondreReclamation" tabindex="-1" aria-labelledby="modalRepondreReclamationLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable admin-modal-dialog admin-modal-dialog--reply">
+        <div class="modal-content admin-modal-card admin-modal-card--reply">
+            <div class="modal-header admin-modal-card__header">
+                <div class="admin-modal-card__title-row">
+                    <span class="admin-modal-card__icon admin-modal-card__icon--reply" aria-hidden="true"><i class="fas fa-reply"></i></span>
+                    <div>
+                        <h2 class="admin-modal-card__heading" id="modalRepondreReclamationLabel">Répondre au demandeur</h2>
+                        <p class="admin-modal-card__subheading" id="repondre-modal-titre-display"></p>
+                    </div>
+                </div>
+                <button type="button" class="admin-modal-card__close" data-bs-dismiss="modal" aria-label="Fermer">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="form-repondre-reclamation" method="post" action="">
+                <div class="modal-body admin-modal-card__body">
+                    <p class="admin-modal-card__notice"><i class="fas fa-envelope" aria-hidden="true"></i> Un e-mail personnalisé sera envoyé au demandeur. Le statut passera à <strong>Traité</strong> et la réponse sera enregistrée dans la base.</p>
+                    <label class="admin-modal-card__field-label" for="repondre-contenu">Votre réponse</label>
+                    <textarea id="repondre-contenu" name="contenu" class="form-control admin-modal-card__textarea" rows="8" required minlength="10" maxlength="10000" placeholder="Message au voyageur (minimum 10 caractères)…"></textarea>
+                    <input type="hidden" name="_token" id="repondre-form-token" value="">
+                </div>
+                <div class="modal-footer admin-modal-card__footer admin-modal-card__footer--split">
+                    <button type="button" class="admin-btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="admin-btn-primary"><i class="fas fa-paper-plane"></i> Envoyer et clôturer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <form method="get" id="admin-reclamation-filters" class="admin-filter-bar" action="{{ path('app_admin_reclamations') }}">
@@ -64,6 +147,102 @@
 <script>
 (function () {
     var form = document.getElementById('admin-reclamation-filters');
+    var modalEl = document.getElementById('modalHistoriqueReclamation');
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', function () {
+            var out = document.getElementById('modal-historique-reclamation-tbody');
+            var rows = document.querySelectorAll('#admin-reclamation-tbody tr[data-historique-row]');
+            var pdfBtn = document.getElementById('btn-historique-pdf-export');
+            if (pdfBtn && form) {
+                var fd = new FormData(form);
+                var params = new URLSearchParams();
+                fd.forEach(function (v, k) { if (v !== '') params.set(k, v); });
+                var base = pdfBtn.getAttribute('data-pdf-base') || '';
+                pdfBtn.href = base + (params.toString() ? '?' + params.toString() : '');
+            }
+            if (!out) return;
+            if (!rows.length) {
+                out.innerHTML = '<tr><td colspan="5" class="admin-historique-table-empty">Aucune réclamation ne correspond à la liste actuelle.</td></tr>';
+                return;
+            }
+            var html = '';
+            rows.forEach(function (tr) {
+                var p = tr.getAttribute('data-auteur-prenom') || '';
+                var n = tr.getAttribute('data-auteur-nom') || '';
+                var d = tr.getAttribute('data-date-ajout') || '—';
+                var titre = tr.getAttribute('data-titre') || '';
+                var b64 = tr.getAttribute('data-reponses-b64') || '';
+                html += '<tr>' +
+                    '<td>' + escapeHtml(p) + '</td>' +
+                    '<td>' + escapeHtml(n) + '</td>' +
+                    '<td>' + escapeHtml(d) + '</td>' +
+                    '<td>' + escapeHtml(titre) + '</td>' +
+                    '<td class="admin-historique-cell--responses">' + formatHistoriqueReponses(b64) + '</td>' +
+                    '</tr>';
+            });
+            out.innerHTML = html;
+        });
+    }
+    function decodeReponsesB64(b64) {
+        if (!b64) return [];
+        try {
+            var s = atob(b64);
+            var data = JSON.parse(s);
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    function formatHistoriqueReponses(b64) {
+        var reps = decodeReponsesB64(b64);
+        if (!reps.length) {
+            return '<span class="admin-historique-no-response">—</span>';
+        }
+        return reps.map(function (item) {
+            var meta = '<strong>' + escapeHtml(item.date || '') + '</strong> · ' + escapeHtml(item.admin || '');
+            var body = formatContenuMultiline(item.contenu || '');
+            return '<div class="admin-historique-reponse"><p class="admin-historique-reponse-meta">' + meta + '</p>' +
+                '<div class="admin-historique-reponse-body">' + body + '</div></div>';
+        }).join('');
+    }
+    function formatContenuMultiline(text) {
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+    function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+
+    (function bindRepondreModal() {
+        var repondreModal = document.getElementById('modalRepondreReclamation');
+        var formRepondre = document.getElementById('form-repondre-reclamation');
+        var titreDisplay = document.getElementById('repondre-modal-titre-display');
+        var tokenInput = document.getElementById('repondre-form-token');
+        var contenuTa = document.getElementById('repondre-contenu');
+        var tbodyRec = document.getElementById('admin-reclamation-tbody');
+        if (!repondreModal || !formRepondre || !titreDisplay || !tokenInput || !contenuTa) return;
+        var lastRepondreBtn = null;
+        if (tbodyRec) {
+            tbodyRec.addEventListener('click', function (e) {
+                var b = e.target.closest('.js-open-repondre-modal');
+                if (b) lastRepondreBtn = b;
+            });
+        }
+        repondreModal.addEventListener('show.bs.modal', function (event) {
+            var btn = null;
+            if (event.relatedTarget && event.relatedTarget.closest) {
+                btn = event.relatedTarget.closest('.js-open-repondre-modal');
+            }
+            if (!btn) btn = lastRepondreBtn;
+            if (!btn) return;
+            formRepondre.setAttribute('action', btn.getAttribute('data-repondre-url') || '');
+            titreDisplay.textContent = btn.getAttribute('data-repondre-titre') || '';
+            tokenInput.value = btn.getAttribute('data-repondre-token') || '';
+            contenuTa.value = '';
+        });
+    })();
+
     var tbody = document.getElementById('admin-reclamation-tbody');
     if (!form || !tbody) return;
 

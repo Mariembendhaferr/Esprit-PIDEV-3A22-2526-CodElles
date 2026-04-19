@@ -25,4 +25,9 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findOneAdmin(): ?User
+    {
+        return $this->findOneBy(['role' => 'admin'], ['id' => 'ASC']);
+    }
 }

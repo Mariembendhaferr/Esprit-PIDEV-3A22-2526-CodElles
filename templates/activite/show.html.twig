@@ -19,6 +19,9 @@
         {% for message in app.flashes('success') %}
             <div class="alert alert-success activite-alert mb-4" role="alert">{{ message }}</div>
         {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger activite-alert mb-4" role="alert">{{ message }}</div>
+        {% endfor %}
 
         <header class="activite-detail-header mb-5">
             <div class="row g-4 align-items-start">
@@ -110,7 +113,15 @@
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-                                            <p class="activite-avis-text mb-2">{{ av.commentaire|nl2br }}</p>
+                                            <p class="activite-avis-text mb-2 js-translatable-text">{{ av.commentaire|nl2br }}</p>
+                                            <div class="activite-translate-controls">
+                                                <label class="activite-translate-label" for="avis-lang-{{ av.id }}">Afficher</label>
+                                                <select id="avis-lang-{{ av.id }}" class="form-select form-select-sm activite-translate-select js-translate-display-lang" aria-label="Langue d’affichage">
+                                                    <option value="" selected disabled>Afficher…</option>
+                                                    <option value="fr">Français</option>
+                                                    <option value="en">English</option>
+                                                </select>
+                                            </div>
                                             {% if visitor_user_id is not null and av.user.id == visitor_user_id %}
                                                 <div class="activite-avis-actions">
                                                     <a href="{{ path('app_activite_avis_edit', { activiteId: activite.id, avisId: av.id }) }}" class="btn btn-sm activite-avis-btn-edit">
@@ -202,6 +213,68 @@
                 inp.addEventListener('change', paint);
             });
             paint();
+        })();
+
+        (function () {
+            function findTranslatableFromControls(wrap) {
+                if (!wrap) return null;
+                var prev = wrap.previousElementSibling;
+                if (prev && prev.classList.contains('js-translatable-text')) return prev;
+                var item = wrap.closest('.activite-avis-item');
+                return item ? item.querySelector('.js-translatable-text') : null;
+            }
+
+            function applyDisplayLanguage(selectEl) {
+                var wrap = selectEl.closest('.activite-translate-controls');
+                var textEl = findTranslatableFromControls(wrap);
+                if (!textEl) return;
+
+                var original = textEl.getAttribute('data-original-plain');
+                if (!original) {
+                    original = textEl.innerText.trim();
+                    textEl.setAttribute('data-original-plain', original);
+                }
+
+                var target = selectEl.value;
+                if (target !== 'fr' && target !== 'en') return;
+
+                var cacheAttr = 'data-cache-' + target;
+                if (selectEl.hasAttribute(cacheAttr)) {
+                    textEl.textContent = selectEl.getAttribute(cacheAttr);
+                    return;
+                }
+
+                selectEl.disabled = true;
+                fetch('{{ path('app_public_translate') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ text: original, target: target })
+                })
+                    .then(function (r) {
+                        return r.text().then(function (body) {
+                            try {
+                                return { okHttp: r.ok, payload: JSON.parse(body) };
+                            } catch (e) {
+                                return { okHttp: false, payload: null };
+                            }
+                        });
+                    })
+                    .then(function (ctx) {
+                        var payload = ctx.payload;
+                        if (!ctx.okHttp || !payload || !payload.ok || typeof payload.translated !== 'string') {
+                            return;
+                        }
+                        selectEl.setAttribute(cacheAttr, payload.translated);
+                        textEl.textContent = payload.translated;
+                    })
+                    .catch(function () {})
+                    .finally(function () { selectEl.disabled = false; });
+            }
+
+            document.querySelectorAll('.js-translate-display-lang').forEach(function (sel) {
+                sel.addEventListener('change', function () { applyDisplayLanguage(sel); });
+            });
         })();
     </script>
 {% endblock %}
