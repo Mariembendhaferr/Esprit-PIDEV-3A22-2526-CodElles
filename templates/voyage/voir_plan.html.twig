@@ -1,0 +1,273 @@
+{# templates/admin/voir_plan.html.twig #}
+{% extends "admin/base-admin.html.twig" %}
+
+{% block title %}Doura Mondo - Détails du Périple{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div class="page-title-group">
+        <h2>Exploration Administrative</h2>
+        <p>Visualisation du Plan de Séjour</p>
+    </div>
+</div>
+
+<!-- VOYAGE SUMMARY -->
+<div class="voyage-summary">
+    <div class="voyage-img-box">
+        <img src="{{ voyage.imageUrl ?: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80' }}"
+             alt="{{ voyage.titre }}"
+             onerror="this.src='https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80'">
+    </div>
+    <div class="voyage-info">
+        <div class="voyage-info-top">
+            <h3>{{ voyage.titre }}</h3>
+            <span class="voyage-id">ID: #{{ '%03d'|format(voyage.idVoyage) }}</span>
+        </div>
+        <div class="voyage-meta">
+            <div class="meta-item">
+                <i class="fa-solid fa-earth-americas"></i>
+                <span class="label">Continent</span>
+                <span class="val">{{ voyage.continent }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="label">Destination</span>
+                <span class="val">{{ voyage.destination }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fa-solid fa-clock"></i>
+                <span class="label">Durée</span>
+                <span class="val">{{ voyage.duree }} Jours</span>
+            </div>
+            <div class="meta-item">
+                <i class="fa-solid fa-coins"></i>
+                <span class="label">Budget</span>
+                <span class="val">{{ voyage.budgetEstime|number_format(0, ',', ' ') }} €</span>
+            </div>
+            <div class="meta-item">
+                <i class="fa-solid fa-users"></i>
+                <span class="label">Personnes</span>
+                <span class="val">{{ voyage.nbPersonnes }} Adulte{{ voyage.nbPersonnes > 1 ? 's' : '' }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fa-solid fa-gem"></i>
+                <span class="label">Catégorie</span>
+                <span class="val">Luxe Palace</span>
+            </div>
+        </div>
+        <div class="voyage-description">
+            <p class="label">Aperçu de l'Expérience</p>
+            <p class="text">
+                {{ voyage.description is defined and voyage.description is not empty
+                    ? voyage.description
+                    : 'Une expérience de voyage d\'exception, soigneusement conçue pour offrir le meilleur de la destination.' }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="itinerary-title">Itinéraire du Périple</div>
+
+<!-- DAILY PLAN LIST -->
+<div class="days-list">
+
+    {% set colors = ['card-green', 'card-gold', 'card-bordeaux'] %}
+
+    {% if planJournaliers is empty %}
+        <div class="empty-plan">
+            <i class="fa-solid fa-calendar-xmark"></i>
+            <p>Aucun plan journalier associé à ce voyage.</p>
+        </div>
+    {% else %}
+        {% for plan in planJournaliers %}
+        {% set colorClass = colors[loop.index0 % 3] %}
+
+        {% set currentActiviteId  = '' %}
+        {% set currentActiviteNom = '' %}
+        {% if plan.activite is defined and plan.activite is not null %}
+            {% set currentActiviteId  = plan.activite.idActivite %}
+            {% set currentActiviteNom = plan.activite.nomActivite ?? '' %}
+        {% endif %}
+
+        <div class="day-card {{ colorClass }}">
+            <div class="day-indicator">
+                <span>Jour</span>{{ plan.jour }}
+            </div>
+            <div class="day-content">
+                <div class="content-group">
+                    <p>Thème de la Journée</p>
+                    <div class="val">{{ plan.titre_jour ?? plan.titrePlan ?? 'Non défini' }}</div>
+                </div>
+                <div class="content-group">
+                    <p>Activité de Prestige</p>
+                    <div class="val">
+                        {% if plan.activite is defined and plan.activite is not null %}
+                            {{ plan.activite.nomActivite ?? plan.activite.nom ?? 'Activité non précisée' }}
+                        {% elseif plan.activites is defined and plan.activites is not empty %}
+                            {% for activite in plan.activites %}
+                                {{ activite.nomActivite ?? activite.nom ?? 'Activité' }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <em>Aucune activité associée</em>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <a href="#"
+               class="btn-edit-day"
+               title="Modifier la journée"
+               data-plan-id="{{ plan.id ?? plan.idPlan ?? '' }}"
+               data-jour="{{ plan.jour }}"
+               data-titre="{{ plan.titre_jour ?? plan.titrePlan ?? '' }}"
+               data-activite-id="{{ currentActiviteId }}"
+               data-activite-nom="{{ currentActiviteNom }}"
+               onclick="ouvrirPopupModifier(this); return false;">
+                <i class="fa-solid fa-pen-fancy"></i>
+            </a>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<!-- Bouton Terminer la consultation -->
+<div class="finish-consultation-wrapper">
+    <a href="{{ path('app_voyage_admin') }}" class="btn-finish-consultation">
+        <i class="fa-solid fa-check-circle"></i>
+        Terminer la consultation
+    </a>
+</div>
+
+
+{# ======================================================= #}
+{#  POPUP — MODIFIER UN PLAN JOURNALIER                    #}
+{# ======================================================= #}
+
+<div id="popup-overlay-modifier">
+    <div id="popup-modal-modifier">
+
+        <div class="popup-top-line"></div>
+
+        <div class="popup-header">
+            <div>
+                <div class="popup-badge">Plan Journalier</div>
+                <h2 class="popup-titre-modal">Modifier la Journée</h2>
+            </div>
+            <div id="popup-jour-tag" class="popup-jour-tag">Jour —</div>
+        </div>
+
+        <button type="button" class="popup-btn-close" onclick="fermerPopupModifier()">&#x2715;</button>
+
+        <div class="popup-divider"></div>
+
+        <form id="form-modifier-plan" method="POST" action="">
+
+            <div class="popup-body">
+
+                <div class="popup-field">
+                    <label for="popup-input-titre" class="popup-label">Thème de la journée</label>
+                    <input type="text"
+                           id="popup-input-titre"
+                           name="titre_jour"
+                           class="popup-input"
+                           placeholder="Ex : Journée culturelle et gastronomique...">
+                    <span class="popup-hint">Nom évocateur qui résume l'esprit de cette journée</span>
+                </div>
+
+                <div class="popup-field">
+                    <label for="popup-select-activite" class="popup-label">Activité de prestige</label>
+                    <div class="popup-select-wrap">
+                        <select id="popup-select-activite"
+                                name="activite_id"
+                                class="popup-select">
+                            <option value="">— Sélectionner une activité —</option>
+                        </select>
+                        <span class="popup-select-arrow">&#9660;</span>
+                    </div>
+                    <span class="popup-hint">Filtrées par destination du voyage</span>
+                </div>
+
+            </div>
+
+            <div class="popup-footer">
+                <button type="button" class="popup-btn-cancel" onclick="fermerPopupModifier()">Annuler</button>
+                <button type="submit" class="popup-btn-save">
+                    <i class="fa-solid fa-check"></i>Enregistrer
+                </button>
+            </div>
+
+        </form>
+
+        <svg class="popup-corner" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 60 L0 0 L60 0" stroke="#b89a5a" stroke-width="1" fill="none"/>
+            <path d="M0 50 L0 10 L50 10" stroke="#b89a5a" stroke-width="0.5" fill="none"/>
+        </svg>
+
+    </div>
+</div>
+
+
+{# ======================================================= #}
+{#  JAVASCRIPT                                              #}
+{# ======================================================= #}
+<script>
+    const voyageDestination = "{{ voyage.destination|e('js') }}";
+
+    function ouvrirPopupModifier(btn) {
+        const planId     = btn.dataset.planId;
+        const jour       = btn.dataset.jour;
+        const titre      = btn.dataset.titre;
+        const activiteId = btn.dataset.activiteId;
+
+        document.getElementById('popup-jour-tag').textContent = 'Jour ' + jour;
+        document.getElementById('popup-input-titre').value    = titre;
+
+        document.getElementById('form-modifier-plan').action =
+            '/admin/voyages/plan-journalier/' + planId + '/modifier';
+
+        chargerActivites(activiteId);
+
+        document.getElementById('popup-overlay-modifier').classList.add('actif');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fermerPopupModifier() {
+        document.getElementById('popup-overlay-modifier').classList.remove('actif');
+        document.body.style.overflow = '';
+    }
+
+    function chargerActivites(activiteIdCourante) {
+        const select = document.getElementById('popup-select-activite');
+        select.innerHTML = '<option value="">Chargement...</option>';
+
+        fetch('/admin/activites/par-destination?destination=' + encodeURIComponent(voyageDestination))
+            .then(r => r.json())
+            .then(data => {
+                select.innerHTML = '<option value="">— Sélectionner une activité —</option>';
+                data.forEach(function(a) {
+                    const opt    = document.createElement('option');
+                    opt.value    = a.idActivite;
+                    opt.textContent = a.nomActivite;
+                    if (String(a.idActivite) === String(activiteIdCourante)) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            })
+            .catch(function() {
+                select.innerHTML = '<option value="">Erreur de chargement</option>';
+            });
+    }
+
+    document.getElementById('popup-overlay-modifier').addEventListener('click', function(e) {
+        if (e.target === this) fermerPopupModifier();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fermerPopupModifier();
+    });
+</script>
+
+{% endblock %}

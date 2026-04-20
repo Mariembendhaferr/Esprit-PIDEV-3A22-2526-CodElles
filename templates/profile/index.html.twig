@@ -1,0 +1,279 @@
+{% extends 'base_client.html.twig' %}
+{% import 'macros.html.twig' as m %}
+{% block title %}Mon Profil{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #2E1010, #5C0000);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 2px; }
+    .dicebear-option {
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        background: white;
+        padding: 2px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .dicebear-option:hover,
+    .dicebear-option.selected {
+        border-color: #C9A84C;
+        transform: scale(1.15);
+        box-shadow: 0 4px 14px rgba(201,168,76,0.5);
+    }
+    .avatar-style-tab {
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+        background: white;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    .avatar-style-tab.active {
+        background: #5C0000;
+        color: white;
+        border-color: #5C0000;
+    }
+    .avatar-grid-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+        min-height: 60px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{% if success %}
+    <div class="alert alert-success">✅ Profil mis à jour avec succès !</div>
+{% endif %}
+
+{# ── Profile header ── #}
+<div class="profile-header">
+    <div>
+        {{ m.photo(user.photoProfil, user.prenom, user.nom, 80) }}
+    </div>
+    <div>
+        <h4 class="fw-bold mb-1">{{ user.prenom }} {{ user.nom }}</h4>
+        <div class="opacity-75">{{ user.email }}</div>
+        <div class="opacity-75 small">
+            {{ user.role == 'admin' ? '👑 Administrateur' : '✈️ Voyageur' }}
+        </div>
+        {% if user.averageRating > 0 %}
+            <div class="mt-1">
+                {% for i in 1..5 %}{{ i <= user.averageRating|round ? '⭐' : '☆' }}{% endfor %}
+                <span class="fw-bold" style="color:#C9A84C;">
+                    {{ user.averageRating|number_format(1) }} ({{ user.totalRatings }} avis)
+                </span>
+            </div>
+        {% endif %}
+    </div>
+    <div class="ms-auto text-end">
+        <div class="small opacity-75">Satisfaction app</div>
+        <div class="fw-bold" style="color:#C9A84C;">
+            {{ appAvg }}% ({{ appTotal }} avis)
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+
+    {# ── Left: Edit form ── #}
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">✏️ Modifier le profil</h5>
+            <form method="POST" action="{{ path('profile') }}" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom</label>
+                        <input type="text" name="nom" class="form-control"
+                               value="{{ user.nom }}">
+                        {% if errors.nom is defined %}
+                            <div class="error-msg">{{ errors.nom }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom</label>
+                        <input type="text" name="prenom" class="form-control"
+                               value="{{ user.prenom }}">
+                        {% if errors.prenom is defined %}
+                            <div class="error-msg">{{ errors.prenom }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom d'utilisateur</label>
+                        <input type="text" name="username" class="form-control"
+                               value="{{ user.username }}">
+                        {% if errors.username is defined %}
+                            <div class="error-msg">{{ errors.username }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Téléphone</label>
+                        <input type="text" name="telephone" class="form-control"
+                               value="{{ user.telephone }}">
+                        {% if errors.telephone is defined %}
+                            <div class="error-msg">{{ errors.telephone }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if user.role == 'admin' %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Rôle</label>
+                            <select name="role" class="form-select">
+                                <option value="admin"    {{ user.role == 'admin'    ? 'selected' : '' }}>Admin</option>
+                                <option value="voyageur" {{ user.role == 'voyageur' ? 'selected' : '' }}>Voyageur</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Statut</label>
+                            <select name="statut" class="form-select">
+                                <option value="actif"   {{ user.statut == 'actif'   ? 'selected' : '' }}>Actif</option>
+                                <option value="inactif" {{ user.statut == 'inactif' ? 'selected' : '' }}>Inactif</option>
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Nouveau mot de passe</label>
+                        <input type="password" name="new_password" class="form-control"
+                               placeholder="Laisser vide pour ne pas changer">
+                        {% if errors.password is defined %}
+                            <div class="error-msg">{{ errors.password }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Photo de profil</label>
+                        <input type="file" name="photo" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">💾 Sauvegarder</button>
+                    <a href="{{ path('home') }}" class="btn btn-outline-secondary">Annuler</a>
+                    <a href="{{ path('qr_profile') }}" class="btn btn-outline-dark ms-auto">📱 Ma carte QR</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Right: Avatar + Actions ── #}
+    <div class="col-md-4">
+
+        {# DiceBear Avatar — separate route, no validation conflict #}
+        <div class="card p-3 mb-3">
+            <h6 class="fw-bold mb-2">🎭 Choisir un avatar</h6>
+
+            {# Style tabs #}
+            <div class="d-flex flex-wrap gap-1 mb-2">
+                <button type="button" class="avatar-style-tab active"
+                        onclick="switchStyle('adventurer', this)">🧑 Cartoon</button>
+                <button type="button" class="avatar-style-tab"
+                        onclick="switchStyle('bottts', this)">🤖 Robot</button>
+                <button type="button" class="avatar-style-tab"
+                        onclick="switchStyle('pixel-art', this)">👾 Pixel</button>
+                <button type="button" class="avatar-style-tab"
+                        onclick="switchStyle('fun-emoji', this)">😄 Emoji</button>
+            </div>
+
+            <form method="POST" action="{{ path('profile_avatar') }}">
+                <div class="avatar-grid-container" id="avatarGrid">
+                    {% set seeds = ['felix','bella','max','luna','oliver','zoe','leo','mia','noah','emma','liam','sofia'] %}
+                    {% for seed in seeds %}
+                        {% set av_name = 'adventurer/' ~ seed %}
+                        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed={{ seed }}"
+                             class="dicebear-option {{ user.photoProfil == av_name ? 'selected' : '' }}"
+                             data-avatar="{{ av_name }}"
+                             data-seed="{{ seed }}"
+                             data-style="adventurer"
+                             onclick="selectProfileAvatar('{{ av_name }}', this)"
+                             alt="{{ seed }}">
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="selected_avatar" id="profileSelectedAvatar"
+                       value="{{ user.photoProfil starts with 'adventurer/' or
+                                 user.photoProfil starts with 'bottts/' or
+                                 user.photoProfil starts with 'pixel-art/' or
+                                 user.photoProfil starts with 'fun-emoji/'
+                                 ? user.photoProfil : '' }}">
+                <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                    ✅ Appliquer l'avatar
+                </button>
+            </form>
+        </div>
+
+        {# Actions rapides #}
+        <div class="card p-3">
+            <h6 class="fw-bold mb-2">⚡ Actions rapides</h6>
+            <div class="d-flex flex-column gap-2">
+                <a href="{{ path('app_rating') }}" class="btn btn-outline-warning btn-sm">
+                    ⭐ Évaluer l'application
+                </a>
+                <a href="{{ path('community_index') }}" class="btn btn-outline-info btn-sm">
+                    🌍 Voir la communauté
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+const seeds = ['felix','bella','max','luna','oliver','zoe','leo','mia','noah','emma','liam','sofia'];
+let currentStyle = 'adventurer';
+
+function switchStyle(style, tabEl) {
+    currentStyle = style;
+
+    // Update tab styles
+    document.querySelectorAll('.avatar-style-tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+
+    // Rebuild avatar grid
+    const grid = document.getElementById('avatarGrid');
+    grid.innerHTML = '';
+
+    seeds.forEach(seed => {
+        const avName = style + '/' + seed;
+        const img = document.createElement('img');
+        img.src = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+        img.className = 'dicebear-option';
+        img.dataset.avatar = avName;
+        img.dataset.seed = seed;
+        img.dataset.style = style;
+        img.alt = seed;
+        img.title = seed;
+
+        // Mark as selected if matches current profile
+        const current = document.getElementById('profileSelectedAvatar').value;
+        if (current === avName) img.classList.add('selected');
+
+        img.onclick = () => selectProfileAvatar(avName, img);
+        grid.appendChild(img);
+    });
+}
+
+function selectProfileAvatar(name, el) {
+    document.querySelectorAll('.dicebear-option').forEach(a => {
+        a.classList.remove('selected');
+    });
+    el.classList.add('selected');
+    document.getElementById('profileSelectedAvatar').value = name;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,255 @@
+{# templates/admin/users.html.twig #}
+{% extends 'base_admin.html.twig' %}
+{% import 'macros.html.twig' as m %}
+{% block title %}Gestion Utilisateurs - Doura Mondo{% endblock %}
+{% block page_title %}👥 Utilisateurs{% endblock %}
+
+{% block stylesheets %}
+<style>
+.filter-bar {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-card);
+}
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+.section-header .count-tag {
+    font-size: .8rem;
+    color: var(--text-light);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+.table-wrap {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+.table-wrap .table { margin: 0; }
+.table thead th { background: var(--surface-alt); padding: .9rem 1rem; }
+.uname { color: var(--text-light); font-size: .83rem; }
+.acts { display: flex; gap: 4px; align-items: center; }
+.abt {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.abt:hover { transform: scale(1.15); }
+.abt-view { background: rgba(37,99,235,.09); color: #1d4ed8; }
+.abt-edit { background: rgba(5,150,105,.09); color: #065f46; }
+.abt-del { background: rgba(220,38,38,.09); color: #991b1b; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="section-header">
+    <div class="d-flex align-items-center gap-2">
+        <span class="count-tag">{{ totalCount }} membre{{ totalCount > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('admin_statistics') }}" class="btn btn-outline-success btn-sm">📊 Statistiques</a>
+        <a href="{{ path('admin_user_add') }}" class="btn btn-primary btn-sm">➕ Ajouter</a>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" action="{{ path('admin_users') }}" id="searchForm">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="search" value="{{ search }}"
+                       class="form-control" id="searchInput"
+                       placeholder="🔍 Rechercher…">
+            </div>
+            <div class="col-md-2">
+                <select name="search_by" class="form-select" id="searchBySelect">
+                    <option value="nom" {{ searchBy == 'nom' ? 'selected' : '' }}>Nom & Prénom</option>
+                    <option value="username" {{ searchBy == 'username' ? 'selected' : '' }}>Username</option>
+                    <option value="email" {{ searchBy == 'email' ? 'selected' : '' }}>Email</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="statut" class="form-select" id="statutSelect">
+                    <option value="tous" {{ filterStatut == 'tous' ? 'selected' : '' }}>Tous statuts</option>
+                    <option value="actif" {{ filterStatut == 'actif' ? 'selected' : '' }}>Actifs</option>
+                    <option value="inactif" {{ filterStatut == 'inactif' ? 'selected' : '' }}>Inactifs</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="role" class="form-select" id="roleSelect">
+                    <option value="tous" {{ filterRole == 'tous' ? 'selected' : '' }}>Tous rôles</option>
+                    <option value="admin" {{ filterRole == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="voyageur" {{ filterRole == 'voyageur' ? 'selected' : '' }}>Voyageur</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 btn-sm">Filtrer</button>
+                <a href="{{ path('admin_users') }}" class="btn btn-outline-secondary w-100 btn-sm">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="table-wrap">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for user in users %}
+                    <tr data-user-row>
+                        <td>
+                            {{ m.photo(user.photoProfil, user.prenom, user.nom, 36) }}
+                        </td>
+                        <td class="fw-semibold">{{ user.nom }}</td>
+                        <td>{{ user.prenom }}</td>
+                        <td class="uname">@{{ user.username }}</td>
+                        <td style="font-size:.83rem;">{{ user.email }}</td>
+                        <td style="font-size:.83rem;">{{ user.telephone ?? '—' }}</td>
+                        <td>
+                            <span class="badge-role {{ user.role == 'admin' ? 'badge-admin' : 'badge-voyageur' }}">
+                                {{ user.role == 'admin' ? '👑 Admin' : '✈️ Voyageur' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge-role {{ user.statut == 'actif' ? 'badge-actif' : 'badge-inactif' }}">
+                                {{ user.statut == 'actif' ? '✓ Actif' : '✗ Inactif' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="acts">
+                                <a href="{{ path('admin_user_view', {id: user.idUser}) }}"
+                                   class="abt abt-view" title="Voir">👁</a>
+                                <a href="{{ path('admin_user_edit', {id: user.idUser}) }}"
+                                   class="abt abt-edit" title="Modifier">✏️</a>
+                                <form method="POST"
+                                      action="{{ path('admin_user_delete', {id: user.idUser}) }}"
+                                      onsubmit="return confirm('Supprimer {{ user.prenom }} {{ user.nom }} ?')"
+                                      style="display:inline;">
+                                    <button type="submit" class="abt abt-del" title="Supprimer">🗑</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted fst-italic">
+                            Aucun utilisateur trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Debounce function to limit filter calls
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Dynamic client-side search for admin users
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBySelect = document.getElementById('searchBySelect');
+    const statutSelect = document.getElementById('statutSelect');
+    const roleSelect = document.getElementById('roleSelect');
+    const tableRows = document.querySelectorAll('tbody tr[data-user-row]');
+    const noResultsRow = document.querySelector('tbody tr td[colspan="9"]')?.closest('tr');
+
+    if (!searchInput || tableRows.length === 0) return;
+
+    const filterUsers = debounce(function() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const searchBy = searchBySelect ? searchBySelect.value : 'nom';
+        const statut = statutSelect ? statutSelect.value : 'tous';
+        const role = roleSelect ? roleSelect.value : 'tous';
+
+        tableRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            let matchesSearch = true;
+            let matchesStatut = true;
+            let matchesRole = true;
+
+            // Search logic
+            if (searchTerm !== '') {
+                let searchText = '';
+                if (searchBy === 'nom') {
+                    searchText = (cells[1]?.textContent + ' ' + cells[2]?.textContent).toLowerCase();
+                } else if (searchBy === 'username') {
+                    searchText = cells[3]?.textContent.toLowerCase();
+                } else if (searchBy === 'email') {
+                    searchText = cells[4]?.textContent.toLowerCase();
+                } else {
+                    searchText = Array.from(cells).map(td => td.textContent.toLowerCase()).join(' ');
+                }
+                matchesSearch = searchText.includes(searchTerm);
+            }
+
+            // Statut filter
+            if (statut !== 'tous') {
+                const statutText = cells[7]?.textContent.toLowerCase();
+                matchesStatut = statutText.includes(statut);
+            }
+
+            // Role filter
+            if (role !== 'tous') {
+                const roleText = cells[6]?.textContent.toLowerCase();
+                matchesRole = roleText.includes(role);
+            }
+
+            row.style.display = (matchesSearch && matchesStatut && matchesRole) ? '' : 'none';
+        });
+
+        // Show/hide "no results" message
+        const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+        if (noResultsRow) {
+            noResultsRow.style.display = visibleRows.length === 0 ? '' : 'none';
+        }
+    }, 300); // 300ms debounce
+
+    searchInput.addEventListener('input', filterUsers);
+    if (searchBySelect) searchBySelect.addEventListener('change', filterUsers);
+    if (statutSelect) statutSelect.addEventListener('change', filterUsers);
+    if (roleSelect) roleSelect.addEventListener('change', filterUsers);
+});
+</script>
+{% endblock %}

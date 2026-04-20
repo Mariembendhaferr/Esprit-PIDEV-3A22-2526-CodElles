@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activite{% endblock %}
+
+{% block body %}
+    <h1>Activite</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ activite.idActivite }}</td>
+            </tr>
+            <tr>
+                <th>NomActivite</th>
+                <td>{{ activite.nomActivite }}</td>
+            </tr>
+            <tr>
+                <th>DescriptionActivite</th>
+                <td>{{ activite.descriptionActivite }}</td>
+            </tr>
+            <tr>
+                <th>CategorieActivite</th>
+                <td>{{ activite.categorieActivite }}</td>
+            </tr>
+            <tr>
+                <th>CoutActivite</th>
+                <td>{{ activite.coutActivite }}</td>
+            </tr>
+            <tr>
+                <th>DureeActivite</th>
+                <td>{{ activite.dureeActivite }}</td>
+            </tr>
+            <tr>
+                <th>DisponibiliteActivite</th>
+                <td>{{ activite.disponibiliteActivite ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>LocalisationActivite</th>
+                <td>{{ activite.localisationActivite }}</td>
+            </tr>
+            <tr>
+                <th>CapaciteMaxActivite</th>
+                <td>{{ activite.capaciteMaxActivite }}</td>
+            </tr>
+            <tr>
+                <th>Places réservées</th>
+                <td>{{ activite.placesReserves }}</td>
+            </tr>
+            <tr>
+                <th>Places restantes</th>
+                <td>{{ activite.placesRestantes }}</td>
+            </tr>
+            <tr>
+                <th>ImageActivite</th>
+                <td>{{ activite.imageActivite }}</td>
+            </tr>
+            <tr>
+                <th>LatitudeActivite</th>
+                <td>{{ activite.latitudeActivite }}</td>
+            </tr>
+            <tr>
+                <th>LongitudeActivite</th>
+                <td>{{ activite.longitudeActivite }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_activite_index') }}">back to list</a>
+
+    <a href="{{ path('app_activite_edit', {'id': activite.idActivite}) }}">edit</a>
+
+    {{ include('activite/_delete_form.html.twig') }}
+{% endblock %}

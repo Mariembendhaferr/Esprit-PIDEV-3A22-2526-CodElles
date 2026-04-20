@@ -1,0 +1,330 @@
+{# templates/base_client.html.twig - Version CLIENT avec navbar luxe + footer #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Doura Mondo - Voyages d'Exception{% endblock %}</title>
+
+    {# Google Fonts #}
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Cinzel:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    {# Bootstrap 5 + Icons #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+{% set noLayout = (block('no_layout') is defined) and (block('no_layout') == 'true') %}
+
+{% if not noLayout %}
+
+    {# ========== NAVBAR LUXE (amis) ========== #}
+    <nav class="navbar-luxe">
+        <div class="navbar-luxe-container">
+            <a class="navbar-brand-luxe" href="{{ path('home') }}">
+                <div class="logo-luxe-wrapper">
+                    <h1 class="logo-script">Doura Mondo</h1>
+                    <div class="logo-subtitle">Voyages d'Exception</div>
+                </div>
+            </a>
+            <button class="navbar-toggler-luxe" type="button" onclick="toggleMobileNav()">
+                <span>☰</span>
+            </button>
+            <div class="navbar-collapse-luxe" id="mainNavbarLuxe">
+                <ul class="navbar-nav-luxe">
+                    <li class="nav-item-luxe">
+                        <a class="nav-link-luxe" href="{{ path('home') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item-luxe">
+                        <a class="nav-link-luxe" href="#">Destinations</a>
+                    </li>
+                    <li class="nav-item-luxe">
+                        <a class="nav-link-luxe" href="#">Inspirations</a>
+                    </li>
+                    <li class="nav-item-luxe">
+                        <a class="nav-link-luxe" href="#">Activités</a>
+                    </li>
+                    <li class="nav-item-luxe">
+                        <a class="nav-link-luxe" href="#">Réservations</a>
+                    </li>
+                    {% if app.session.get('user_id') %}
+                        <li class="nav-item-luxe">
+                            <a class="nav-link-luxe" href="{{ path('user_dashboard') }}">Mon Dashboard</a>
+                        </li>
+                        <li class="nav-item-luxe">
+                            <a class="nav-link-luxe" href="{{ path('logout') }}">Déconnexion</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item-luxe">
+                            <a class="nav-link-luxe" href="{{ path('login') }}">Connexion</a>
+                        </li>
+                        <li class="nav-item-luxe">
+                            <a class="nav-link-luxe btn-inscription" href="{{ path('register') }}">Inscription</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {# ========== CONTENU PRINCIPAL ========== #}
+    <main class="client-main">
+        {% block body %}{% endblock %}
+    </main>
+
+    {# ========== FOOTER LUXE ========== #}
+    <footer class="footer-luxe">
+        <div class="footer-luxe-container">
+            <div class="footer-luxe-grid">
+                <div class="footer-luxe-col">
+                    <div class="footer-logo-block">
+                        <a href="{{ path('home') }}" class="footer-logo-script">Doura Mondo</a>
+                        <div class="footer-or-line"></div>
+                        <p class="footer-tagline">Spécialistes du voyage sur mesure depuis plus d'une décennie.</p>
+                        <div class="footer-socials">
+                            <a class="footer-social-btn" href="#"><i class="fab fa-twitter"></i></a>
+                            <a class="footer-social-btn" href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a class="footer-social-btn" href="#"><i class="fab fa-youtube"></i></a>
+                            <a class="footer-social-btn" href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a class="footer-social-btn" href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-luxe-col">
+                    <div class="footer-col-title">Contact</div>
+                    <div class="footer-contact-item"><i class="fa fa-map-marker-alt"></i><span>Tunis, Tunisie</span></div>
+                    <div class="footer-contact-item"><i class="fa fa-phone-alt"></i><span>+216 29 327 092</span></div>
+                    <div class="footer-contact-item"><i class="fa fa-envelope"></i><span>douramondo@gmail.com</span></div>
+                </div>
+                <div class="footer-luxe-col">
+                    <div class="footer-col-title">Liens</div>
+                    <a class="footer-link" href="#">À Propos</a>
+                    <a class="footer-link" href="#">Contact</a>
+                    <a class="footer-link" href="#">Nos Destinations</a>
+                    <a class="footer-link" href="#">Conditions Générales</a>
+                </div>
+                <div class="footer-luxe-col">
+                    <div class="footer-col-title">Services</div>
+                    <a class="footer-link" href="#">Sur Mesure</a>
+                    <a class="footer-link" href="#">Conciergerie</a>
+                    <a class="footer-link" href="#">Assistance 24/7</a>
+                    <a class="footer-link" href="#">Voyages de Noces</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2025 <a href="{{ path('home') }}">Doura Mondo</a> — Tous droits réservés.</p>
+                <p>Fait avec <span style="color:#8B2C2C;">♥</span> pour les voyageurs d'exception</p>
+            </div>
+        </div>
+    </footer>
+
+{% endif %}
+
+{% block javascripts %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function toggleMobileNav() {
+    const nav = document.getElementById('mainNavbarLuxe');
+    nav.classList.toggle('open');
+}
+</script>
+
+<style>
+:root {
+    --bordeaux: #8B2C2C;
+    --bordeaux-fonce: #6B1E1E;
+    --gold: #C9A84C;
+    --fond-nav: #FCF8F0;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Outfit', sans-serif;
+    background: #F1F8FF;
+    min-height: 100vh;
+}
+.client-main { min-height: 60vh; padding: 40px 0; }
+
+/* ========== NAVBAR LUXE ========== */
+.navbar-luxe {
+    background-color: var(--fond-nav);
+    padding: 0 60px;
+    min-height: 72px;
+    border-bottom: 1px solid rgba(139, 44, 44, 0.10);
+}
+.navbar-luxe-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 72px;
+}
+.navbar-brand-luxe { text-decoration: none; }
+.logo-luxe-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+.logo-script {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 42px;
+    font-weight: 500;
+    color: var(--bordeaux);
+    line-height: 1;
+}
+.logo-subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    letter-spacing: 4.5px;
+    text-transform: uppercase;
+    color: #9B7240;
+    margin-left: 5px;
+}
+.navbar-toggler-luxe {
+    display: none;
+    background: none;
+    border: 1px solid rgba(139,44,44,0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.navbar-collapse-luxe { display: flex; align-items: center; }
+.navbar-nav-luxe { display: flex; list-style: none; margin: 0; padding: 0; gap: 0; }
+.nav-item-luxe { list-style: none; }
+.nav-link-luxe {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3f2c24;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-left: 32px;
+    padding: 0 0 5px 0;
+    position: relative;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.nav-link-luxe:hover { color: var(--bordeaux); }
+.nav-link-luxe::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--bordeaux);
+    transition: 0.3s;
+}
+.nav-link-luxe:hover::after { width: 100%; }
+.btn-inscription {
+    background: var(--bordeaux);
+    color: white !important;
+    padding: 8px 20px !important;
+    border-radius: 30px;
+    margin-left: 20px;
+}
+.btn-inscription::after { display: none; }
+.btn-inscription:hover { background: var(--bordeaux-fonce); }
+
+/* ========== FOOTER LUXE ========== */
+.footer-luxe {
+    background: linear-gradient(160deg, #faf7f2 0%, #f0e8d8 50%, #faf7f2 100%);
+    padding: 60px 0 0;
+    border-top: 2px solid;
+    border-image: linear-gradient(90deg, transparent, #9B7240, #8B2C2C, #9B7240, transparent) 1;
+}
+.footer-luxe-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.footer-luxe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; margin-bottom: 40px; }
+.footer-logo-script {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 42px;
+    font-weight: 400;
+    color: #8B2C2C;
+    line-height: 1;
+    text-decoration: none;
+}
+.footer-or-line { width: 40px; height: 1px; background: linear-gradient(90deg, #8B2C2C, #9B7240); margin: 20px 0; }
+.footer-tagline { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-style: italic; color: #6b4f3e; margin-bottom: 20px; }
+.footer-socials { display: flex; gap: 8px; }
+.footer-social-btn {
+    width: 36px; height: 36px;
+    background: #8B2C2C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+}
+.footer-social-btn:hover { background: #6B1E1E; }
+.footer-col-title {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+    margin-bottom: 24px;
+}
+.footer-contact-item { display: flex; gap: 12px; margin-bottom: 14px; }
+.footer-contact-item i { color: #9B7240; width: 16px; }
+.footer-contact-item span { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: #4a3728; }
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #4a3728;
+    text-decoration: none;
+}
+.footer-link::before {
+    content: '';
+    width: 12px;
+    height: 1px;
+    background: #9B7240;
+}
+.footer-link:hover { color: #8B2C2C; padding-left: 4px; }
+.footer-copyright {
+    margin-top: 40px;
+    border-top: 1px solid rgba(139,44,44,0.1);
+    padding: 18px 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.footer-copyright p { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(74,55,40,0.5); margin: 0; }
+@media (max-width: 991px) {
+    .navbar-toggler-luxe { display: block; }
+    .navbar-collapse-luxe {
+        position: fixed;
+        top: 72px;
+        left: -100%;
+        width: 280px;
+        height: calc(100vh - 72px);
+        background: var(--fond-nav);
+        padding: 20px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+    .navbar-collapse-luxe.open { left: 0; }
+    .navbar-nav-luxe { flex-direction: column; }
+    .nav-link-luxe { margin-left: 0; padding: 12px 0; display: block; }
+    .btn-inscription { margin-left: 0; margin-top: 10px; text-align: center; }
+    .navbar-luxe { padding: 0 20px; }
+    .logo-script { font-size: 28px; }
+}
+@media (max-width: 768px) {
+    .footer-luxe-grid { grid-template-columns: 1fr; gap: 30px; }
+    .footer-copyright { flex-direction: column; text-align: center; gap: 10px; }
+    .client-main { padding: 20px 0; }
+}
+</style>
+</body>
+</html>

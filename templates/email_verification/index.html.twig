@@ -1,0 +1,115 @@
+{# templates/email_verification/index.html.twig #}
+{% extends 'base_auth.html.twig' %}
+{% block title %}Vérification Email{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .verify-card {
+        max-width: 480px;
+        margin: 4rem auto;
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+        text-align: center;
+    }
+    .code-inputs {
+        display: flex;
+        gap: 0.6rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+    .code-inputs input {
+        width: 48px;
+        height: 56px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .code-inputs input:focus {
+        border-color: #5C0000;
+        box-shadow: 0 0 0 3px rgba(92,0,0,0.1);
+    }
+    .timer {
+        font-size: 0.9rem;
+        color: #9A8060;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="verify-card">
+    <div style="font-size:3rem;">📧</div>
+    <h4 class="fw-bold mt-2">Vérification Email</h4>
+    <p class="text-muted">Un code a été envoyé à <strong>{{ email }}</strong></p>
+
+    {% if error %}
+        {% if error starts with 'success:' %}
+            <div class="alert alert-success">{{ error[8:] }}</div>
+        {% else %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+    {% endif %}
+
+    <div class="timer" id="timer">Code expire dans: 15:00</div>
+
+    <form method="POST" action="{{ path('email_verification') }}" id="verifyForm">
+        <div class="code-inputs" id="codeContainer">
+            {% for i in 1..6 %}
+                <input type="text" name="code{{ i }}" id="code{{ i }}"
+                       maxlength="1" inputmode="numeric" autocomplete="off">
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mb-2">
+            ✅ Vérifier le code
+        </button>
+    </form>
+
+    <form method="POST" action="{{ path('email_verification') }}">
+        <input type="hidden" name="action" value="resend">
+        <button type="submit" class="btn btn-outline-secondary w-100 mb-2">
+            🔄 Renvoyer le code
+        </button>
+    </form>
+
+    <a href="{{ path('register') }}" class="btn btn-link text-muted">← Retour</a>
+</div>
+
+<script>
+    const inputs = document.querySelectorAll('.code-inputs input');
+    inputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && i < inputs.length - 1) {
+                inputs[i + 1].focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value === '' && i > 0) {
+                inputs[i - 1].focus();
+            }
+        });
+    });
+    if (inputs[0]) inputs[0].focus();
+
+    let seconds = {{ expiresIn }};
+    const timerEl = document.getElementById('timer');
+    function updateTimer() {
+        if (seconds <= 0) {
+            timerEl.textContent = 'Code expiré !';
+            timerEl.style.color = '#ef4444';
+            return;
+        }
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        timerEl.textContent = `Code expire dans: ${m}:${s}`;
+        seconds--;
+        setTimeout(updateTimer, 1000);
+    }
+    updateTimer();
+</script>
+{% endblock %}

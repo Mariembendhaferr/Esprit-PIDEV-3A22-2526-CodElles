@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ma carte QR{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .qr-card {
+        max-width: 400px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+        text-align: center;
+    }
+    #qrCanvas { margin: 1.5rem auto; display: block; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="qr-card">
+    <div style="font-size:2.5rem;">📱</div>
+    <h5 class="fw-bold mt-2">{{ user.prenom }} {{ user.nom }}</h5>
+    <p class="text-muted">@{{ user.username }} · {{ user.email }}</p>
+
+    <canvas id="qrCanvas"></canvas>
+
+    <p class="text-muted small mt-2">
+        Scannez ce QR code pour voir le profil
+    </p>
+    <a href="{{ path('profile') }}" class="btn btn-outline-secondary mt-2">
+        ← Retour au profil
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+new QRCode(document.getElementById('qrCanvas'), {
+    text: "{{ qrData }}",
+    width: 256,
+    height: 256,
+    colorDark: "#5C0000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+});
+</script>
+{% endblock %}

@@ -1,0 +1,482 @@
+{# templates/user/dashboard.html.twig #}
+{% extends 'base_client.html.twig' %}
+{% block title %}Mon Dashboard - Doura Mondo{% endblock %}
+{% block page_title %}Mon Dashboard{% endblock %}
+
+{% block stylesheets %}
+<style>
+.profile-banner {
+    background: linear-gradient(135deg, #1c0404 0%, #3a0000 50%, #5C0000 100%);
+    border-radius: 18px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(92,0,0,0.22);
+}
+.profile-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+.pb-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C, #E8C97A);
+    color: #2E1010;
+    font-size: 1.6rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid rgba(201,168,76,0.40);
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+    overflow: hidden;
+}
+.pb-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.pb-info { position: relative; z-index: 1; flex: 1; }
+.pb-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--gold);
+    margin-bottom: .15rem;
+}
+.pb-user { font-size: .82rem; color: rgba(242,230,204,.45); margin-bottom: .4rem; }
+.pb-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: 3px 12px;
+    background: rgba(201,168,76,.12);
+    border: 1px solid rgba(201,168,76,.22);
+    border-radius: 20px;
+    font-size: .72rem; font-weight: 600;
+    color: var(--gold);
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.quick-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: var(--transition);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .55rem;
+}
+.quick-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(201,168,76,.35);
+    color: var(--text-main);
+}
+.quick-card .qc-ico { font-size: 2.2rem; }
+.quick-card .qc-label {
+    font-weight: 600; font-size: .88rem;
+    color: var(--crimson-deep);
+}
+.quick-card .qc-sub { font-size: .72rem; color: var(--text-light); }
+
+.info-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+    box-shadow: var(--shadow-card);
+}
+.info-card h6 {
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+}
+.info-row {
+    display: flex;
+    gap: .5rem;
+    padding: .6rem 0;
+    border-bottom: 1px solid rgba(201,168,76,.06);
+    font-size: .88rem;
+}
+.info-row:last-child { border-bottom: none; }
+.info-key {
+    color: var(--text-light);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .3px;
+    width: 120px;
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+.info-val { color: var(--text-main); }
+
+.weather-search {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(201,168,76,0.15);
+}
+.weather-widget {
+    background: linear-gradient(135deg, #fff9e8 0%, #fff2df 100%);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.carbon-widget {
+    margin-bottom: 1.5rem;
+}
+.carbon-widget .card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+.city-search-container {
+    position: relative;
+}
+.city-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.city-suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+.city-suggestion-item:hover {
+    background-color: #f5f5f5;
+}
+.city-suggestion-item .city-name {
+    font-weight: 600;
+}
+.city-suggestion-item .country-name {
+    font-size: 0.75rem;
+    color: #666;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="profile-banner">
+    <div class="pb-avatar">
+        {% if user.photoProfil and user.photoProfil != 'default.jpg' %}
+            <img src="/{{ user.photoProfil }}" alt="avatar">
+        {% else %}
+            {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+        {% endif %}
+    </div>
+    <div class="pb-info">
+        <div class="pb-name">{{ user.prenom }} {{ user.nom }}</div>
+        <div class="pb-user">@{{ user.username }}</div>
+        <div class="pb-badge">✈️ Voyageur</div>
+        {% if user.averageRating > 0 %}
+            <div style="margin-top:.5rem; position:relative; z-index:1;">
+                {% for i in 1..5 %}{{ i <= user.averageRating|round ? '⭐' : '☆' }}{% endfor %}
+                <span style="color:var(--gold); font-weight:700; font-size:.85rem;">
+                    {{ user.averageRating|number_format(1) }}
+                </span>
+            </div>
+        {% endif %}
+    </div>
+    <div style="position:relative;z-index:1;text-align:right;">
+        <div style="font-size:.7rem;color:rgba(201,168,76,.35);letter-spacing:1px;">AUJOURD'HUI</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);">
+            {{ "now"|date("d M Y") }}
+        </div>
+    </div>
+</div>
+
+<div class="weather-search">
+    <form method="GET" action="{{ path('user_dashboard') }}" class="d-flex gap-2">
+        <input type="text" 
+               name="weather_city" 
+               value="{{ current_city ?? 'Tunis' }}" 
+               class="form-control" 
+               placeholder="🌍 Entrez une ville (ex: Paris, New York, Dubai)...">
+        <button type="submit" class="btn btn-primary">
+            🔍 Voir Météo
+        </button>
+    </form>
+    <small class="text-muted mt-2 d-block">
+        💡 Astuce: Pour plus de précision, utilisez "Ville,Pays" (ex: Paris,FR)
+    </small>
+</div>
+
+{% if weather %}
+<div class="weather-widget">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <div style="font-size: 3rem;">
+                {% if weather.demo %}
+                    🌤️
+                {% else %}
+                    <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="{{ weather.description }}" width="60">
+                {% endif %}
+            </div>
+            <div>
+                <h5 class="mb-0" style="color: #5C0000; font-family: 'Cormorant Garamond', serif;">
+                    Météo à {{ weather.city }}
+                </h5>
+                <div class="text-muted small">{{ weather.description }}</div>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="display-6 fw-bold" style="color: #C9A84C;">{{ weather.temp }}°C</div>
+            <div class="small text-muted">Ressenti {{ weather.feels_like }}°C</div>
+            {% if weather.demo %}
+                <span class="badge bg-warning text-dark">🧪 Mode Démo</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% elseif current_city %}
+<div class="alert alert-warning">
+    ❌ Impossible de récupérer la météo pour "{{ current_city }}".
+</div>
+{% endif %}
+
+<div class="carbon-widget">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold mb-0">
+                    <span style="font-size:1.2rem;">🌍</span> Empreinte carbone
+                </h6>
+                <span class="badge bg-success">Éco-conseil</span>
+            </div>
+            
+            {% if carbonEstimate %}
+            <div class="row align-items-center mb-3">
+                <div class="col-4 text-center">
+                    <div class="display-6 fw-bold" style="color: #2E7D32;">
+                        {{ carbonEstimate.co2_kg }}
+                    </div>
+                    <small class="text-muted">kg CO₂</small>
+                </div>
+                <div class="col-8">
+                    <div class="progress mb-2" style="height: 8px;">
+                        {% set percent = (carbonEstimate.co2_kg / 500 * 100) %}
+                        {% if percent > 100 %}{% set percent = 100 %}{% endif %}
+                        <div class="progress-bar bg-success" style="width: {{ percent }}%">
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        🌳 {{ carbonEstimate.trees_to_offset }} arbre(s) à planter
+                    </div>
+                    <div class="small text-muted">
+                        💡 {{ carbonEstimate.eco_tip }}
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            {% else %}
+            <div class="alert alert-info text-center small mb-3">
+                🌍 Sélectionnez une ville de départ et d'arrivée pour calculer votre empreinte carbone
+            </div>
+            {% endif %}
+
+            <form method="GET" action="{{ path('user_dashboard') }}" id="carbonForm">
+                <input type="hidden" name="weather_city" value="{{ current_city ?? 'Tunis' }}">
+                <div class="row g-2">
+                    <div class="col-12 mb-2">
+                        <label class="small text-muted">📍 Départ</label>
+                        <div class="city-search-container">
+                            <input type="text" 
+                                   id="fromCityInput" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Ex: Paris, Tunis, London..."
+                                   value="{{ app.request.query.get('from_city', '') }}">
+                            <input type="hidden" name="from_lat" id="fromLat" value="{{ app.request.query.get('from_lat', '') }}">
+                            <input type="hidden" name="from_lon" id="fromLon" value="{{ app.request.query.get('from_lon', '') }}">
+                            <input type="hidden" name="from_city" id="fromCity" value="{{ app.request.query.get('from_city', '') }}">
+                            <div id="fromSuggestions" class="city-suggestions"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="small text-muted">📍 Arrivée</label>
+                        <div class="city-search-container">
+                            <input type="text" 
+                                   id="toCityInput" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Ex: Paris, Tunis, London..."
+                                   value="{{ app.request.query.get('to_city', '') }}">
+                            <input type="hidden" name="to_lat" id="toLat" value="{{ app.request.query.get('to_lat', '') }}">
+                            <input type="hidden" name="to_lon" id="toLon" value="{{ app.request.query.get('to_lon', '') }}">
+                            <input type="hidden" name="to_city" id="toCity" value="{{ app.request.query.get('to_city', '') }}">
+                            <div id="toSuggestions" class="city-suggestions"></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-sm btn-outline-success w-100">
+                            ✈️ Calculer l'empreinte carbone
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="small text-muted mt-2 text-center">
+                <i class="fas fa-leaf text-success"></i> Entrez n'importe quelle ville dans le monde
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="quick-grid">
+    <a href="{{ path('user_qr_code') }}" class="quick-card">
+        <div class="qc-ico">📱</div>
+        <div class="qc-label">QR Code</div>
+        <div class="qc-sub">Ma carte de profil</div>
+    </a>
+    <a href="{{ path('app_rating') }}" class="quick-card">
+        <div class="qc-ico">⭐</div>
+        <div class="qc-label">Évaluer</div>
+        <div class="qc-sub">Notez l'application</div>
+    </a>
+    <a href="{{ path('profile') }}" class="quick-card">
+        <div class="qc-ico">👤</div>
+        <div class="qc-label">Mon Profil</div>
+        <div class="qc-sub">Modifier mes infos</div>
+    </a>
+    <a href="{{ path('community_index') }}" class="quick-card">
+        <div class="qc-ico">🌍</div>
+        <div class="qc-label">Communauté</div>
+        <div class="qc-sub">Découvrez les membres</div>
+    </a>
+</div>
+
+<div class="info-card">
+    <h6>👤 Informations du compte</h6>
+    <div class="info-row">
+        <div class="info-key">Email</div>
+        <div class="info-val">{{ user.email }}</div>
+    </div>
+    <div class="info-row">
+        <div class="info-key">Statut</div>
+        <div class="info-val">
+            <span style="color:{{ user.statut == 'actif' ? '#059669' : '#9ca3af' }}; font-weight:600;">
+                ● {{ user.statut|capitalize }}
+            </span>
+        </div>
+    </div>
+    {% if user.dateInscription %}
+    <div class="info-row">
+        <div class="info-key">Membre depuis</div>
+        <div class="info-val">{{ user.dateInscription|date('d/m/Y') }}</div>
+    </div>
+    {% endif %}
+    {% if user.telephone %}
+    <div class="info-row">
+        <div class="info-key">Téléphone</div>
+        <div class="info-val">+216 {{ user.telephone }}</div>
+    </div>
+    {% endif %}
+    {% if user.derniereConnexion %}
+    <div class="info-row">
+        <div class="info-key">Dernière connexion</div>
+        <div class="info-val">{{ user.derniereConnexion|date('d/m/Y H:i') }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function setupCityAutocomplete(inputId, hiddenLatId, hiddenLonId, hiddenCityId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    const suggestionsDiv = document.getElementById(suggestionsId);
+    let timeoutId = null;
+
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+
+        timeoutId = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        suggestionsDiv.style.display = 'none';
+                        return;
+                    }
+                    
+                    suggestionsDiv.innerHTML = '';
+                    data.forEach(place => {
+                        const div = document.createElement('div');
+                        div.className = 'city-suggestion-item';
+                        const cityName = place.display_name.split(',')[0];
+                        const countryName = place.address?.country || '';
+                        div.innerHTML = `
+                            <div class="city-name">${cityName}</div>
+                            <div class="country-name">${countryName}</div>
+                        `;
+                        div.onclick = () => {
+                            input.value = cityName;
+                            document.getElementById(hiddenLatId).value = place.lat;
+                            document.getElementById(hiddenLonId).value = place.lon;
+                            document.getElementById(hiddenCityId).value = cityName;
+                            suggestionsDiv.style.display = 'none';
+                        };
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    suggestionsDiv.style.display = 'none';
+                });
+        }, 500);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+}
+
+setupCityAutocomplete('fromCityInput', 'fromLat', 'fromLon', 'fromCity', 'fromSuggestions');
+setupCityAutocomplete('toCityInput', 'toLat', 'toLon', 'toCity', 'toSuggestions');
+</script>
+{% endblock %}
