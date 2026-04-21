@@ -195,8 +195,7 @@ function deleteReservation() {
     if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) {
         return;
     }
-//hiiiiiii
-    // 🔥 THE FIX: Use the exact URL from the Controller above
+    
     const url = `/activities/client/reservation/${currentReservationId}/delete`;
     
     console.log("🗑️ Sending delete request to:", url);
