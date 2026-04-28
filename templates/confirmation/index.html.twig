@@ -2,226 +2,478 @@
 
 {% block title %}Confirmation – Doura Mondo{% endblock %}
 
+{% block stylesheets %}
+<style>
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-40px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.5); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes checkPop {
+        0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+        60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes pulseBorder {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,44,44,0.4); }
+        50%       { box-shadow: 0 0 0 12px rgba(139,44,44,0); }
+    }
+    @keyframes shimmer {
+        0%   { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+    @keyframes floatPlane {
+        0%, 100% { transform: translateY(0) rotate(-5deg); }
+        50%       { transform: translateY(-10px) rotate(-5deg); }
+    }
+    @keyframes confettiFall {
+        0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @keyframes countUp {
+        from { opacity: 0; transform: scale(0.8); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes lineExpand {
+        from { width: 0; }
+        to   { width: 100%; }
+    }
+    @keyframes badgeBounce {
+        0%, 100% { transform: translateY(0); }
+        30%       { transform: translateY(-6px); }
+        60%       { transform: translateY(-3px); }
+    }
+
+    .confetti-piece {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        top: -20px;
+        border-radius: 2px;
+        animation: confettiFall linear forwards;
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    .confirm-card {
+        background: rgba(255,255,255,0.97);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(212,184,150,0.4);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.10);
+        animation: fadeInUp 0.7s ease 0.3s both;
+    }
+
+    .check-circle {
+        width: 65px;
+        height: 65px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+        border: 2px solid rgba(255,255,255,0.4);
+        animation: pulseBorder 2s ease-in-out infinite, checkPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) 0.5s both;
+    }
+
+    .confirm-hero {
+        background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%);
+        padding: 20px 20px;
+        text-align: center;
+        color: white;
+        animation: fadeInDown 0.6s ease both;
+        position: relative;
+        overflow: hidden;
+    }
+    .confirm-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #FFD700, transparent);
+        animation: shimmer 2s ease-in-out infinite;
+        background-size: 200% auto;
+    }
+
+    .badge-success {
+        display: inline-block;
+        background: rgba(107,30,30,0.9);
+        border-radius: 60px;
+        padding: 6px 20px;
+        margin-bottom: 14px;
+        animation: badgeBounce 1s ease 1s both;
+    }
+
+    .floating-plane {
+        position: absolute;
+        top: 14px;
+        right: 30px;
+        font-size: 30px;
+        opacity: 0.15;
+        animation: floatPlane 3s ease-in-out infinite;
+    }
+
+    .section-left  { animation: fadeInLeft  0.7s ease 0.6s both; }
+    .section-right { animation: fadeInRight 0.7s ease 0.8s both; }
+
+    .deco-line {
+        height: 2px;
+        background: linear-gradient(90deg, #8B2C2C, #D4A853, #8B2C2C);
+        border-radius: 2px;
+        margin-bottom: 16px;
+        animation: lineExpand 0.8s ease 1s both;
+    }
+
+    .amount-block {
+        background: linear-gradient(135deg, #6B1E1E, #8B2C2C);
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 16px;
+        animation: scaleIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) 1s both;
+    }
+    .amount-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.9rem;
+        color: white;
+        font-weight: 600;
+        animation: countUp 0.5s ease 1.2s both;
+    }
+
+    .client-section { animation: fadeInUp 0.6s ease 1s both; }
+
+    .btn-confirm {
+        display: inline-block;
+        padding: 10px 22px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+    .btn-confirm:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .btn-confirm:active { transform: scale(0.97); }
+
+    .btn-primary-conf {
+        background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+        color: white;
+    }
+    .btn-gold-conf {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #6B1E1E;
+        box-shadow: 0 4px 15px rgba(255,165,0,0.3);
+    }
+    .btn-outline-conf {
+        background: transparent;
+        border: 2px solid #D4B896;
+        color: #6B1E1E;
+    }
+
+    .btns-group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #F0E8D8;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.6s ease 1.2s both;
+    }
+
+    .info-label {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #9B7240;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .info-value {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 13px;
+        color: #3f2c24;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .section-head-icon {
+        width: 36px;
+        height: 36px;
+        background: #8B2C2C;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .info-row { margin-bottom: 12px; }
+
+    .email-notice {
+        background: #FDF8F0;
+        border-left: 4px solid #8B2C2C;
+        padding: 14px 20px;
+        border-radius: 10px;
+        margin-bottom: 22px;
+        animation: fadeInLeft 0.6s ease 0.9s both;
+    }
+
+    .card-footer-strip {
+        background: #FDF8F0;
+        padding: 16px 30px;
+        text-align: center;
+        border-top: 1px solid #F0E8D8;
+        animation: fadeInUp 0.5s ease 1.4s both;
+    }
+
+    @media print {
+        .btns-group, .floating-plane, .confetti-piece { display: none !important; }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 
 <audio id="sound-start" src="{{ asset('sounds/start.mp3') }}" preload="auto"></audio>
 
 <!-- Hero Banner -->
-<div style="background: linear-gradient(135deg, #6B1E1E 0%, #8B2C2C 50%, #6B1E1E 100%); padding: 35px 20px; text-align: center; color: white;">
-    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0; letter-spacing: 2px;">✨ Réservation confirmée ✨</h2>
-    <p style="font-family: 'Montserrat', sans-serif; font-size: 12px; letter-spacing: 3px; margin: 8px 0 0; opacity: 0.85; text-transform: uppercase;">Votre voyage est officiellement réservé</p>
+<div class="confirm-hero">
+    <div class="floating-plane">✈️</div>
+    <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem; margin:0; letter-spacing:2px;">✨ Réservation confirmée ✨</h2>
+    <p style="font-family:'Montserrat',sans-serif; font-size:11px; letter-spacing:3px; margin:6px 0 0; opacity:0.85; text-transform:uppercase;">Votre voyage est officiellement réservé</p>
 </div>
 
-<!-- Contenu principal -->
-<div style="background: linear-gradient(rgba(254,246,232,0.75), rgba(250,240,220,0.80)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; padding: 60px 20px; min-height: 70vh;">
+<!-- Fond -->
+<div style="background: linear-gradient(rgba(254,246,232,0.80), rgba(250,240,220,0.85)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600') center/cover no-repeat; padding: 30px 20px; min-height: 70vh;">
     <div class="container">
-        <div style="max-width: 960px; margin: 0 auto;">
+        <div style="max-width: 780px; margin: 0 auto;">
 
-            <!-- Message de succès animé -->
-            <div style="text-align: center; margin-bottom: 30px;">
-                <div style="display: inline-block; background: rgba(107,30,30,0.9); border-radius: 60px; padding: 8px 24px; margin-bottom: 20px;">
-                    <span style="font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 2px; color: #E8DDC9; text-transform: uppercase;">✓ Transaction réussie</span>
+            <!-- Badge succès -->
+            <div style="text-align:center; margin-bottom:18px;">
+                <div class="badge-success">
+                    <span style="font-family:'Montserrat',sans-serif; font-size:11px; letter-spacing:2px; color:#E8DDC9; text-transform:uppercase;">✓ Transaction réussie</span>
                 </div>
             </div>
 
             <!-- Carte principale -->
-            <div style="background: rgba(255,255,255,0.95); border-radius: 24px; overflow: hidden; border: 1px solid rgba(212,184,150,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.08);">
+            <div class="confirm-card">
 
-                <!-- En-tête avec icône -->
-                <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); padding: 30px; text-align: center;">
-                    <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid rgba(255,255,255,0.3);">
-                        <i class="bi bi-check-lg" style="font-size: 45px; color: white;"></i>
+                <!-- En-tête -->
+                <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); padding:22px; text-align:center; position:relative; overflow:hidden;">
+                    <div style="position:absolute; top:-40px; left:-40px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.04);"></div>
+                    <div style="position:absolute; bottom:-30px; right:-30px; width:110px; height:110px; border-radius:50%; background:rgba(255,255,255,0.04);"></div>
+
+                    <div class="check-circle">
+                        <i class="bi bi-check-lg" style="font-size:32px; color:white;"></i>
                     </div>
-                    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0 0 8px; color: white; letter-spacing: 1px;">Merci, {{ client.prenom }} {{ client.nom }} !</h2>
-                    <p style="font-family: 'Montserrat', sans-serif; font-size: 13px; color: rgba(255,255,255,0.85); margin: 0;">Votre réservation a été confirmée avec succès</p>
+                    <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; margin:0 0 6px; color:white; letter-spacing:1px; animation: fadeInUp 0.5s ease 0.8s both; opacity:0;">
+                        Merci, {{ client.prenom }} {{ client.nom }} !
+                    </h2>
+                    <p style="font-family:'Montserrat',sans-serif; font-size:12px; color:rgba(255,255,255,0.85); margin:0; animation: fadeInUp 0.5s ease 1s both; opacity:0;">
+                        Votre réservation a été confirmée avec succès
+                    </p>
                 </div>
 
-                <!-- Corps de la confirmation -->
-                <div style="padding: 40px;">
+                <!-- Corps -->
+                <div style="padding:24px;">
 
-                    <!-- Message personnalisé -->
-                    <div style="background: #FDF8F0; border-left: 4px solid #8B2C2C; padding: 18px 24px; border-radius: 12px; margin-bottom: 30px;">
-                        <p style="font-family: 'Montserrat', sans-serif; font-size: 13px; color: #5a3a2a; margin: 0; line-height: 1.6;">
-                            <i class="bi bi-envelope-paper" style="margin-right: 10px; color: #8B2C2C;"></i>
-                            Un email de confirmation a été envoyé à <strong>{{ client.email }}</strong>. 
+                    <!-- Notice email -->
+                    <div class="email-notice">
+                        <p style="font-family:'Montserrat',sans-serif; font-size:12px; color:#5a3a2a; margin:0; line-height:1.6;">
+                            <i class="bi bi-envelope-paper" style="margin-right:8px; color:#8B2C2C;"></i>
+                            Un email de confirmation a été envoyé à <strong>{{ client.email }}</strong>.
                             Vous pouvez présenter cet email lors de votre départ.
                         </p>
                     </div>
 
                     <div class="row">
-                        <!-- Détails du voyage -->
-                        <div class="col-md-6">
-                            <div style="margin-bottom: 30px;">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #F0E8D8;">
-                                    <div style="width: 40px; height: 40px; background: #8B2C2C; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-suitcase-lg" style="color: white; font-size: 18px;"></i>
-                                    </div>
-                                    <h3 style="font-family: 'Playfair Display', serif; color: #6B1E1E; font-size: 1.2rem; margin: 0;">Détails du voyage</h3>
+
+                        <!-- Détails voyage -->
+                        <div class="col-md-6 section-left">
+                            <div class="section-head">
+                                <div class="section-head-icon">
+                                    <i class="bi bi-suitcase-lg" style="color:white; font-size:16px;"></i>
                                 </div>
+                                <h3 style="font-family:'Playfair Display',serif; color:#6B1E1E; font-size:1.1rem; margin:0;">Détails du voyage</h3>
+                            </div>
+                            <div class="deco-line"></div>
 
-                                <div style="padding-left: 10px;">
-                                    <div style="margin-bottom: 16px;">
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Destination</span>
-                                        <span style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #2c2c2c;">{{ destination }}</span>
-                                    </div>
-
-                                    <div style="margin-bottom: 16px;">
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Référence réservation</span>
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; color: #8B2C2C;">#{{ reservation.id }}</span>
-                                    </div>
-
-                                    <div style="margin-bottom: 16px;">
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Période</span>
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #3f2c24;">
-                                            Du <strong>{{ reservation.dateDepart|date('d/m/Y') }}</strong> au <strong>{{ reservation.dateRetour|date('d/m/Y') }}</strong>
+                            <div style="padding-left:8px;">
+                                <div class="info-row">
+                                    <span class="info-label">Destination</span>
+                                    <span style="font-family:'Playfair Display',serif; font-size:1.1rem; color:#2c2c2c;">{{ destination }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Référence réservation</span>
+                                    <span style="font-family:'Montserrat',sans-serif; font-size:13px; font-weight:600; color:#8B2C2C;">#{{ reservation.id }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Période</span>
+                                    <span class="info-value">
+                                        Du <strong>{{ reservation.dateDepart|date('d/m/Y') }}</strong> au <strong>{{ reservation.dateRetour|date('d/m/Y') }}</strong>
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Nombre de voyageurs</span>
+                                    <span class="info-value">
+                                        <i class="bi bi-people" style="margin-right:4px;"></i> {{ reservation.nombrePersonnes }} personne(s)
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Statut</span>
+                                    {% if reservation.statut == 'payé' %}
+                                        <span style="display:inline-block; background:#28a745; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">
+                                            <i class="bi bi-check-circle"></i> Payé
                                         </span>
-                                    </div>
-
-                                    <div style="margin-bottom: 16px;">
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Nombre de voyageurs</span>
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #3f2c24;">
-                                            <i class="bi bi-people" style="margin-right: 5px;"></i> {{ reservation.nombrePersonnes }} personne(s)
+                                    {% else %}
+                                        <span style="display:inline-block; background:#ffc107; color:#2c2c2c; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;">
+                                            <i class="bi bi-clock"></i> En attente
                                         </span>
-                                    </div>
-
-                                    <div>
-                                        <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Statut</span>
-                                        {% if reservation.statut == 'payé' %}
-                                            <span style="display: inline-block; background: #28a745; color: white; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">
-                                                <i class="bi bi-check-circle"></i> Payé
-                                            </span>
-                                        {% else %}
-                                            <span style="display: inline-block; background: #ffc107; color: #2c2c2c; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">
-                                                <i class="bi bi-clock"></i> En attente de paiement
-                                            </span>
-                                        {% endif %}
-                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Paiement -->
-                        <div class="col-md-6">
-                            <div style="margin-bottom: 30px;">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #F0E8D8;">
-                                    <div style="width: 40px; height: 40px; background: #8B2C2C; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-credit-card" style="color: white; font-size: 18px;"></i>
-                                    </div>
-                                    <h3 style="font-family: 'Playfair Display', serif; color: #6B1E1E; font-size: 1.2rem; margin: 0;">Paiement</h3>
+                        <div class="col-md-6 section-right">
+                            <div class="section-head">
+                                <div class="section-head-icon">
+                                    <i class="bi bi-credit-card" style="color:white; font-size:16px;"></i>
                                 </div>
-
-                                {% if paiement %}
-                                    <div style="padding-left: 10px;">
-                                        <div style="background: linear-gradient(135deg, #6B1E1E, #8B2C2C); border-radius: 16px; padding: 25px; text-align: center; margin-bottom: 20px;">
-                                            <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.7); text-transform: uppercase; margin-bottom: 10px;">Montant total réglé</div>
-                                            <div style="font-family: 'Playfair Display', serif; font-size: 2.2rem; color: white; font-weight: 600;">
-                                                {{ paiement.montant|number_format(2, ',', ' ') }} €
-                                            </div>
-                                            {% if reservation.montantTotal > paiement.montant %}
-                                                <div style="margin-top: 8px; font-size: 12px; color: #FFD700;">
-                                                    <i class="bi bi-tag"></i> Réduction appliquée : -{{ ((reservation.montantTotal - paiement.montant) / reservation.montantTotal * 100)|round }}%
-                                                </div>
-                                                <div style="font-size: 11px; color: rgba(255,255,255,0.7);">
-                                                    Prix initial : {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
-                                                </div>
-                                            {% endif %}
-                                        </div>
-
-                                        <div style="margin-bottom: 12px;">
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Mode de paiement</span>
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #3f2c24;">
-                                                <i class="bi bi-credit-card-2-front" style="margin-right: 5px;"></i> {{ paiement.modePaiement }}
-                                            </span>
-                                        </div>
-
-                                        <div style="margin-bottom: 12px;">
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Référence transaction</span>
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 12px; color: #8B2C2C; font-family: monospace;">{{ paiement.referencePaiement }}</span>
-                                        </div>
-
-                                        <div>
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9B7240; text-transform: uppercase; display: block; margin-bottom: 5px;">Date du paiement</span>
-                                            <span style="font-family: 'Montserrat', sans-serif; font-size: 13px; color: #3f2c24;">
-                                                {{ paiement.datePaiement|date('d/m/Y à H:i') }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <div style="text-align: center; padding: 40px 20px; background: #FDF8F0; border-radius: 16px;">
-                                        <i class="bi bi-hourglass-split" style="font-size: 48px; color: #D4B896;"></i>
-                                        <p style="font-family: 'Montserrat', sans-serif; font-size: 13px; color: #9B7240; margin-top: 15px;">
-                                            En attente de paiement<br>
-                                            <a href="{{ path('app_payment', {'id': reservation.id}) }}" style="color: #8B2C2C; text-decoration: none; font-weight: 600;">Procéder au paiement →</a>
-                                        </p>
-                                    </div>
-                                {% endif %}
+                                <h3 style="font-family:'Playfair Display',serif; color:#6B1E1E; font-size:1.1rem; margin:0;">Paiement</h3>
                             </div>
+                            <div class="deco-line"></div>
+
+                            {% if paiement %}
+                                <div style="padding-left:8px;">
+                                    <div class="amount-block">
+                                        <div style="font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.7); text-transform:uppercase; margin-bottom:8px;">Montant total réglé</div>
+                                        <div class="amount-value">{{ paiement.montant|number_format(2, ',', ' ') }} €</div>
+                                        {% if reservation.montantTotal > paiement.montant %}
+                                            <div style="margin-top:6px; font-size:11px; color:#FFD700;">
+                                                <i class="bi bi-tag"></i> Réduction : -{{ ((reservation.montantTotal - paiement.montant) / reservation.montantTotal * 100)|round }}%
+                                            </div>
+                                            <div style="font-size:10px; color:rgba(255,255,255,0.7);">
+                                                Prix initial : {{ reservation.montantTotal|number_format(2, ',', ' ') }} €
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Mode de paiement</span>
+                                        <span class="info-value"><i class="bi bi-credit-card-2-front" style="margin-right:4px;"></i> {{ paiement.modePaiement }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Référence transaction</span>
+                                        <span style="font-size:12px; color:#8B2C2C; font-family:monospace;">{{ paiement.referencePaiement }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Date du paiement</span>
+                                        <span class="info-value">{{ paiement.datePaiement|date('d/m/Y à H:i') }}</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div style="text-align:center; padding:30px 20px; background:#FDF8F0; border-radius:14px;">
+                                    <i class="bi bi-hourglass-split" style="font-size:40px; color:#D4B896;"></i>
+                                    <p style="font-family:'Montserrat',sans-serif; font-size:12px; color:#9B7240; margin-top:12px;">
+                                        En attente de paiement<br>
+                                        <a href="{{ path('app_payment', {'id': reservation.id}) }}" style="color:#8B2C2C; text-decoration:none; font-weight:600;">Procéder au paiement →</a>
+                                    </p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <!-- Informations client -->
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #F0E8D8;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <div style="width: 36px; height: 36px; background: #9B7240; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-person" style="color: white; font-size: 16px;"></i>
+                    <!-- Infos client -->
+                    <div class="client-section" style="margin-top:16px; padding-top:16px; border-top:1px solid #F0E8D8;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                            <div style="width:32px; height:32px; background:#9B7240; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                <i class="bi bi-person" style="color:white; font-size:14px;"></i>
                             </div>
-                            <h4 style="font-family: 'Playfair Display', serif; color: #6B1E1E; font-size: 1rem; margin: 0;">Informations du voyageur</h4>
+                            <h4 style="font-family:'Playfair Display',serif; color:#6B1E1E; font-size:0.95rem; margin:0;">Informations du voyageur</h4>
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <p style="margin-bottom: 8px;"><span style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: #9B7240;">Nom complet</span><br>
-                                <strong style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #2c2c2c;">{{ client.prenom }} {{ client.nom }}</strong></p>
+                                <p style="margin-bottom:6px;">
+                                    <span class="info-label">Nom complet</span>
+                                    <strong style="font-family:'Montserrat',sans-serif; font-size:13px; color:#2c2c2c;">{{ client.prenom }} {{ client.nom }}</strong>
+                                </p>
                             </div>
                             <div class="col-md-4">
-                                <p style="margin-bottom: 8px;"><span style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: #9B7240;">Email</span><br>
-                                <strong style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #2c2c2c;">{{ client.email }}</strong></p>
+                                <p style="margin-bottom:6px;">
+                                    <span class="info-label">Email</span>
+                                    <strong style="font-family:'Montserrat',sans-serif; font-size:13px; color:#2c2c2c;">{{ client.email }}</strong>
+                                </p>
                             </div>
                             <div class="col-md-4">
-                                <p style="margin-bottom: 8px;"><span style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: #9B7240;">Téléphone</span><br>
-                                <strong style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: #2c2c2c;">{{ client.telephone }}</strong></p>
+                                <p style="margin-bottom:6px;">
+                                    <span class="info-label">Téléphone</span>
+                                    <strong style="font-family:'Montserrat',sans-serif; font-size:13px; color:#2c2c2c;">{{ client.telephone }}</strong>
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Boutons d'action -->
-                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #F0E8D8; flex-wrap: wrap;">
-                        <a href="{{ path('app_reservation') }}" style="background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: white; text-decoration: none; display: inline-block; transition: 0.3s;">
+                    <!-- Boutons -->
+                    <div class="btns-group">
+                        <a href="{{ path('app_reservation') }}" class="btn-confirm btn-primary-conf">
                             <i class="bi bi-plus-circle"></i> Nouvelle réservation
                         </a>
-                        
-                        <a href="{{ path('app_confirmation_download_pdf', {'id': reservation.id}) }}" 
-                           style="background: linear-gradient(135deg, #8B2C2C, #6B1E1E); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: white; text-decoration: none; display: inline-block; transition: 0.3s; border: 2px solid #D4A853;">
+                        <a href="{{ path('app_confirmation_download_pdf', {'id': reservation.id}) }}" class="btn-confirm btn-primary-conf" style="border:2px solid #D4A853;">
                             <i class="bi bi-download"></i> Télécharger PDF
                         </a>
-                        
-                        {# BOUTON GAGNER DES POINTS AVEC SON SIMULTANÉ #}
-                        <a href="{{ path('app_quiz', {'id': reservation.id}) }}" 
-                           id="btn-quiz"
-                           style="background: linear-gradient(135deg, #FFD700, #FFA500); border: none; padding: 14px 32px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 50px; color: #6B1E1E; text-decoration: none; display: inline-block; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">
+                        <a href="#" id="btn-quiz" class="btn-confirm btn-gold-conf">
                             <i class="bi bi-question-circle"></i> 🎯 Gagner des points
                         </a>
-
-                        <button onclick="window.print();" style="background: transparent; border: 2px solid #D4B896; padding: 12px 28px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1px; border-radius: 50px; color: #6B1E1E; cursor: pointer; transition: 0.3s;">
+                        <button onclick="window.print();" class="btn-confirm btn-outline-conf">
                             <i class="bi bi-printer"></i> Imprimer
                         </button>
                     </div>
 
-                    <!-- Note de bas -->
-                    <div style="text-align: center; margin-top: 30px;">
-                        <p style="font-family: 'Montserrat', sans-serif; font-size: 11px; color: #9B7240; margin: 0;">
+                    <div style="text-align:center; margin-top:18px;">
+                        <p style="font-family:'Montserrat',sans-serif; font-size:11px; color:#9B7240; margin:0;">
                             <i class="bi bi-envelope"></i> Un email récapitulatif vous a été envoyé. Conservez-le précieusement.
                         </p>
                     </div>
                 </div>
 
-                <!-- Pied de carte -->
-                <div style="background: #FDF8F0; padding: 20px 40px; text-align: center; border-top: 1px solid #F0E8D8;">
-                    <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" alt="Visa" style="height: 30px; opacity: 0.6;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/349/349228.png" alt="Mastercard" style="height: 30px; opacity: 0.6;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174861.png" alt="PayPal" style="height: 30px; opacity: 0.6;">
+                <!-- Footer carte -->
+                <div class="card-footer-strip">
+                    <div style="display:flex; justify-content:center; gap:16px; margin-bottom:10px;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" alt="Visa" style="height:24px; opacity:0.6;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/349/349228.png" alt="Mastercard" style="height:24px; opacity:0.6;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174861.png" alt="PayPal" style="height:24px; opacity:0.6;">
                     </div>
-                    <p style="font-family: 'Montserrat', sans-serif; font-size: 10px; color: #9B7240; margin: 0;">
+                    <p style="font-family:'Montserrat',sans-serif; font-size:10px; color:#9B7240; margin:0;">
                         Merci de votre confiance – Doura Mondo • Voyages d'Exception depuis 2025
                     </p>
                 </div>
@@ -231,26 +483,49 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btn-quiz');
-    var audio = document.getElementById('sound-start');
-    
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ===== CONFETTIS =====
+    const colors = ['#8B2C2C','#D4A853','#FFD700','#6B1E1E','#9B7240','#E8DDC9'];
+    for (let i = 0; i < 60; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.width  = (Math.random() * 7 + 5) + 'px';
+        el.style.height = (Math.random() * 7 + 5) + 'px';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        el.style.animationDuration = (Math.random() * 2.5 + 2) + 's';
+        el.style.animationDelay   = (Math.random() * 1.5) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+    }
+
+    // ===== FIX opacity:0 =====
+    document.querySelectorAll('[style*="opacity:0"]').forEach(el => {
+        el.addEventListener('animationstart', () => el.style.opacity = '');
+    });
+
+    // ===== BOUTON QUIZ + SON =====
+    const btn   = document.getElementById('btn-quiz');
+    const audio = document.getElementById('sound-start');
+    const targetUrl = "{{ path('app_quiz', {'id': reservation.id}) }}";
+
     if (btn && audio) {
-        audio.load();
-        
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function (e) {
             e.preventDefault();
-            var url = this.href;
-            
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
             audio.currentTime = 0;
-            var playPromise = audio.play();
-            
-            window.location.href = url;
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(function(error) {
-                    console.log('Audio non disponible:', error);
+            const p = audio.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    audio.addEventListener('ended', () => { window.location.href = targetUrl; });
+                }).catch(() => {
+                    setTimeout(() => { window.location.href = targetUrl; }, 500);
                 });
+            } else {
+                setTimeout(() => { window.location.href = targetUrl; }, 500);
             }
         });
     }
