@@ -7,38 +7,39 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
+#[ORM\Table(name: 'client')]
 class Client
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_client')]   // ← nom colonne base pi
     private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(name: 'nom', length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(name: 'prenom', length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
     private ?string $prenom = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(name: 'date_naissance', type: 'date')]
     #[Assert\NotBlank]
     #[Assert\Type('\DateTimeInterface')]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: 'email', length: 255, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
     private ?string $email = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(name: 'telephone', length: 50)]
     #[Assert\NotBlank]
     private ?string $telephone = null;
 
-    #[ORM\Column(options: ['default' => 0])]
+    #[ORM\Column(name: 'points', options: ['default' => 0])]
     private ?int $points = 0;
 
     // Getters and Setters

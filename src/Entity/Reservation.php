@@ -9,52 +9,52 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[ORM\Table(name: 'reservation')]
 class Reservation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_reservation')]  // ← nom colonne base pi
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'id_client', referencedColumnName: 'id_client', nullable: false)]  // ← FK base pi
     private ?Client $client = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'id_voyage', referencedColumnName: 'id', nullable: false)]
     private ?Voyage $voyage = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(name: 'date_reservation', type: 'date')]
     private ?\DateTimeInterface $dateReservation = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(name: 'date_depart', type: 'date')]
     #[Assert\NotBlank(message: 'La date de départ est obligatoire.')]
     #[Assert\Type('\DateTimeInterface')]
     #[Assert\GreaterThanOrEqual('today', message: 'La date de départ doit être aujourd\'hui ou dans le futur.')]
     private ?\DateTimeInterface $dateDepart = null;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(name: 'date_retour', type: 'date')]
     #[Assert\NotBlank(message: 'La date de retour est obligatoire.')]
     #[Assert\Type('\DateTimeInterface')]
     #[Assert\GreaterThan(propertyPath: 'dateDepart', message: 'La date de retour doit être après la date de départ.')]
     private ?\DateTimeInterface $dateRetour = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'nombre_personnes', type: 'integer')]
     #[Assert\NotBlank]
     #[Assert\Positive(message: 'Le nombre de personnes doit être au moins 1.')]
     #[Assert\LessThanOrEqual(value: 20, message: 'Maximum 20 personnes par réservation.')]
     private ?int $nombrePersonnes = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(name: 'montant_total', type: 'decimal', precision: 10, scale: 2)]
     private ?float $montantTotal = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(name: 'statut', length: 50)]
     private ?string $statut = 'en attente';
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(name: 'id_agent', nullable: true)]
     private ?int $idAgent = null;
 
-    // 👇 AJOUTEZ CETTE RELATION
     #[ORM\OneToMany(mappedBy: 'reservation', targetEntity: Paiement::class, cascade: ['persist', 'remove'])]
     private Collection $paiements;
 
@@ -65,8 +65,6 @@ class Reservation
 
     /**
      * Calcule le montant total basé sur le budgetEstime du voyage
-     * budgetEstime = prix par personne pour la durée du voyage
-     * On ajuste proportionnellement si les dates diffèrent de la durée standard du voyage
      */
     public function calculerMontant(): void
     {
@@ -80,7 +78,6 @@ class Reservation
         $dureevoyage = $this->voyage->getDuree() ?: 1;
         $budgetParPersonne = $this->voyage->getBudgetEstime() ?: 0;
 
-        // Prix par personne par jour = budgetEstime / durée du voyage
         $prixParPersonneParJour = $budgetParPersonne / $dureevoyage;
 
         $this->montantTotal = round($prixParPersonneParJour * $days * $this->nombrePersonnes, 2);
@@ -107,14 +104,7 @@ class Reservation
     public function getIdAgent(): ?int { return $this->idAgent; }
     public function setIdAgent(?int $idAgent): static { $this->idAgent = $idAgent; return $this; }
 
-    // 👇 AJOUTEZ CES METHODES
-    /**
-     * @return Collection<int, Paiement>
-     */
-    public function getPaiements(): Collection
-    {
-        return $this->paiements;
-    }
+    public function getPaiements(): Collection { return $this->paiements; }
 
     public function addPaiement(Paiement $paiement): static
     {

@@ -4,7 +4,7 @@ namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class SerpApiService
+class SerpService
 {
     private string $apiKey;
     private HttpClientInterface $client;

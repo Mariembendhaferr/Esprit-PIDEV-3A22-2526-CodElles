@@ -32,6 +32,6 @@ services:
             $groqApiKey: '%env(GROQ_API_KEY)%'
     
 
-    App\service\SerpApiService:
+    App\service\SerpService:
         arguments:
             $serpApiKey: '%env(SERPAPI_API_KEY)%'

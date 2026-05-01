@@ -7,34 +7,35 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PaiementRepository::class)]
+#[ORM\Table(name: 'paiement')]
 class Paiement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'id_paiement')]  // ← nom colonne base pi
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'paiements')]
+    #[ORM\JoinColumn(name: 'id_reservation', referencedColumnName: 'id_reservation', nullable: false)]  // ← FK base pi
     private ?Reservation $reservation = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(name: 'montant', type: 'decimal', precision: 10, scale: 2)]
     #[Assert\Positive]
     private ?float $montant = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(name: 'date_paiement', type: 'datetime')]
     private ?\DateTimeInterface $datePaiement = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(name: 'mode_paiement', length: 100)]
     private ?string $modePaiement = null;
 
-    #[ORM\Column(length: 100, unique: true)]
+    #[ORM\Column(name: 'reference_paiement', length: 255, unique: true)]
     private ?string $referencePaiement = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $statut = 'payé';
+    #[ORM\Column(name: 'statut', length: 50)]
+    private ?string $statut = 'en attente';
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(name: 'type_paiement', length: 100)]
     private ?string $typePaiement = 'Complet';
 
     // Getters and Setters
