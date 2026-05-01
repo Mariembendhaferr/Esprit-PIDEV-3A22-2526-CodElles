@@ -1,0 +1,399 @@
+{# templates/admin/planifier_sejour.html.twig #}
+{% extends "admin/base-admin.html.twig" %}
+
+{% block title %}Doura Mondo - Planification du Séjour{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Styles pour les messages d'erreur */
+    .form-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .field-error {
+        display: block;
+        font-size: 0.75rem;
+        margin-top: 6px;
+        color: #5C0000;
+        min-height: 20px;
+        font-style: italic;
+    }
+    
+    .field-ok {
+        color: #2e7d32 !important;
+        font-style: normal !important;
+        font-weight: 600;
+    }
+    
+    .input-error {
+        border-color: #5C0000 !important;
+        box-shadow: 0 0 0 2px rgba(92,0,0,.25) !important;
+    }
+    
+    .input-ok {
+        border-color: #2e7d32 !important;
+        box-shadow: 0 0 0 2px rgba(46,125,50,.25) !important;
+    }
+    
+    .select-error {
+        border-color: #5C0000 !important;
+        box-shadow: 0 0 0 2px rgba(92,0,0,.25) !important;
+    }
+    
+    /* Animation pour les messages */
+    .field-error {
+        animation: fadeInUp 0.3s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Compteur de caractères */
+    .char-counter {
+        display: block;
+        font-size: 0.7rem;
+        margin-top: 5px;
+        color: #666;
+        font-family: 'Cinzel', serif;
+    }
+    
+    .char-counter i {
+        margin-right: 4px;
+        color: var(--gold, #C5A880);
+    }
+    
+    /* Message d'erreur global */
+    .global-error {
+        background: rgba(92,0,0,0.1);
+        border-left: 4px solid #5C0000;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        color: #5C0000;
+        font-family: 'Cormorant Garamond', serif;
+    }
+    
+    .global-error i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- STEPPER -->
+<div class="stepper-container">
+    <div class="step">
+        <div class="step-circle">1</div>
+        <div class="step-label">Imaginez et Pensez</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+        <div class="step-circle">2</div>
+        <div class="step-label">Créez votre idée</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+        <div class="step-circle">3</div>
+        <div class="step-label">Planifier son séjour</div>
+    </div>
+</div>
+
+<!-- PAGE TITLE -->
+<div class="page-heading">
+    <h2>Planification du Périple</h2>
+    <p>Définissez chaque journée d'exception</p>
+</div>
+
+<!-- Message d'erreur global -->
+<div id="global-error" class="global-error" style="display: none;">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span id="global-error-message"></span>
+</div>
+
+<!-- FORM -->
+<form method="post" action="{{ path('app_voyage_planifier_save', {'id': voyage.idVoyage}) }}" id="planificationForm" onsubmit="return validateAllDays()">
+    <div id="days-grid" class="days-grid"></div>
+
+    <div class="form-actions">
+        <a href="{{ path('app_voyage_admin') }}" class="btn-cancel">
+            <i class="fa-solid fa-times"></i> Annuler
+        </a>
+        <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-check"></i> Valider le périple
+        </button>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('days-grid');
+        const numDays = {{ voyage.duree }};
+        const accentClasses = ['card-green', 'card-gold', 'card-bordeaux'];
+
+        const activites = [
+            {% for activite in activites|default([]) %}
+               { id: {{ activite.id }}, nom: "{{ activite.nomActivite|e('js') }}" }
+                                                                                        {% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        for (let i = 1; i <= numDays; i++) {
+            const card = document.createElement('div');
+            const accent = accentClasses[(i - 1) % accentClasses.length];
+            card.className = `day-card ${accent}`;
+            card.style.animationDelay = (i * 0.1) + 's';
+
+            let optionsHtml = activites.length > 0
+                ? activites.map(a => `<option value="${a.id}">${a.nom}</option>`).join('')
+                : '<option value="" disabled>Aucune activité disponible pour cette destination</option>';
+
+            card.innerHTML = `
+                <div class="day-indicator">
+                    <span>Jour</span>${i}
+                </div>
+                <div class="card-form-content">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-feather-pointed"></i> Thème du Jour <span style="color:#5C0000;">*</span></label>
+                        <input type="text" 
+                               name="jour_${i}_theme" 
+                               id="theme_jour_${i}"
+                               class="luxury-input theme-input" 
+                               placeholder="ex: Arrivée Royale au Palace (minimum 25 caractères)" 
+                               data-jour="${i}"
+                               oninput="validateThemeJour(${i})"
+                               onkeyup="validateThemeJour(${i})">
+                        <span class="field-error" id="err-theme-${i}"></span>
+                        <span class="char-counter" id="counter-theme-${i}">
+                            <i class="fa-regular fa-keyboard"></i> <span id="theme-length-${i}">0</span>/25 caractères minimum
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-gem"></i> Activité Prévue <span style="color:#5C0000;">*</span></label>
+                        <div style="position:relative;">
+                            <select name="jour_${i}_activite_id" 
+                                    id="activite_jour_${i}"
+                                    class="luxury-input luxury-select activite-select" 
+                                    data-jour="${i}"
+                                    onchange="validateActiviteJour(${i})">
+                                <option value="" disabled selected>Choisir une activité...</option>
+                                ${optionsHtml}
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                        <span class="field-error" id="err-activite-${i}"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    });
+
+    // ============================================
+    // VALIDATION DU TITRE DU JOUR (25 caractères min)
+    // ============================================
+    function validateThemeJour(jour) {
+        const input = document.getElementById(`theme_jour_${jour}`);
+        const errSpan = document.getElementById(`err-theme-${jour}`);
+        const counterSpan = document.getElementById(`theme-length-${jour}`);
+        const valeur = input.value;
+        const longueur = valeur.length;
+        
+        // Mettre à jour le compteur
+        if (counterSpan) {
+            counterSpan.textContent = longueur;
+            if (longueur > 0 && longueur < 25) {
+                counterSpan.style.color = '#5C0000';
+                counterSpan.style.fontWeight = 'bold';
+            } else if (longueur >= 25) {
+                counterSpan.style.color = '#2e7d32';
+                counterSpan.style.fontWeight = 'bold';
+            } else {
+                counterSpan.style.color = '#666';
+            }
+        }
+        
+        // Cas 1 : Champ vide
+        if (longueur === 0) {
+            if (errSpan) {
+                errSpan.textContent = '⚠ Le thème du jour est obligatoire';
+                errSpan.className = 'field-error';
+            }
+            input.classList.add('input-error');
+            input.classList.remove('input-ok');
+            return false;
+        }
+        
+        // Cas 2 : Vérifier les caractères autorisés
+        const regexCaracteres = /^[a-zA-ZÀ-ÿ0-9\s\-\'\!\?]+$/;
+        if (!regexCaracteres.test(valeur)) {
+            if (errSpan) {
+                errSpan.textContent = '⚠ Lettres, chiffres, espaces, tirets, apostrophes, ! et ? uniquement';
+                errSpan.className = 'field-error';
+            }
+            input.classList.add('input-error');
+            input.classList.remove('input-ok');
+            return false;
+        }
+        
+        // Cas 3 : Vérifier la longueur minimale de 25 caractères
+        if (longueur < 25) {
+            if (errSpan) {
+                errSpan.textContent = `⚠ Le thème doit contenir au moins 25 caractères (actuellement : ${longueur}/25)`;
+                errSpan.className = 'field-error';
+            }
+            input.classList.add('input-error');
+            input.classList.remove('input-ok');
+            return false;
+        }
+        
+        // Cas 4 : ✅ Tout est valide
+        if (errSpan) {
+            errSpan.textContent = `✓ ${longueur}/25 caractères - Thème valide`;
+            errSpan.className = 'field-error field-ok';
+        }
+        input.classList.remove('input-error');
+        input.classList.add('input-ok');
+        return true;
+    }
+    
+    // ============================================
+    // VALIDATION DE L'ACTIVITÉ (obligatoire)
+    // ============================================
+    function validateActiviteJour(jour) {
+        const select = document.getElementById(`activite_jour_${jour}`);
+        const errSpan = document.getElementById(`err-activite-${jour}`);
+        const valeur = select.value;
+        
+        // Cas : Aucune activité sélectionnée
+        if (!valeur || valeur === '') {
+            if (errSpan) {
+                errSpan.textContent = '⚠ Veuillez sélectionner une activité';
+                errSpan.className = 'field-error';
+            }
+            select.classList.add('select-error');
+            return false;
+        }
+        
+        // ✅ Activité valide
+        if (errSpan) {
+            errSpan.textContent = '✓ Activité sélectionnée';
+            errSpan.className = 'field-error field-ok';
+        }
+        select.classList.remove('select-error');
+        return true;
+    }
+    
+    // ============================================
+    // VALIDATION GLOBALE AVANT SOUMISSION
+    // ============================================
+    function validateAllDays() {
+        const numDays = {{ voyage.duree }};
+        let allValid = true;
+        let firstError = null;
+        const errors = [];
+        
+        // Parcourir tous les jours
+        for (let i = 1; i <= numDays; i++) {
+            // Valider le thème
+            const themeValid = validateThemeJour(i);
+            if (!themeValid) {
+                allValid = false;
+                errors.push(`Jour ${i}: Thème invalide (minimum 25 caractères requis)`);
+                if (!firstError) {
+                    firstError = document.getElementById(`theme_jour_${i}`);
+                }
+            }
+            
+            // Valider l'activité
+            const activiteValid = validateActiviteJour(i);
+            if (!activiteValid) {
+                allValid = false;
+                errors.push(`Jour ${i}: Aucune activité sélectionnée`);
+                if (!firstError) {
+                    firstError = document.getElementById(`activite_jour_${i}`);
+                }
+            }
+        }
+        
+        // Afficher les erreurs globales
+        const globalErrorDiv = document.getElementById('global-error');
+        const globalErrorMessage = document.getElementById('global-error-message');
+        
+        if (!allValid) {
+            if (globalErrorDiv && globalErrorMessage) {
+                globalErrorMessage.innerHTML = `
+                    <strong>❌ Veuillez corriger les erreurs suivantes :</strong><br>
+                    ${errors.map(err => `• ${err}`).join('<br>')}
+                `;
+                globalErrorDiv.style.display = 'block';
+                
+                // Scroll vers la première erreur
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+            return false;
+        }
+        
+        // ✅ Tout est valide
+        if (globalErrorDiv) {
+            globalErrorDiv.style.display = 'none';
+        }
+        
+        // Afficher une confirmation avant soumission
+        return confirm('✓ Tous les jours sont correctement remplis ! Voulez-vous valider ce périple ?');
+    }
+    
+    // ============================================
+    // VALIDATION EN TEMPS RÉEL POUR TOUS LES CHAMPS
+    // ============================================
+    // Cette fonction est appelée périodiquement pour vérifier tous les champs
+    function validateAllFieldsRealtime() {
+        const numDays = {{ voyage.duree }};
+        for (let i = 1; i <= numDays; i++) {
+            validateThemeJour(i);
+            validateActiviteJour(i);
+        }
+    }
+    
+    // Vérifier tous les champs toutes les 500ms (optionnel)
+    // setInterval(validateAllFieldsRealtime, 500);
+    
+    // Ajouter des écouteurs d'événements pour tous les champs après leur création
+    setTimeout(() => {
+        const numDays = {{ voyage.duree }};
+        for (let i = 1; i <= numDays; i++) {
+            // Pour le thème
+            const themeInput = document.getElementById(`theme_jour_${i}`);
+            if (themeInput) {
+                themeInput.addEventListener('blur', () => validateThemeJour(i));
+                themeInput.addEventListener('input', () => validateThemeJour(i));
+            }
+            
+            // Pour l'activité
+            const activiteSelect = document.getElementById(`activite_jour_${i}`);
+            if (activiteSelect) {
+                activiteSelect.addEventListener('change', () => validateActiviteJour(i));
+                activiteSelect.addEventListener('blur', () => validateActiviteJour(i));
+            }
+        }
+    }, 100);
+</script>
+{% endblock %}

@@ -1,0 +1,352 @@
+{% extends 'admin/base-admin.html.twig' %}
+
+{% block title %}Destinations Tendances{% endblock %}
+
+{% block stylesheets %}
+<style>
+
+        /* Rendre le fond de la zone principale beige */
+        .main-content {
+            background: #f5efe6;  /* Couleur beige clair */
+            min-height: 100vh;
+        }
+        
+        /* Si vous voulez aussi le fond du body */
+        body {
+            background: #f5efe6;
+        }
+    
+    /* ── STYLES GLOBAUX ─────────────────────────────────── */
+    .tendances-container {
+        padding: 36px 40px;
+        background: #f5f5f5;
+        min-height: 100vh;
+    }
+
+    /* ── EN-TÊTE LUXUEUX ───────────────────────────────── */
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: #5c0000;
+        border-radius: 3px;
+    }
+
+    .page-header-left h1 {
+        font-family: 'Cinzel', serif;
+        font-size: 2.2rem;
+        color: #5c0000;
+        margin: 0 0 12px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        letter-spacing: 2px;
+    }
+
+    .page-header-left h1 .fire {
+        color: #e74c3c;
+        font-size: 2rem;
+    }
+
+    .page-header-left p {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    /* ── GRILLE DESTINATIONS ────────────────────────────── */
+    .destinations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 28px;
+        margin-bottom: 60px;
+    }
+
+    /* ── CARTE (ROUGE BORDEAUX EN HAUT / BLANC EN BAS) ──── */
+    .dest-card {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #eee;
+    }
+
+    .dest-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(92, 0, 0, 0.15);
+    }
+
+    /* Partie haute : rouge bordeaux */
+    .dest-img {
+        height: 170px;
+        background: linear-gradient(135deg, #5c0000 0%, #8b0000 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dest-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+    }
+
+    .dest-emoji {
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Badge de tendance */
+    .trend-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        border-radius: 25px;
+        padding: 5px 14px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Badge de rang */
+    .rank-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        color: #fff;
+        border-radius: 12px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Cinzel', serif;
+        font-size: 1rem;
+        font-weight: 800;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Partie basse : blanche */
+    .dest-body {
+        padding: 22px;
+        text-align: center;
+        background: #fff;
+    }
+
+    .dest-name {
+        font-family: 'Cinzel', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #5c0000;
+        margin: 0 0 10px 0;
+        letter-spacing: 1px;
+    }
+
+    .dest-traffic {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.8rem;
+        color: #888;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .dest-traffic i {
+        color: #5c0000;
+    }
+
+    /* Bouton Voir détails - Rouge */
+    .dest-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .btn-detail {
+        flex: 1;
+        background: #5c0000;
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-detail:hover {
+        background: #8b0000;
+        transform: translateY(-2px);
+    }
+
+    /* ── BOUTON RETOUR EN BAS ─────────────────────────── */
+    .back-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+
+    .btn-back-bottom {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #5c0000;
+        color: #fff;
+        border: none;
+        border-radius: 40px;
+        padding: 12px 30px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+    }
+
+    .btn-back-bottom:hover {
+        background: #8b0000;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(92, 0, 0, 0.3);
+    }
+
+    /* ── ÉTAT VIDE ───────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: #fff;
+        border-radius: 20px;
+        color: #999;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; color: #5c0000; }
+    .empty-state h3 { font-size: 1.1rem; color: #5c0000; margin: 0 0 8px 0; }
+    .empty-state p  { font-size: 0.85rem; margin: 0; }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 768px) {
+        .tendances-container { padding: 20px; }
+        .page-header-left h1 { font-size: 1.5rem; flex-direction: column; gap: 5px; }
+        .destinations-grid { grid-template-columns: 1fr; }
+        .back-footer { margin-top: 30px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tendances-container">
+
+    {# ── EN-TÊTE ───────────────────────────────────── #}
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>
+                <span class="fire">🔥</span>
+                Destinations Tendances
+                <span class="fire">🔥</span>
+            </h1>
+            <p>Données en temps réel via Google Trends — Choisissez votre prochaine destination</p>
+        </div>
+    </div>
+
+    {# ── GRILLE DESTINATIONS ────────────────────────── #}
+    {% if destinations is empty %}
+        <div class="empty-state">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <h3>Aucune donnée disponible</h3>
+            <p>Vérifiez votre clé SERP API ou réessayez dans quelques instants.</p>
+        </div>
+    {% else %}
+        <div class="destinations-grid">
+            {% set emojis = {
+                'Bali':      '🏝️',
+                'Istanbul':  '🕌',
+                'Dubai':     '🏙️',
+                'Marrakech': '🏮',
+                'Barcelone': '⛵',
+                'Tokyo':     '🗼',
+                'Santorin':  '🌊',
+                'Maldives':  '🤿',
+                'Paris':     '🗼',
+                'Rome':      '🏛️',
+                'Lisbonne':  '🎭',
+                'Prague':    '🏰',
+            } %}
+
+            {% for index, dest in destinations %}
+            <div class="dest-card">
+                <div class="dest-img">
+                    {% if dest.image %}
+                        <img src="{{ dest.image }}" alt="{{ dest.name }}">
+                    {% else %}
+                        <span class="dest-emoji">{{ emojis[dest.name] ?? '✈️' }}</span>
+                    {% endif %}
+                    <span class="rank-badge">#{{ index + 1 }}</span>
+                    <span class="trend-badge">
+                        🔥 {{ dest.trend }}
+                    </span>
+                </div>
+                <div class="dest-body">
+                    <h3 class="dest-name">{{ dest.name }}</h3>
+                    <p class="dest-traffic">
+                        <i class="fa-solid fa-chart-line"></i>
+                        {{ dest.traffic|number_format(0, ',', ' ') }} recherches estimées
+                    </p>
+                    <div class="dest-actions">
+                        <a href="{{ path('admin_destination_detail', {destination: dest.name}) }}" class="btn-detail">
+                            <i class="fa-solid fa-magnifying-glass"></i> Voir détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# ── BOUTON RETOUR EN BAS ────────────────────────── #}
+    <div class="back-footer">
+        <a href="{{ path('app_voyage_admin') }}" class="btn-back-bottom">
+            <i class="fa-solid fa-arrow-left"></i> Retour à la liste des voyages
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

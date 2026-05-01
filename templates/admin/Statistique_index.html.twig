@@ -1,0 +1,502 @@
+{# templates/statistique/index.html.twig #}
+{% extends 'admin/base-admin.html.twig' %}
+
+{% block title %}Statistiques Voyages{% endblock %}
+
+{% block stylesheets %}
+<style>
+  /* ── Charte Doura Mondo : Rouge & Doré ─────────────────── */
+  :root {
+    --rouge:      #5C0000;
+    --rouge-deep: #5C0000;
+    --rouge-soft: rgba(192,57,43,.18);
+    --or:         #c9a84c;
+    --or-light:   #e8c96a;
+    --or-soft:    rgba(201,168,76,.15);
+    --surface:    #6b1212;
+    --surface2:   #5C0000;
+    --border:     rgba(201,168,76,.35);
+    --text:       #f0e6d3;
+    --muted:      #d4a090;
+    --radius:     14px;
+    --shadow:     0 8px 40px rgba(0,0,0,.55);
+  }
+
+  .stats-wrap * { box-sizing: border-box; }
+
+  .stats-wrap {
+    padding: 36px 40px 64px;
+    max-width: 1500px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text);
+  }
+
+  /* ── En-tête ───────────────────────────────────────────── */
+  .stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .stats-header-left h2 {
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: 400;
+    color: #5C0000;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 16px rgba(92,0,0,.3);
+    line-height: 1.1;
+  }
+
+  .stats-header-left p {
+    font-size: .82rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--or-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-size: .78rem;
+    color: var(--or-light);
+    font-weight: 600;
+    letter-spacing: 1px;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .badge-live::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--rouge);
+    animation: pulse 1.8s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(192,57,43,.4); }
+    50%      { opacity:.6; transform:scale(1.3); box-shadow:0 0 0 6px rgba(192,57,43,0); }
+  }
+
+  /* ── KPI Grid ──────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+  }
+
+  .kpi-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 22px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .22s, box-shadow .22s;
+    cursor: default;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card.k-or::before    { background: linear-gradient(90deg, var(--or), var(--or-light)); }
+  .kpi-card.k-rouge::before { background: linear-gradient(90deg, var(--rouge-deep), var(--rouge)); }
+
+  .kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+    border-color: rgba(201,168,76,.35);
+  }
+
+  .kpi-icon {
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--or-soft);
+    border: 1px solid var(--border);
+  }
+
+  .kpi-card.k-rouge .kpi-icon {
+    background: var(--rouge-soft);
+    border-color: rgba(192,57,43,.25);
+  }
+
+  .kpi-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .kpi-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 6px;
+  }
+
+  .kpi-card.k-or    .kpi-value { color: var(--or-light); }
+  .kpi-card.k-rouge .kpi-value { color: #e57368; }
+
+  .kpi-sub {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* ── Séparateur ────────────────────────────────────────── */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .72rem;
+    letter-spacing: 3px;
+    color: var(--or);
+    text-transform: uppercase;
+  }
+
+  .or-divider::before, .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── Chart Grid ────────────────────────────────────────── */
+  .chart-row { display: grid; gap: 20px; }
+  .chart-row.cols-2 { grid-template-columns: 1fr 1fr; }
+
+  @media(max-width:1100px) { .chart-row.cols-2 { grid-template-columns: 1fr; } }
+  @media(max-width:768px)  { .stats-wrap { padding: 20px 16px; } }
+
+  .chart-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px 22px 14px;
+    transition: transform .2s, box-shadow .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--or), transparent);
+    opacity: .45;
+  }
+
+  .chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+    border-color: rgba(201,168,76,.3);
+  }
+
+  .chart-card.full { grid-column: 1 / -1; }
+
+  .chart-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--or-light);
+    letter-spacing: .5px;
+    margin-bottom: 3px;
+  }
+
+  .chart-subtitle {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+    letter-spacing: .5px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+
+<div class="stats-wrap">
+
+  {# ── En-tête ─────────────────────────────────────────── #}
+  <div class="stats-header">
+    <div class="stats-header-left">
+      <h2>Tableau de Bord · Statistiques</h2>
+      <p>Analyse complète de l'offre de voyages</p>
+    </div>
+    <div class="badge-live">Données en temps réel</div>
+  </div>
+
+  {# ── KPIs ─────────────────────────────────────────────── #}
+  <div class="kpi-grid">
+    <div class="kpi-card k-or">
+      <div class="kpi-icon">✈️</div>
+      <div class="kpi-label">Total Voyages</div>
+      <div class="kpi-value">{{ totalVoyages }}</div>
+      <div class="kpi-sub">voyages au catalogue</div>
+    </div>
+
+    <div class="kpi-card k-rouge">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Budget Moyen</div>
+      <div class="kpi-value">{{ budgetMoyenGlobal|number_format(0, ',', ' ') }} DT</div>
+      <div class="kpi-sub">budget estimé moyen</div>
+    </div>
+
+    <div class="kpi-card k-or">
+      <div class="kpi-icon">🕐</div>
+      <div class="kpi-label">Durée Moyenne</div>
+      <div class="kpi-value">{{ dureeMoyenneGlobal }} j</div>
+      <div class="kpi-sub">jours par voyage</div>
+    </div>
+
+    <div class="kpi-card k-rouge">
+      <div class="kpi-icon">📍</div>
+      <div class="kpi-label">Top Destination</div>
+      <div class="kpi-value" style="font-size:1.15rem; font-family:'Playfair Display',serif;">{{ topDestination }}</div>
+      <div class="kpi-sub">destination la plus représentée</div>
+    </div>
+  </div>
+
+  {# ── Séparateur ───────────────────────────────────────── #}
+  <div class="or-divider">Analyses graphiques</div>
+
+  {# ── Ligne 1 : Donut + Budget ─────────────────────────── #}
+  <div class="chart-row cols-2">
+    <div class="chart-card">
+      <div class="chart-title">Répartition par Continent</div>
+      <div class="chart-subtitle">Part des voyages selon le continent</div>
+      <div id="chart-donut"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Budget Moyen par Continent</div>
+      <div class="chart-subtitle">Budget estimé moyen en DT</div>
+      <div id="chart-budget"></div>
+    </div>
+  </div>
+
+  {# ── Ligne 2 : Durée + Personnes ──────────────────────── #}
+  <div class="chart-row cols-2">
+    <div class="chart-card">
+      <div class="chart-title">Durée Moyenne par Continent</div>
+      <div class="chart-subtitle">Nombre moyen de jours par voyage</div>
+      <div id="chart-duree"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Personnes Accueillies par Continent</div>
+      <div class="chart-subtitle">Somme du nombre de personnes</div>
+      <div id="chart-personnes"></div>
+    </div>
+  </div>
+
+  {# ── Ligne 3 : Top destinations ───────────────────────── #}
+  <div class="chart-row">
+    <div class="chart-card full">
+      <div class="chart-title">Top Destinations</div>
+      <div class="chart-subtitle">Les destinations les plus représentées au catalogue</div>
+      <div id="chart-top-dest"></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+
+  /* ── Palette Doura Mondo ─────────────────────────────── */
+  const OR       = '#c9a84c';
+  const OR_LIGHT = '#e8c96a';
+  const ROUGE    = '#c0392b';
+  const ROUGE2   = '#e57368';
+  const BG       = '#7B1818';
+  const TEXT     = '#f0e6d3';
+  const MUTED    = '#9e8a6f';
+  const BORDER   = 'rgba(201,168,76,.18)';
+  const PALETTE  = [OR_LIGHT, ROUGE2, '#d4a843', '#e8856a', '#c9bc84', '#cc6655', '#e0c875', '#b05040'];
+
+  /* ── Données Twig ────────────────────────────────────── */
+  const repartitionRaw = {{ repartitionContinents|raw }};
+  const budgetRaw      = {{ budgetParContinent|raw }};
+  const dureeRaw       = {{ dureeParContinent|raw }};
+  const topDestRaw     = {{ topDestinations|raw }};
+  const personnesRaw   = {{ personnesParContinent|raw }};
+
+  /* ── Base options ────────────────────────────────────── */
+  const base = {
+    chart: {
+      background: 'transparent',
+      foreColor: TEXT,
+      toolbar: { show: false },
+      fontFamily: 'Montserrat, sans-serif',
+    },
+    grid: { borderColor: BORDER, strokeDashArray: 4 },
+    tooltip: { theme: 'dark', style: { fontFamily: 'Montserrat, sans-serif' } },
+    legend: { labels: { colors: TEXT }, fontFamily: 'Montserrat, sans-serif' },
+  };
+
+  /* ── 1. DONUT ────────────────────────────────────────── */
+  new ApexCharts(document.querySelector('#chart-donut'), {
+    ...base,
+    chart: { ...base.chart, type: 'donut', height: 340 },
+    series: repartitionRaw.map(r => parseInt(r.nb)),
+    labels: repartitionRaw.map(r => r.continent),
+    colors: PALETTE,
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '68%',
+          labels: {
+            show: true,
+            name:  { color: MUTED, fontFamily: 'Montserrat, sans-serif', fontSize: '13px' },
+            value: { color: OR_LIGHT, fontFamily: 'Cinzel, serif', fontSize: '22px', fontWeight: '700' },
+            total: {
+              show: true, label: 'Total', color: MUTED,
+              formatter: w => w.globals.seriesTotals.reduce((a,b) => a+b, 0)
+            }
+          }
+        }
+      }
+    },
+    stroke: { colors: [BG], width: 3 },
+    dataLabels: {
+      enabled: true,
+      style: { fontFamily: 'Montserrat, sans-serif', fontSize: '11px' },
+      dropShadow: { enabled: false }
+    },
+  }).render();
+
+  /* ── 2. BARRES Budget ────────────────────────────────── */
+  new ApexCharts(document.querySelector('#chart-budget'), {
+    ...base,
+    chart: { ...base.chart, type: 'bar', height: 340 },
+    series: [{ name: 'Budget moyen (DT)', data: budgetRaw.map(r => Math.round(parseFloat(r.budget))) }],
+    xaxis: {
+      categories: budgetRaw.map(r => r.continent),
+      labels: { style: { colors: MUTED } },
+      axisBorder: { color: BORDER }, axisTicks: { color: BORDER },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: MUTED },
+        formatter: v => v.toLocaleString('fr-FR') + ' DT'
+      }
+    },
+    colors: [OR],
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
+    dataLabels: {
+      enabled: true,
+      formatter: v => v.toLocaleString('fr-FR') + ' DT',
+      offsetY: -18,
+      style: { fontSize: '11px', colors: [OR_LIGHT] }
+    },
+    fill: {
+      type: 'gradient',
+      gradient: { shade: 'dark', type: 'vertical', shadeIntensity: .4, gradientToColors: [ROUGE], stops: [0, 100] }
+    },
+  }).render();
+
+  /* ── 3. AREA Durée ───────────────────────────────────── */
+  new ApexCharts(document.querySelector('#chart-duree'), {
+    ...base,
+    chart: { ...base.chart, type: 'area', height: 320 },
+    series: [{ name: 'Durée (jours)', data: dureeRaw.map(r => parseFloat(parseFloat(r.duree).toFixed(1))) }],
+    xaxis: {
+      categories: dureeRaw.map(r => r.continent),
+      labels: { style: { colors: MUTED } },
+      axisBorder: { color: BORDER }, axisTicks: { color: BORDER },
+    },
+    yaxis: {
+      labels: { style: { colors: MUTED }, formatter: v => v + ' j' }
+    },
+    colors: [OR_LIGHT],
+    fill: {
+      type: 'gradient',
+      gradient: { shadeIntensity: 1, opacityFrom: .4, opacityTo: .02, stops: [0, 100] }
+    },
+    stroke: { curve: 'smooth', width: 3, colors: [OR] },
+    markers: { size: 6, colors: [ROUGE], strokeColors: [OR], strokeWidth: 2 },
+    dataLabels: { enabled: false },
+  }).render();
+
+  /* ── 4. BARRES Top destinations ──────────────────────── */
+  new ApexCharts(document.querySelector('#chart-top-dest'), {
+    ...base,
+    chart: { ...base.chart, type: 'bar', height: 360 },
+    series: [{ name: 'Nb voyages', data: topDestRaw.map(r => parseInt(r.nb)) }],
+    xaxis: {
+      categories: topDestRaw.map(r => r.destination),
+      labels: { style: { colors: MUTED, fontSize: '12px' } },
+      axisBorder: { color: BORDER }, axisTicks: { color: BORDER },
+    },
+    yaxis: { labels: { style: { colors: MUTED } } },
+    colors: PALETTE,
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '55%', distributed: true } },
+    legend: { show: false },
+    dataLabels: {
+      enabled: true,
+      style: { fontSize: '12px', colors: [BG], fontWeight: '700' }
+    },
+  }).render();
+
+  /* ── 5. BARRES Personnes ─────────────────────────────── */
+  new ApexCharts(document.querySelector('#chart-personnes'), {
+    ...base,
+    chart: { ...base.chart, type: 'bar', height: 320 },
+    series: [{ name: 'Personnes', data: personnesRaw.map(r => parseInt(r.total)) }],
+    xaxis: {
+      categories: personnesRaw.map(r => r.continent),
+      labels: { style: { colors: MUTED } },
+      axisBorder: { color: BORDER }, axisTicks: { color: BORDER },
+    },
+    yaxis: { labels: { style: { colors: MUTED } } },
+    colors: [ROUGE],
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
+    fill: {
+      type: 'gradient',
+      gradient: { shade: 'dark', type: 'vertical', shadeIntensity: .4, gradientToColors: [OR], stops: [0, 100] }
+    },
+    dataLabels: {
+      enabled: true,
+      style: { fontSize: '11px', colors: [TEXT] }
+    },
+  }).render();
+
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon calendrier - Doura Mondo{% endblock %}
+
+{% block body %}
+<div class="client-container-detail">
+    <h1 style="font-family:'Playfair Display',serif; color:#2d1810;">Mon calandrier</h1>
+    <div class="gold-line"></div>
+
+    <div id="calendar"></div>
+
+    <!-- Modal pour détails & suppression -->
+    <div id="eventModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1000; background:white; padding:30px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.3); width:90%; max-width:500px;">
+        <button onclick="closeModal()" style="position:absolute; top:15px; right:15px; border:none; background:none; font-size:24px; cursor:pointer;">✕</button>
+        
+        <h2 id="modalTitle" style="color:#2d1810; margin-bottom:10px;"></h2>
+        <p id="modalDate" style="color:#8B8680; font-size:14px; margin-bottom:20px;"></p>
+        
+        <div id="modalDetails" style="margin:20px 0; padding:15px; background:#F5E8C0; border-radius:8px;"></div>
+        
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <a id="modalLink" href="#" style="flex:1; padding:12px; text-align:center; background:#8B0000; color:white; text-decoration:none; border-radius:8px; font-weight:600;">
+                Voir l'activité
+            </a>
+            <button onclick="deleteReservation()" style="flex:1; padding:12px; background:#d32f2f; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                Supprimer
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="modalOverlay" onclick="closeModal()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999;"></div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
+    <style>
+        .fc-toolbar-title {
+            font-family: 'Playfair Display', serif;
+            color: #2d1810;
+        }
+        .fc-button {
+            background-color: #8B0000 !important;
+            border-color: #3D0000 !important;
+        }
+        .fc-button:hover {
+            background-color: #6b0000 !important;
+        }
+        .client-container-detail {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .gold-line {
+            height: 2px;
+            background: linear-gradient(to right, #C9A84C, transparent);
+            margin: 15px 0 30px 0;
+        }
+
+        /* EVENT STYLING */
+        .fc .fc-event {
+            cursor: pointer !important;
+            border: 2px solid #3D0000 !important;
+            transition: transform 0.2s ease;
+        }
+
+        .fc .fc-event:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
+        }
+
+        .fc-event-title {
+            font-weight: 600;
+            color: white !important;
+            padding: 4px 6px;
+        }
+
+        .fc .fc-daygrid-day {
+            border-color: #E8D8C8;
+        }
+
+        .fc .fc-daygrid-day:hover {
+            background-color: #FDFAF5;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales/fr.js"></script>
+    
+    <script>
+        // Global variables
+        let currentReservationId = null;
+        let currentActivityId = null;
+        let calendar = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'fr',
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                events: function(info, successCallback, failureCallback) {
+                    // 1. Prepare parameters (current user from Symfony)
+                    const params = new URLSearchParams({
+                        start: info.start.toISOString(),
+                        end: info.end.toISOString(),
+                        filters: JSON.stringify({})
+                    });
+
+                    fetch("/fc-load-events?" + params.toString())
+                        .then(response => {
+                            if (!response.ok) throw new Error('Server error');
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Process events to add custom data
+                            const processedEvents = data.map(event => ({
+                                ...event,
+                                extendedProps: {
+                                    ...event.extendedProps,
+                                    reservationId: event.extendedProps?.reservationId,
+                                    activityId: event.extendedProps?.activityId,
+                                    participants: event.extendedProps?.participants,
+                                    location: event.extendedProps?.location,
+                                    price: event.extendedProps?.price
+                                }
+                            }));
+                            successCallback(processedEvents);
+                        })
+                        .catch(error => {
+                            console.error("Calendar Error:", error);
+                            failureCallback(error);
+                        });
+                },
+                eventClick: function(info) {
+                    // OPEN MODAL INSTEAD OF REDIRECTING
+                    openEventModal(info.event);
+                }
+            });
+            calendar.render();
+        });
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    function openEventModal(event) {
+        // 1. Access extendedProps correctly
+        const props = event.extendedProps;
+        
+        currentReservationId = props.reservationId;
+        currentActivityId    = props.activityId;
+
+        if (!currentActivityId) {
+            console.error('❌ Missing activityId in event:', event);
+            return;
+        }
+
+        document.getElementById('modalTitle').textContent = event.title;
+        document.getElementById('modalDate').textContent = '📅 ' + event.start.toLocaleDateString('fr-FR', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // 2. Map the details from extendedProps
+        const details = `
+            <strong>👥 Participants:</strong> ${props.participants || '1'}<br>
+            <strong>📍 Lieu:</strong> ${props.location || 'Non spécifié'}<br>
+            <strong>💰 Prix:</strong> ${props.price || '0'} DT
+        `;
+        document.getElementById('modalDetails').innerHTML = details;
+        document.getElementById('modalLink').href = `/activities/${currentActivityId}`;
+
+        document.getElementById('eventModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            currentReservationId = null;
+            currentActivityId = null;
+        }
+//////////////////////////////////////////////////////////////////////////
+function deleteReservation() {
+    if (!currentReservationId) {
+        alert('❌ Erreur: ID de réservation manquant.');
+        return;
+    }
+
+    if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) {
+        return;
+    }
+    
+    const url = `/activities/client/reservation/${currentReservationId}/delete`;
+    
+    console.log("🗑️ Sending delete request to:", url);
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // This will show a specific error if it's a 404 or 500
+            throw new Error(`Erreur serveur (${response.status})`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('✅ Réservation annulée avec succès.');
+            closeModal();
+            // 🔄 IMPORTANT: This tells FullCalendar to reload the events
+            if (calendar) {
+                calendar.refetchEvents();
+            }
+        } else {
+            alert('❌ Erreur : ' + (data.message || 'Impossible d\'annuler la réservation.'));
+        }
+    })
+    .catch(error => {
+        console.error('❌ Delete Error:', error);
+        alert('❌ Erreur lors de la suppression. Vérifiez que la route /client/reservation/' + currentReservationId + '/delete existe.');
+    });
+}
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+{% endblock %}

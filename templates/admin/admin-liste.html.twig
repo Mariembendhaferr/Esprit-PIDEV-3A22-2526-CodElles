@@ -1,0 +1,815 @@
+{# templates/admin/admin-liste.html.twig #}
+{% extends 'admin/base-admin.html.twig' %}
+
+{% block title %}Gestion des Voyages{% endblock %}
+
+{% block content %}
+
+
+
+<!-- En-tête avec recherche + stats -->
+<div class="search-stats-wrapper">
+    <div class="search-pill">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Rechercher un titre, un continent ou une destination...">
+    </div>
+    <button class="btn-stats" id="statsBtn">
+        <i class="fa-solid fa-chart-pie"></i> Statistiques
+    </button>
+</div>
+
+
+
+
+<!-- Sonnette notifications + Menu utilisateur -->
+<div style="position:fixed; top:40px; right:140px; z-index:999; display:flex; align-items:center; gap:10px;">
+
+    {# ── SONNETTE ── #}
+    <a href="{{ path('app_admin_notifications') }}"
+       id="notifBell"
+       title="Notifications communauté"
+       style="
+           position: relative;
+           display: flex; align-items: center; justify-content: center;
+           width: 42px; height: 42px;
+           background: transparent;
+           border: 1px solid rgba(197,168,128,0.35);
+           border-radius: 20px;
+           color: #5C0000;
+           font-size: 1.4rem;
+           text-decoration: none;
+           box-shadow: 0 2px 10px rgba(92,0,0,0.08);
+           transition: all .25s ease;
+       "
+       onmouseover="this.style.background='#5C0000';this.style.color='#C5A880';"
+       onmouseout="this.style.background='white';this.style.color='#5C0000';">
+        <i class="fa-solid fa-bell"></i>
+        <span id="notifBadge" style="
+            position: absolute;
+            top: -5px; right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: .58rem;
+            font-weight: 700;
+            min-width: 18px; height: 18px;
+            border-radius: 9px;
+            border: 2px solid white;
+            display: none;
+            align-items: center; justify-content: center;
+            padding: 0 4px;
+            font-family: 'Montserrat', sans-serif;
+        ">0</span>
+    </a>
+
+</div>
+
+
+<!-- Bouton Tendances -->
+<a href="{{ path('admin_destinations_tendances') }}" class="btn-tendances">
+    <i class="fa-solid fa-fire"></i>
+   
+</a>
+
+
+
+
+
+<!-- MEGA SYSTEM (TABLEAU CARD) -->
+<div class="mega-system-container">
+    <div class="table-mega-shape-layer">
+        <div class="shape-top-left"></div>
+        <div class="shape-bottom-wide"></div>
+        <div class="shape-concave-curve"></div>
+    </div>
+
+    <div class="cutout-actions">
+        <a href="{{ path('app_voyage_ajouter') }}" class="btn-action-pill btn-plus">
+            <i class="fas fa-plus"></i>
+        </a>
+        <a href="{{ path('app_export_pdf') }}" class="btn-action-pill" style="text-decoration:none;">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+        </a>
+        <a href="{{ path('app_export_csv') }}" class="btn-action-pill" style="text-decoration:none;">
+            <i class="fa-solid fa-file-csv"></i> CSV
+        </a>
+    </div>
+
+    <div class="table-mega-content">
+        <!-- FILTRES -->
+        <div class="filters-row">
+            <div class="filter-wrapper">
+                <button class="filter-menubtn" data-filter="budget" onclick="toggleDropdown(this)">
+                    <span class="btn-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="dropdown-header">Trier par budget</div>
+                    <button class="dropdown-item" data-sort="budget" data-order="ASC">
+                        <i class="fa-solid fa-arrow-up-short-wide"></i> Croissant
+                    </button>
+                    <button class="dropdown-item" data-sort="budget" data-order="DESC">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i> Décroissant
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-wrapper">
+                <button class="filter-menubtn" data-filter="duree" onclick="toggleDropdown(this)">
+                    <span class="btn-label"><i class="fa-regular fa-clock"></i> Durée</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="dropdown-header">Trier par durée</div>
+                    <button class="dropdown-item" data-sort="duree" data-order="ASC">
+                        <i class="fa-solid fa-arrow-up-short-wide"></i> Croissant
+                    </button>
+                    <button class="dropdown-item" data-sort="duree" data-order="DESC">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i> Décroissant
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-wrapper">
+                <button class="filter-menubtn" data-filter="nb_pers" onclick="toggleDropdown(this)">
+                    <span class="btn-label"><i class="fa-solid fa-users"></i> Nb Personnes</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="dropdown-header">Trier par personnes</div>
+                    <button class="dropdown-item" data-sort="nb_pers" data-order="ASC">
+                        <i class="fa-solid fa-arrow-up-short-wide"></i> Croissant
+                    </button>
+                    <button class="dropdown-item" data-sort="nb_pers" data-order="DESC">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i> Décroissant
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-wrapper">
+                <button class="filter-menubtn" data-filter="destination" onclick="toggleDropdown(this)">
+                    <span class="btn-label"><i class="fa-solid fa-location-dot"></i> Destination</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+                <div class="filter-dropdown">
+                    <div class="dropdown-header">Trier par Pays</div>
+                    <button class="dropdown-item" data-sort="destination" data-order="ASC">
+                        <i class="fa-solid fa-arrow-up-short-wide"></i> Croissant
+                    </button>
+                    <button class="dropdown-item" data-sort="destination" data-order="DESC">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i> Décroissant
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bouton reset filtres -->
+            <button class="filter-menubtn" id="resetFiltersBtn" onclick="resetFilters()" style="opacity:0; pointer-events:none; transition: opacity .2s;">
+                <span class="btn-label"><i class="fa-solid fa-xmark"></i> Réinitialiser</span>
+            </button>
+        </div>
+
+
+
+
+        <!-- TABLEAU -->
+        <div class="table-responsive">
+            <table class="luxe-table">
+                <thead>
+                    <tr>
+                        <th>Image <i class="fa-regular fa-image"></i></th>
+                        <th>Titre <i class="fa-solid fa-book-open"></i></th>
+                        <th>Continent <i class="fa-solid fa-globe"></i></th>
+                        <th>Destination <i class="fa-solid fa-location-dot"></i></th>
+                        <th>Nb Pers <i class="fa-solid fa-users"></i></th>
+                        <th>Durée <i class="fa-regular fa-clock"></i></th>
+                        <th>Budget <i class="fa-solid fa-euro-sign"></i></th>
+                        <th>Action <i class="fa-solid fa-gear"></i></th>
+                    </tr>
+                </thead>
+                <tbody id="voyages-table-body">
+                    {% for voyage in voyages %}
+                    <tr data-id="{{ voyage.idVoyage }}"
+                        data-flag="{{ flags[voyage.idVoyage] ?? '' }}"
+                        data-destination="{{ voyage.destination }}"
+                        data-titre="{{ voyage.titre }}"
+                        data-continent="{{ voyage.continent }}"
+                        data-image="{{ voyage.imageUrl }}"
+                        data-nb-personnes="{{ voyage.nbPersonnes }}"
+                        data-duree="{{ voyage.duree }}"
+                        data-budget="{{ voyage.budgetEstime }}"
+                        data-voir-plan-url="{{ path('app_voyage_voir_plan', {'id': voyage.idVoyage}) }}">
+                        <td>
+                            {% if voyage.imageUrl %}
+                                <img src="{{ voyage.imageUrl }}" alt="{{ voyage.titre }}" class="voyage-thumb" onerror="this.src='https://via.placeholder.com/56?text=Image'">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=150&q=80" alt="{{ voyage.titre }}" class="voyage-thumb">
+                            {% endif %}
+                        </td>
+                        <td><span class="voyage-title-text">{{ voyage.titre }}</span></td>
+                        <td><span class="continent-text">{{ voyage.continent }}</span></td>
+                        <td>
+                            <div class="dest-cell">
+                                {% if flags[voyage.idVoyage] is defined and flags[voyage.idVoyage] is not empty %}
+                                    <img src="{{ flags[voyage.idVoyage] }}"
+                                         alt="{{ voyage.destination }}"
+                                         class="flag-img"
+                                         onerror="this.style.display='none'">
+                                {% else %}
+                                    <span class="flag-icon">🌍</span>
+                                {% endif %}
+                                <span>{{ voyage.destination }}</span>
+                            </div>
+                        </td>
+                        <td><span class="nb-personne">{{ voyage.nbPersonnes }}</span></td>
+                        <td><span class="duree-text">{{ voyage.duree }} Jours</span></td>
+                        <td><span class="budget-val">{{ voyage.budgetEstime|number_format(0, ',', ' ') }} €</span></td>
+                        <td>
+                            <div class="table-action-btns">
+                                <a href="{{ path('app_voyage_voir_plan', {'id': voyage.idVoyage}) }}" class="btn-icon-action btn-icon-view">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <button class="btn-icon-action btn-icon-edit" onclick="editVoyage({{ voyage.idVoyage }})">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="btn-icon-action btn-icon-del" onclick="deleteVoyage({{ voyage.idVoyage }})">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 50px;">
+                            <i class="fa-solid fa-suitcase" style="font-size: 48px; color: var(--gold);"></i>
+                            <p style="margin-top: 15px; font-family: 'Cinzel', serif;">Aucun voyage trouvé</p>
+                            <a href="{{ path('app_voyage_ajouter') }}" class="btn-submit" style="margin-top: 15px; display: inline-block;">
+                                <i class="fas fa-plus"></i> Créer le premier voyage
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+        <!-- PAGINATION -->
+        <div class="pagination-footer" id="pagination">
+            <div class="page-node nav" id="prevPage"><i class="fa-solid fa-chevron-left"></i></div>
+            <div id="page-numbers"></div>
+            <div class="page-node nav" id="nextPage"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Modal confirmation suppression -->
+<div id="delete-overlay" style="
+    display:none; position:fixed; inset:0;
+    background:rgba(40,0,0,.75);
+    z-index:99999;
+    align-items:center; justify-content:center;
+">
+    <div style="
+        background: linear-gradient(135deg, #3A0000, #5C0000);
+        border: 2px solid #C5A880;
+        border-radius: 18px;
+        padding: 40px 50px;
+        text-align: center;
+        color: #C5A880;
+        font-family: 'Cormorant Garamond', serif;
+        box-shadow: 0 30px 80px rgba(0,0,0,.6);
+        max-width: 420px;
+        width: 90%;
+    ">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; margin-bottom:15px; display:block; color:#e8b84b;"></i>
+        <div style="font-size:1.6rem; font-weight:700; margin-bottom:10px;">Supprimer ce voyage ?</div>
+        <div style="font-size:1rem; opacity:.8; margin-bottom:30px;">Cette action est irréversible.</div>
+        <div style="display:flex; gap:15px; justify-content:center;">
+            <button onclick="closeDeleteModal()" style="
+                background:none; border:2px solid #C5A880;
+                color:#C5A880; padding:10px 28px;
+                border-radius:10px; font-size:1rem;
+                font-family:'Cormorant Garamond',serif;
+                cursor:pointer; transition:all .2s;
+            " onmouseover="this.style.background='rgba(197,168,128,.15)'"
+               onmouseout="this.style.background='none'">
+                <i class="fa-solid fa-xmark"></i> Annuler
+            </button>
+            <button id="confirm-delete-btn" onclick="confirmDelete()" style="
+                background: linear-gradient(135deg, #8B0000, #5C0000);
+                border:2px solid #C5A880;
+                color:#C5A880; padding:10px 28px;
+                border-radius:10px; font-size:1rem;
+                font-family:'Cormorant Garamond',serif;
+                cursor:pointer; transition:all .2s;
+            " onmouseover="this.style.background='linear-gradient(135deg,#a00000,#700000)'"
+               onmouseout="this.style.background='linear-gradient(135deg,#8B0000,#5C0000)'">
+                <i class="fa-solid fa-trash-can"></i> Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+{% block javascripts %}
+{{ parent() }}
+<style>
+.flag-img {
+    width: 28px;
+    height: 20px;
+    object-fit: cover;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+}
+.dest-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.dropdown-item.active-sort {
+    background: rgba(92,0,0,.1);
+    color: var(--bordeaux, #5C0000);
+    font-weight: 700;
+}
+</style>
+<script>
+    // ═══════════════════════════════════════════════════════════════════
+    // VARIABLES GLOBALES
+    // ═══════════════════════════════════════════════════════════════════
+    let allVoyages     = [];
+    let filteredVoyages = [];
+    let currentPage    = 1;
+    const itemsPerPage = 6;
+    let currentSort    = { field: null, order: 'ASC' };
+    let currentSearch  = '';
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RECHERCHE + TRI
+    // ═══════════════════════════════════════════════════════════════════
+    function applySearchAndSort() {
+        const search = currentSearch.toLowerCase().trim();
+
+        // Filtrer
+        filteredVoyages = allVoyages.filter(v => {
+            if (!search) return true;
+            return (
+                v.titre.toLowerCase().includes(search) ||
+                v.continent.toLowerCase().includes(search) ||
+                v.destination.toLowerCase().includes(search) ||
+                String(v.nb_personnes).includes(search) ||
+                String(v.duree).includes(search) ||
+                String(v.budget_estime).includes(search)
+            );
+        });
+
+        // Trier
+        if (currentSort.field) {
+            filteredVoyages.sort((a, b) => {
+                let valA = a[currentSort.field];
+                let valB = b[currentSort.field];
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+                if (valA < valB) return currentSort.order === 'ASC' ? -1 : 1;
+                if (valA > valB) return currentSort.order === 'ASC' ?  1 : -1;
+                return 0;
+            });
+        }
+
+        // Afficher bouton reset si filtre ou recherche actif
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        if (resetBtn) {
+            const hasActive = currentSearch || currentSort.field;
+            resetBtn.style.opacity = hasActive ? '1' : '0';
+            resetBtn.style.pointerEvents = hasActive ? 'auto' : 'none';
+        }
+
+        currentPage = 1;
+
+        if (filteredVoyages.length > 0) {
+            document.getElementById('pagination').style.display = '';
+            displayPage(1);
+        } else {
+            document.getElementById('pagination').style.display = 'none';
+            document.getElementById('voyages-table-body').innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center; padding:50px;">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size:48px; color:var(--gold, #C5A880);"></i>
+                        <p style="margin-top:15px; font-family:'Cinzel',serif;">Aucun résultat pour "<strong>${escapeHtml(currentSearch)}</strong>"</p>
+                    </td>
+                </tr>`;
+        }
+    }
+
+    function resetFilters() {
+        currentSearch  = '';
+        currentSort    = { field: null, order: 'ASC' };
+        filteredVoyages = [...allVoyages];
+
+        // Vider la barre de recherche
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) searchInput.value = '';
+
+        // Retirer les highlights des boutons de tri
+        document.querySelectorAll('.dropdown-item.active-sort').forEach(b => b.classList.remove('active-sort'));
+
+        // Cacher le bouton reset
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        if (resetBtn) { resetBtn.style.opacity = '0'; resetBtn.style.pointerEvents = 'none'; }
+
+        currentPage = 1;
+        displayPage(1);
+        document.getElementById('pagination').style.display = '';
+    }
+
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // AFFICHAGE TABLEAU (pagination)
+    // ═══════════════════════════════════════════════════════════════════
+
+    
+    function displayPage(page) {
+        const source = (currentSearch || currentSort.field) ? filteredVoyages : allVoyages;
+        const start = (page - 1) * itemsPerPage;
+        const end   = start + itemsPerPage;
+        const pageVoyages = source.slice(start, end);
+
+        const tbody = document.getElementById('voyages-table-body');
+
+        if (pageVoyages.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center; padding:50px;">
+                        <i class="fa-solid fa-suitcase" style="font-size:48px; color:var(--gold, #C5A880);"></i>
+                        <p style="margin-top:15px;">Aucun voyage trouvé</p>
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = pageVoyages.map(voyage => `
+            <tr data-id="${voyage.id}">
+                <td>
+                    <img src="${escapeHtml(voyage.image_url) || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=150&q=80'}"
+                         alt="${escapeHtml(voyage.titre)}"
+                         class="voyage-thumb"
+                         onerror="this.src='https://via.placeholder.com/56?text=Image'">
+                </td>
+                <td><span class="voyage-title-text">${escapeHtml(voyage.titre)}</span></td>
+                <td><span class="continent-text">${escapeHtml(voyage.continent)}</span></td>
+                <td>
+                    <div class="dest-cell">
+                        ${voyage.flag && voyage.flag !== '🌍'
+                            ? `<img src="${escapeHtml(voyage.flag)}" alt="${escapeHtml(voyage.destination)}" class="flag-img" onerror="this.style.display='none'">`
+                            : '<span class="flag-icon">🌍</span>'
+                        }
+                        <span>${escapeHtml(voyage.destination)}</span>
+                    </div>
+                </td>
+                <td><span class="nb-personne">${voyage.nb_personnes}</span></td>
+                <td><span class="duree-text">${voyage.duree} Jours</span></td>
+                <td><span class="budget-val">${formatNumber(voyage.budget_estime)} €</span></td>
+                <td>
+                    <div class="table-action-btns">
+                        <a href="${escapeHtml(voyage.voir_plan_url)}" class="btn-icon-action btn-icon-view">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <button class="btn-icon-action btn-icon-edit" onclick="editVoyage(${voyage.id})">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn-icon-action btn-icon-del" onclick="deleteVoyage(${voyage.id})">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        updatePaginationButtons(source.length);
+    }
+
+    function updatePaginationButtons(total) {
+        const source = (currentSearch || currentSort.field) ? filteredVoyages : allVoyages;
+        const totalItems = total !== undefined ? total : source.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const pageNumbersDiv = document.getElementById('page-numbers');
+
+        let pagesHtml = '';
+        for (let i = 1; i <= totalPages; i++) {
+            pagesHtml += `<div class="page-node ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</div>`;
+        }
+        pageNumbersDiv.innerHTML = pagesHtml;
+
+        document.getElementById('prevPage').style.opacity = currentPage === 1 ? '0.5' : '1';
+        document.getElementById('nextPage').style.opacity = currentPage === totalPages ? '0.5' : '1';
+    }
+
+    function goToPage(page) {
+        const source = (currentSearch || currentSort.field) ? filteredVoyages : allVoyages;
+        const totalPages = Math.ceil(source.length / itemsPerPage);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        displayPage(currentPage);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Lire les données depuis les attributs data-* du HTML Twig
+        const rows = document.querySelectorAll('#voyages-table-body tr[data-id]');
+        allVoyages = [];
+
+        rows.forEach(row => {
+            const id = row.getAttribute('data-id');
+            if (!id) return;
+            allVoyages.push({
+                id:            parseInt(id),
+                image_url:     row.getAttribute('data-image') || '',
+                titre:         row.getAttribute('data-titre') || '',
+                continent:     row.getAttribute('data-continent') || '',
+                destination:   row.getAttribute('data-destination') || '',
+                flag:          row.getAttribute('data-flag') || '🌍',
+                nb_personnes:  parseInt(row.getAttribute('data-nb-personnes')) || 0,
+                duree:         parseInt(row.getAttribute('data-duree')) || 0,
+                budget_estime: parseFloat(row.getAttribute('data-budget')) || 0,
+                voir_plan_url: row.getAttribute('data-voir-plan-url') || '',
+            });
+        });
+
+        filteredVoyages = [...allVoyages];
+
+        if (allVoyages.length > 0) {
+            displayPage(1);
+        } else {
+            document.getElementById('pagination').style.display = 'none';
+        }
+
+        // ── Recherche en temps réel ──
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                currentSearch = this.value;
+                applySearchAndSort();
+            });
+        }
+
+        // ── Filtres de tri ──
+        document.querySelectorAll('.dropdown-item[data-sort]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const field = this.getAttribute('data-sort');
+                const order = this.getAttribute('data-order');
+
+                const fieldMap = {
+                    'budget':      'budget_estime',
+                    'duree':       'duree',
+                    'nb_pers':     'nb_personnes',
+                    'destination': 'destination'
+                };
+
+                currentSort = { field: fieldMap[field] || field, order };
+                applySearchAndSort();
+
+                // Fermer le dropdown
+                document.querySelectorAll('.filter-dropdown.show').forEach(d => d.classList.remove('show'));
+
+                // Highlight bouton actif (même colonne, désactiver les autres)
+                document.querySelectorAll('.dropdown-item[data-sort]').forEach(b => b.classList.remove('active-sort'));
+                this.classList.add('active-sort');
+            });
+        });
+
+        // ── Pagination ──
+        document.getElementById('prevPage').addEventListener('click', function() {
+            if (currentPage > 1) goToPage(currentPage - 1);
+        });
+        document.getElementById('nextPage').addEventListener('click', function() {
+            const source = (currentSearch || currentSort.field) ? filteredVoyages : allVoyages;
+            const totalPages = Math.ceil(source.length / itemsPerPage);
+            if (currentPage < totalPages) goToPage(currentPage + 1);
+        });
+
+        // ── Menu utilisateur ──
+       
+        
+
+       
+        
+        document.getElementById('statsBtn')?.addEventListener('click', function() {
+            window.location.href = "{{ path('app_statistiques') }}";
+        });
+
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════════════════════════════════
+    function editVoyage(id) {
+        window.location.href = `/admin/voyages/modifier/${id}`;
+    }
+
+    let voyageToDelete = null;
+
+    function deleteVoyage(id) {
+        voyageToDelete = id;
+        const overlay = document.getElementById('delete-overlay');
+        overlay.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        voyageToDelete = null;
+        document.getElementById('delete-overlay').style.display = 'none';
+    }
+
+    function confirmDelete() {
+        if (!voyageToDelete) return;
+        const id = voyageToDelete;
+        closeDeleteModal();
+
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (row) { row.style.opacity = '0.5'; row.style.pointerEvents = 'none'; }
+
+        fetch(`/admin/voyages/supprimer/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                if (row) row.remove();
+                setTimeout(() => { location.reload(); }, 500);
+            } else {
+                showNotification(data.message, 'error');
+                if (row) { row.style.opacity = '1'; row.style.pointerEvents = 'auto'; }
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors de la suppression', 'error');
+            if (row) { row.style.opacity = '1'; row.style.pointerEvents = 'auto'; }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // UTILITAIRES
+    // ═══════════════════════════════════════════════════════════════════
+    function toggleDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        if (dropdown) dropdown.classList.toggle('show');
+    }
+
+    function formatNumber(number) {
+        return new Intl.NumberFormat('fr-FR').format(number);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Fermer les dropdowns en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.filter-wrapper')) {
+            document.querySelectorAll('.filter-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // NOTIFICATIONS
+    // ═══════════════════════════════════════════════════════════════════
+    function showNotification(message, type = 'success') {
+        document.querySelectorAll('.notification-toast').forEach(n => n.remove());
+        const notification = document.createElement('div');
+        notification.className = `notification-toast notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${escapeHtml(message)}</span>
+            </div>`;
+        document.body.appendChild(notification);
+        setTimeout(() => { notification.classList.add('show'); }, 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => { notification.remove(); }, 300);
+        }, 3000);
+    }
+    
+</script>
+
+<script>
+// Badge sonnette
+fetch('{{ path('app_admin_notifications_count') }}')
+    .then(r => r.json())
+    .then(data => {
+        const badge = document.getElementById('notifBadge');
+        if (badge && data.count > 0) {
+            badge.textContent = data.count > 99 ? '99+' : data.count;
+            badge.style.display = 'flex';
+            // Animation sonnette
+            const bell = document.getElementById('notifBell');
+            if (bell) {
+                bell.style.animation = 'bellRing .5s ease 2';
+            }
+        }
+    }).catch(() => {});
+</script>
+<style>
+@keyframes bellRing {
+    0%   { transform: rotate(0deg); }
+    25%  { transform: rotate(12deg); }
+    50%  { transform: rotate(-10deg); }
+    75%  { transform: rotate(8deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Bouton Tendances - Version Cercle */
+.btn-tendances {
+    position: fixed;
+    top: 35px;
+    right: 60px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #800d00 0%, #6e1208 50%, #450707 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(132, 24, 12, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(62, 7, 4, 0.5);
+}
+
+.btn-tendances:hover {
+    transform: scale(1.15);
+    background: linear-gradient(135deg, #e74c3c 0%, #ff6b6b 50%, #ff8c8c 100%);
+    box-shadow: 0 0 25px rgba(231, 76, 60, 0.9), 0 6px 18px rgba(0, 0, 0, 0.4);
+    border-color: #ff6a00;
+}
+
+.btn-tendances i {
+    font-size: 1.5rem;
+    animation: firePulse 1.2s infinite;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes firePulse {
+    0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+    }
+    50% { 
+        transform: scale(1.2);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Effet de lueur externe */
+.btn-tendances::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(135deg, #ff6200, #5f0b0b, #eb6a00);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-tendances:hover::before {
+    opacity: 1;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+{% block no_layout %}true{% endblock %}
+{% block title %}Réinitialisation mot de passe{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        background: linear-gradient(135deg, #2E1010 0%, #5C0000 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .reset-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 460px;
+        max-width: 95vw;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: fadeInUp 0.7s ease forwards;
+    }
+    @keyframes fadeInUp {
+        from { opacity:0; transform:translateY(30px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .code-inputs {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+    .code-inputs input {
+        width: 46px; height: 54px;
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 700;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        transition: border-color 0.2s;
+    }
+    .code-inputs input:focus {
+        border-color: #5C0000;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(92,0,0,0.1);
+    }
+    .timer { color: #9A8060; font-size: 0.85rem; text-align: center; margin-bottom: 1rem; }
+    .timer.urgent { color: #ef4444; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="reset-card">
+    <div class="text-center mb-3">
+        <div style="font-size:3rem;">🔑</div>
+        <h4 class="fw-bold">Réinitialiser le mot de passe</h4>
+        <p class="text-muted small">
+            Code envoyé à <strong>{{ contact }}</strong>
+        </p>
+    </div>
+
+    {% if success %}
+        <div class="alert alert-success text-center">
+            ✅ Mot de passe réinitialisé !
+            <a href="{{ path('login') }}" class="fw-bold">Se connecter</a>
+        </div>
+    {% else %}
+
+        {% if error %}
+            {% if error starts with 'success:' %}
+                <div class="alert alert-success">{{ error[8:] }}</div>
+            {% else %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+        {% endif %}
+
+        <div class="timer" id="timer">Code expire dans : 15:00</div>
+
+        <form method="POST" action="{{ path('password_reset') }}" id="mainForm">
+
+            {# Code fields — always shown #}
+            <div class="code-inputs" id="codeContainer">
+                {% for i in 1..6 %}
+                    <input type="text" name="code{{ i }}" id="code{{ i }}"
+                           maxlength="1" inputmode="numeric" autocomplete="off"
+                           {% if codeVerified %}disabled style="background:#f0fdf4; border-color:#10b981;"{% endif %}>
+                {% endfor %}
+            </div>
+
+            {% if not codeVerified %}
+                <input type="hidden" name="action" value="verify">
+                <button type="submit" class="btn btn-primary w-100 mb-2">
+                    ✓ Vérifier le code
+                </button>
+            {% else %}
+                {# Password fields shown after code verified #}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nouveau mot de passe</label>
+                    <input type="password" name="new_password" class="form-control"
+                           placeholder="Min 6 caractères">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Confirmer le mot de passe</label>
+                    <input type="password" name="confirm_password" class="form-control"
+                           placeholder="Répétez le mot de passe">
+                </div>
+                <input type="hidden" name="action" value="reset">
+                <button type="submit" class="btn btn-success w-100 mb-2">
+                    🔒 Réinitialiser le mot de passe
+                </button>
+            {% endif %}
+        </form>
+
+        <form method="POST" action="{{ path('password_reset') }}">
+            <input type="hidden" name="action" value="resend">
+            <button type="submit" class="btn btn-outline-secondary w-100 mb-2">
+                🔄 Renvoyer le code
+            </button>
+        </form>
+
+        <a href="{{ path('forgot_password') }}" class="btn btn-link text-muted w-100">
+            ← Retour
+        </a>
+    {% endif %}
+</div>
+
+<script>
+    const inputs = document.querySelectorAll('.code-inputs input:not([disabled])');
+    inputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && i < inputs.length - 1) inputs[i+1].focus();
+        });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && input.value === '' && i > 0) inputs[i-1].focus();
+        });
+    });
+    if (inputs[0]) inputs[0].focus();
+
+    let seconds = {{ expiresIn }};
+    const timerEl = document.getElementById('timer');
+    function tick() {
+        if (seconds <= 0) {
+            timerEl.textContent = 'Code expiré !';
+            timerEl.classList.add('urgent');
+            return;
+        }
+        const m = Math.floor(seconds/60).toString().padStart(2,'0');
+        const s = (seconds%60).toString().padStart(2,'0');
+        timerEl.textContent = `Code expire dans : ${m}:${s}`;
+        if (seconds <= 60) timerEl.classList.add('urgent');
+        seconds--;
+        setTimeout(tick, 1000);
+    }
+    tick();
+</script>
+{% endblock %}

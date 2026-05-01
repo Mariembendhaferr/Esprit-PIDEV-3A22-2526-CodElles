@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mot de passe oublié{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .forgot-card {
+        position: relative;
+        z-index: 10;  {# THIS was the missing fix #}
+        max-width: 460px;
+        margin: 4rem auto;
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .radio-pills {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .radio-pill {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    .radio-pill.active {
+        border-color: #5C0000;
+        background: rgba(92,0,0,0.05);
+        color: #5C0000;
+    }
+    .radio-pill input { display: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="forgot-card">
+    <div class="text-center mb-3">
+        <div style="font-size:3rem;">🔐</div>
+        <h4 class="fw-bold">Mot de passe oublié</h4>
+        <p class="text-muted">Choisissez comment recevoir votre code</p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ path('forgot_password') }}">
+
+        {# Radio pills #}
+        <div class="radio-pills">
+            <label class="radio-pill active" id="emailPill">
+                <input type="radio" name="type" value="email" checked>
+                📧 Email
+            </label>
+            <label class="radio-pill" id="smsPill">
+                <input type="radio" name="type" value="sms">
+                📱 SMS
+            </label>
+        </div>
+
+        {# Contact field #}
+        <div class="mb-3">
+            <label class="form-label fw-semibold" id="contactLabel">ADRESSE E-MAIL</label>
+            <input
+                type="text"
+                name="contact"
+                id="contactField"
+                class="form-control form-control-lg"
+                placeholder="votre@email.com"
+            >
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 btn-lg mb-2">
+            ✦ Envoyer le code
+        </button>
+        <a href="{{ path('login') }}" class="btn btn-link w-100 text-muted">
+            ← Retour à la connexion
+        </a>
+    </form>
+</div>
+
+<script>
+    const emailPill = document.getElementById('emailPill');
+    const smsPill   = document.getElementById('smsPill');
+    const label     = document.getElementById('contactLabel');
+    const field     = document.getElementById('contactField');
+
+    emailPill.addEventListener('click', () => {
+        emailPill.classList.add('active');
+        smsPill.classList.remove('active');
+        label.textContent = 'ADRESSE E-MAIL';
+        field.placeholder = 'votre@email.com';
+        field.value = '';
+    });
+
+    smsPill.addEventListener('click', () => {
+        smsPill.classList.add('active');
+        emailPill.classList.remove('active');
+        label.textContent = 'NUMÉRO DE TÉLÉPHONE';
+        field.placeholder = '8 chiffres';
+        field.value = '';
+    });
+</script>
+{% endblock %}

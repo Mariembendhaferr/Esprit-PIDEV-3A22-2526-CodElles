@@ -1,0 +1,13 @@
+{% extends 'admin/base-admin.html.twig' %}
+{% block title %}Modifier Activité – Doura Mondo{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div>
+        <h1>Modifier l'activité</h1>
+        <p>{{ activite.nomActivite }}</p>
+    </div>
+</div>
+<div class="gold-line"></div>
+{{ include('activite/_form.html.twig', {'button_label': 'Update'}) }}
+{% endblock %}

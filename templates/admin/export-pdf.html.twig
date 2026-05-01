@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'DejaVu Sans', sans-serif;
+        background: #FDFAF6;
+        color: #2C1A0E;
+        font-size: 10.5px;
+    }
+
+    /* ══════════════════════════════════════
+       BORDURE DÉCORATIVE EXTÉRIEURE
+    ══════════════════════════════════════ */
+    .page-frame {
+        border: 2.5px solid #C5A880;
+        margin: 12px;
+        padding: 0;
+        min-height: 94%;
+        position: relative;
+    }
+
+    .page-frame::before {
+        content: '';
+        position: absolute;
+        inset: 5px;
+        border: 1px solid rgba(197, 168, 128, 0.35);
+        pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════
+       EN-TÊTE OFFICIEL
+    ══════════════════════════════════════ */
+    .header {
+        background: linear-gradient(135deg, #3A0000 0%, #5C0000 50%, #3A0000 100%);
+        padding: 0;
+        border-bottom: 3px solid #C5A880;
+    }
+
+    .header-inner {
+        display: table;
+        width: 100%;
+        padding: 18px 28px;
+    }
+
+    .header-left  { display: table-cell; vertical-align: middle; width: 60%; }
+    .header-right { display: table-cell; vertical-align: middle; text-align: right; }
+
+    .ornament     { color: #C5A880; font-size: 11px; letter-spacing: 6px; opacity: .7; }
+    .logo-title   {
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 6px;
+        color: #C5A880;
+        margin: 4px 0 2px;
+        text-transform: uppercase;
+    }
+    .logo-tagline { font-size: 8.5px; color: #C5A880; letter-spacing: 3.5px; opacity: .75; text-transform: uppercase; }
+
+    .doc-badge {
+        display: inline-block;
+        border: 1.5px solid #C5A880;
+        color: #C5A880;
+        padding: 5px 14px;
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .header-meta  { font-size: 9px; color: #C5A880; opacity: .8; line-height: 1.8; }
+
+    /* ══════════════════════════════════════
+       BANDE DE RÉFÉRENCE
+    ══════════════════════════════════════ */
+    .ref-band {
+        background: #F5EDE0;
+        border-bottom: 1px solid #C5A880;
+        padding: 7px 28px;
+        display: table;
+        width: 100%;
+    }
+    .ref-band-cell { display: table-cell; font-size: 9px; color: #5C0000; letter-spacing: .5px; }
+    .ref-band-cell:last-child { text-align: right; }
+    .ref-label { font-weight: bold; text-transform: uppercase; margin-right: 5px; }
+
+    /* ══════════════════════════════════════
+       CORPS — INTRO
+    ══════════════════════════════════════ */
+    .body-wrap { padding: 16px 28px; }
+
+    .section-title {
+        font-size: 9px;
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #8B0000;
+        border-bottom: 1px solid #C5A880;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+    .section-title::before { content: '◆  '; font-size: 7px; }
+
+    .intro-box {
+        border: 1px solid #C5A880;
+        background: #FFF8F0;
+        padding: 11px 16px;
+        margin-bottom: 16px;
+        position: relative;
+    }
+    .intro-box::before {
+        content: '❝';
+        position: absolute;
+        top: -8px;
+        left: 14px;
+        font-size: 22px;
+        color: #C5A880;
+        background: #FFF8F0;
+        padding: 0 4px;
+        line-height: 1;
+    }
+    .intro-text {
+        font-style: italic;
+        color: #4A2C0A;
+        line-height: 1.7;
+        font-size: 10px;
+    }
+
+    /* ══════════════════════════════════════
+       STATS — CADRES OFFICIELS
+    ══════════════════════════════════════ */
+    .stats-row { display: table; width: 100%; margin-bottom: 16px; border-spacing: 0; }
+    .stat-cell { display: table-cell; width: 33.33%; padding: 0 6px 0 0; }
+    .stat-cell:last-child { padding-right: 0; }
+
+    .stat-box {
+        border: 1.5px solid #C5A880;
+        background: #3A0000;
+        text-align: center;
+        padding: 12px 8px;
+        position: relative;
+    }
+    .stat-box::after {
+        content: '';
+        position: absolute;
+        inset: 3px;
+        border: 1px solid rgba(197,168,128,.25);
+    }
+    .stat-num   { font-size: 26px; font-weight: bold; color: #C5A880; line-height: 1; }
+    .stat-label { font-size: 8px; color: #C5A880; opacity: .75; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+    /* ══════════════════════════════════════
+       TABLEAU PRINCIPAL
+    ══════════════════════════════════════ */
+    .table-wrap {
+        border: 1.5px solid #C5A880;
+        margin-bottom: 16px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+
+    thead tr { background: #3A0000; }
+    thead th {
+        padding: 9px 8px;
+        color: #C5A880;
+        font-weight: bold;
+        text-align: left;
+        border-right: 1px solid rgba(197,168,128,.4);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+    }
+    thead th:last-child { border-right: none; }
+
+    tbody tr:nth-child(even) { background: #FFF8F0; }
+    tbody tr:nth-child(odd)  { background: #FFFFFF; }
+
+    tbody td {
+        padding: 7px 8px;
+        border-right: 1px solid #EAD9C0;
+        border-bottom: 1px solid #EAD9C0;
+        vertical-align: middle;
+        color: #2C1A0E;
+    }
+    tbody td:last-child { border-right: none; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .td-index  { text-align: center; color: #8B0000; font-weight: bold; font-size: 9px; }
+    .td-center { text-align: center; }
+    .td-titre  { font-weight: bold; color: #3A0000; }
+    .td-budget-high { color: #8B0000; font-weight: bold; }
+    .td-statut { text-align: center; color: #1a5c38; font-weight: bold; font-size: 9px; }
+
+    /* ligne de total */
+    .tfoot-row { background: #5C0000 !important; }
+    .tfoot-row td {
+        color: #C5A880 !important;
+        font-weight: bold;
+        font-size: 9px;
+        border-color: #C5A880 !important;
+        padding: 8px 8px;
+    }
+
+    /* ══════════════════════════════════════
+       BLOC SIGNATURE
+    ══════════════════════════════════════ */
+    .signature-section {
+        display: table;
+        width: 100%;
+        margin-bottom: 16px;
+    }
+    .sig-left  { display: table-cell; width: 55%; vertical-align: bottom; padding-right: 20px; }
+    .sig-right { display: table-cell; width: 45%; vertical-align: top; }
+
+    .sig-mention {
+        border: 1px solid #C5A880;
+        background: #FFF8F0;
+        padding: 10px 14px;
+        font-size: 9px;
+        color: #4A2C0A;
+        line-height: 1.7;
+    }
+    .sig-mention-title {
+        font-size: 8px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #8B0000;
+        border-bottom: 1px solid #C5A880;
+        padding-bottom: 5px;
+        margin-bottom: 7px;
+    }
+
+    .sig-box {
+        border: 1.5px solid #C5A880;
+        padding: 14px 18px 10px;
+        background: #FFFFFF;
+        position: relative;
+    }
+    .sig-box-label {
+        font-size: 8px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #8B0000;
+        margin-bottom: 6px;
+    }
+
+    /* Signature manuscrite stylisée */
+    .sig-name-cursive {
+        font-family: 'DejaVu Sans', cursive;
+        font-size: 22px;
+        color: #3A0000;
+        font-style: italic;
+        font-weight: bold;
+        letter-spacing: 1px;
+        border-bottom: 1.5px solid #C5A880;
+        padding-bottom: 4px;
+        margin-bottom: 8px;
+    }
+
+    .sig-contact-block { font-size: 8.5px; color: #5C0000; line-height: 1.8; }
+    .sig-contact-block span { color: #8B0000; font-weight: bold; margin-right: 4px; }
+
+    .sig-stamp {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        width: 52px;
+        height: 52px;
+        border: 2px solid #C5A880;
+        border-radius: 50%;
+        text-align: center;
+        padding-top: 10px;
+        font-size: 7px;
+        color: #8B0000;
+        letter-spacing: 1px;
+        font-weight: bold;
+        line-height: 1.4;
+        opacity: .8;
+    }
+
+    /* ══════════════════════════════════════
+       PIED DE PAGE
+    ══════════════════════════════════════ */
+    .footer {
+        background: #3A0000;
+        border-top: 3px solid #C5A880;
+        padding: 10px 28px;
+        display: table;
+        width: 100%;
+    }
+    .footer-left  { display: table-cell; vertical-align: middle; }
+    .footer-right { display: table-cell; vertical-align: middle; text-align: right; }
+    .footer-text  { font-size: 8px; color: #C5A880; opacity: .8; letter-spacing: 1px; line-height: 1.7; }
+    .footer-brand { font-size: 10px; font-weight: bold; color: #C5A880; letter-spacing: 3px; }
+
+    /* filigrane subtil */
+    .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-35deg);
+        font-size: 72px;
+        font-weight: bold;
+        color: rgba(92, 0, 0, 0.04);
+        letter-spacing: 8px;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="watermark">DOURA MONDO</div>
+
+<div class="page-frame">
+
+    {# ── EN-TÊTE ── #}
+    <div class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="ornament">— ✦ —</div>
+                <div class="logo-title">Doura Mondo</div>
+                <div class="logo-tagline">Agence de Voyages de Luxe</div>
+            </div>
+            <div class="header-right">
+                <div class="doc-badge">Document Officiel</div>
+                <div class="header-meta">
+                    Réf. DM-{{ date|date('Ymd') }}-VOY<br>
+                    Édité le {{ date|date('d/m/Y') }} à {{ date|date('H:i') }}<br>
+                    contact@douramondo.com
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── BANDE REF ── #}
+    <div class="ref-band">
+        <div class="ref-band-cell">
+            <span class="ref-label">Objet :</span> Liste exhaustive des voyages proposés
+        </div>
+        <div class="ref-band-cell">
+            <span class="ref-label">Établi par :</span> Zeyneb Chouchene &nbsp;|&nbsp;
+            <span class="ref-label">Statut :</span> Confidentiel
+        </div>
+    </div>
+
+    <div class="body-wrap">
+
+        {# ── INTRO ── #}
+        <div class="section-title">Présentation</div>
+        <div class="intro-box">
+            <p class="intro-text">
+                Doura Mondo vous propose une sélection de voyages d'exception soigneusement
+                élaborés pour satisfaire les voyageurs les plus exigeants. Chaque destination
+                fait l'objet d'une étude approfondie afin de garantir une expérience inoubliable,
+                alliant découverte culturelle, confort et authenticité. Le présent document constitue
+                un état complet de notre catalogue de voyages à la date d'édition.
+            </p>
+        </div>
+
+        {# ── STATISTIQUES ── #}
+        {% set totalPersonnes = 0 %}
+        {% set totalBudget    = 0 %}
+        {% for v in voyages %}
+            {% set totalPersonnes = totalPersonnes + v.nbPersonnes %}
+            {% set totalBudget    = totalBudget    + v.budgetEstime %}
+        {% endfor %}
+        {% set budgetMoyen = voyages|length > 0 ? (totalBudget / voyages|length)|round : 0 %}
+
+        <div class="section-title">Synthèse chiffrée</div>
+        <div class="stats-row">
+            <div class="stat-cell">
+                <div class="stat-box">
+                    <div class="stat-num">{{ voyages|length }}</div>
+                    <div class="stat-label">Voyages au catalogue</div>
+                </div>
+            </div>
+            <div class="stat-cell">
+                <div class="stat-box">
+                    <div class="stat-num">{{ totalPersonnes }}</div>
+                    <div class="stat-label">Voyageurs accueillis</div>
+                </div>
+            </div>
+            <div class="stat-cell">
+                <div class="stat-box">
+                    <div class="stat-num">{{ budgetMoyen|number_format(0, ',', ' ') }} €</div>
+                    <div class="stat-label">Budget moyen</div>
+                </div>
+            </div>
+        </div>
+
+        {# ── TABLEAU ── #}
+        <div class="section-title">Détail des voyages</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:4%">#</th>
+                        <th style="width:22%">Titre du voyage</th>
+                        <th style="width:13%">Continent</th>
+                        <th style="width:17%">Destination</th>
+                        <th style="width:10%">Personnes</th>
+                        <th style="width:10%">Durée</th>
+                        <th style="width:13%">Budget estimé</th>
+                        <th style="width:11%">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for voyage in voyages %}
+                    <tr>
+                        <td class="td-index">{{ loop.index }}</td>
+                        <td class="td-titre">{{ voyage.titre }}</td>
+                        <td>{{ voyage.continent }}</td>
+                        <td>{{ voyage.destination }}</td>
+                        <td class="td-center">{{ voyage.nbPersonnes }}</td>
+                        <td class="td-center">{{ voyage.duree }} j.</td>
+                        <td class="{{ voyage.budgetEstime > 5000 ? 'td-budget-high' : '' }}">
+                            {{ voyage.budgetEstime|number_format(0, ',', ' ') }} €
+                        </td>
+                        <td class="td-statut">✔ Actif</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="tfoot-row">
+                        <td colspan="4">Total général</td>
+                        <td class="td-center">{{ totalPersonnes }}</td>
+                        <td class="td-center">—</td>
+                        <td>{{ totalBudget|number_format(0, ',', ' ') }} €</td>
+                        <td class="td-center">{{ voyages|length }} actifs</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {# ── SIGNATURE ── #}
+        <div class="section-title">Signature &amp; Validation</div>
+        <div class="signature-section">
+
+            <div class="sig-left">
+                <div class="sig-mention">
+                    <div class="sig-mention-title">Mention légale</div>
+                    Ce document est établi à titre informatif et récapitulatif.
+                    Les informations qu'il contient sont confidentielles et destinées
+                    à l'usage exclusif de Doura Mondo. Toute reproduction ou diffusion
+                    sans autorisation est interdite. Document généré automatiquement
+                    par le système de gestion Doura Mondo.
+                </div>
+            </div>
+
+            <div class="sig-right">
+                <div class="sig-box">
+                    <div class="sig-stamp">DM<br>{{ date|date('Y') }}<br>✦</div>
+                    <div class="sig-box-label">Responsable du document</div>
+                    <div class="sig-name-cursive">Zeyneb Chouchene</div>
+                    <div class="sig-contact-block">
+                        <span>Titre :</span> Directrice — Doura Mondo<br>
+                        <span>Email :</span> zeyneb@douramondo.com<br>
+                        <span>Date :</span> {{ date|date('d/m/Y') }}<br>
+                        <span>Réf. :</span> DM-{{ date|date('Ymd') }}-VOY
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>{# fin body-wrap #}
+
+    {# ── PIED DE PAGE ── #}
+    <div class="footer">
+        <div class="footer-left">
+            <div class="footer-brand">✦ DOURA MONDO ✦</div>
+            <div class="footer-text">Agence de Voyages de Luxe &nbsp;|&nbsp; contact@douramondo.com</div>
+        </div>
+        <div class="footer-right">
+            <div class="footer-text">
+                © {{ date|date('Y') }} Doura Mondo — Tous droits réservés<br>
+                Document confidentiel — Réf. DM-{{ date|date('Ymd') }}-VOY
+            </div>
+        </div>
+    </div>
+
+</div>{# fin page-frame #}
+
+</body>
+</html>

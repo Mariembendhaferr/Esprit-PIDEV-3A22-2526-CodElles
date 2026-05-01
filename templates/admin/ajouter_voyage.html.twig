@@ -1,0 +1,1311 @@
+{# templates/admin/ajouter_voyage.html.twig #}
+{% extends "admin/base-admin.html.twig" %}
+
+{% block title %}Doura Mondo - Initier une Destination d'Exception{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+/* ═══════════════════════════════════════════
+   CHARTE GRAPHIQUE : bordeaux / or / beige
+   ═══════════════════════════════════════════ */
+:root {
+    --bordeaux:       #5C0000;
+    --bordeaux-light: #7A0000;
+    --bordeaux-dark:  #3A0000;
+    --gold:           #C5A880;
+    --gold-light:     #D4BC9A;
+    --beige-bg:       #F4F1EA;
+    --beige-light:    #FDFCF9;
+}
+
+/* ── Champ destination + bouton map ── */
+.destination-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.destination-wrapper input {
+    flex: 1;
+    border-radius: 8px 0 0 8px !important;
+}
+.btn-open-map {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--bordeaux), var(--bordeaux-light));
+    border: none; border-radius: 0 8px 8px 0;
+    color: var(--gold); font-size: 1.1rem; cursor: pointer;
+    transition: background .2s, transform .2s;
+}
+.btn-open-map:hover {
+    background: linear-gradient(135deg, var(--bordeaux-dark), var(--bordeaux));
+    transform: scale(1.05);
+}
+
+/* ── Autocomplete dropdown ── */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 44px;
+    background: var(--beige-light);
+    border: 1px solid var(--gold);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    list-style: none; margin: 0; padding: 0;
+    z-index: 9999; display: none;
+    max-height: 240px; overflow-y: auto;
+    box-shadow: 0 10px 28px rgba(92,0,0,.18);
+}
+.autocomplete-dropdown li {
+    padding: 10px 15px;
+    color: var(--bordeaux);
+    cursor: pointer;
+    font-size: .88rem;
+    border-bottom: 1px solid rgba(197,168,128,.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background .15s;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+}
+.autocomplete-dropdown li:last-child { border-bottom: none; }
+.autocomplete-dropdown li:hover { background: rgba(92,0,0,.07); }
+.autocomplete-dropdown li.incompatible {
+    opacity: .4; cursor: not-allowed; color: #999;
+}
+.continent-badge {
+    font-size: .7rem;
+    background: rgba(92,0,0,.1);
+    color: var(--bordeaux);
+    border: 1px solid var(--gold);
+    padding: 2px 8px; border-radius: 10px;
+    white-space: nowrap; margin-left: 8px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: .05em;
+}
+.autocomplete-dropdown li.incompatible .continent-badge {
+    background: #f5e0e0;
+    color: #999;
+}
+
+/* ── Erreur champ ── */
+.input-error {
+    border-color: var(--bordeaux-light) !important;
+    box-shadow: 0 0 0 2px rgba(92,0,0,.25) !important;
+}
+.field-error {
+    display: block;
+    font-size: .78rem;
+    margin-top: 4px;
+    color: var(--bordeaux);
+    min-height: 16px;
+    font-style: italic;
+}
+.field-ok {
+    color: #2e7d32 !important;
+    font-style: normal !important;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   MODAL CARTE
+   ═══════════════════════════════════════════ */
+.map-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(40,0,0,.72);
+    z-index: 10000;
+    align-items: center; justify-content: center;
+}
+.map-overlay.actif { display: flex; }
+
+.map-modal {
+    background: var(--beige-light);
+    border-radius: 16px;
+    width: 94vw; max-width: 1080px; max-height: 92vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 30px 90px rgba(92,0,0,.45);
+    border: 2px solid var(--gold);
+}
+.map-modal-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 16px 24px 12px;
+    background: var(--bordeaux);
+    border-bottom: 2px solid var(--gold);
+}
+.map-modal-badge {
+    font-family: 'Cinzel', serif;
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .15em;
+    color: var(--gold); margin-bottom: 3px;
+}
+.map-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem; color: var(--beige-bg); margin: 0; font-weight: 600;
+}
+.map-modal-close {
+    background: none; border: 1px solid rgba(197,168,128,.4);
+    color: var(--gold); font-size: 1.1rem;
+    cursor: pointer; padding: 4px 10px; border-radius: 6px;
+    transition: all .2s;
+}
+.map-modal-close:hover { background: rgba(197,168,128,.15); color: #fff; }
+
+.map-continent-hint {
+    padding: 8px 24px;
+    font-size: .82rem;
+    background: rgba(197,168,128,.15);
+    border-bottom: 1px solid var(--gold-light);
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .2s;
+}
+
+#leaflet-map {
+    flex: 1; height: 480px; width: 100%;
+    background: #e8e0d5;
+}
+
+.map-modal-footer {
+    display: flex; align-items: center; gap: 18px;
+    padding: 10px 24px;
+    background: var(--bordeaux);
+    border-top: 2px solid var(--gold);
+    flex-wrap: wrap;
+}
+.map-legend {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .75rem; color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+}
+.map-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+.map-legend-dot.active   { background: var(--bordeaux-light); border: 2px solid var(--gold); }
+.map-legend-dot.hover    { background: var(--gold); }
+.map-legend-dot.inactive { background: #aaa; border: 1px solid #ccc; }
+
+.map-btn-cancel {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 7px 18px; border-radius: 8px;
+    cursor: pointer; font-size: .82rem;
+    font-family: 'Cinzel', serif;
+    transition: all .2s;
+}
+.map-btn-cancel:hover { background: rgba(197,168,128,.15); color: #fff; }
+
+/* Leaflet tooltip charte */
+.country-tooltip {
+    background: var(--bordeaux) !important;
+    border: 1px solid var(--gold) !important;
+    color: var(--gold-light) !important;
+    font-weight: 700 !important;
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-family: 'Cinzel', serif !important;
+    box-shadow: 0 4px 12px rgba(92,0,0,.35) !important;
+}
+.leaflet-tooltip-pane .country-tooltip::before { display: none; }
+
+.leaflet-popup-content-wrapper {
+    background: var(--bordeaux) !important;
+    color: var(--beige-bg) !important;
+    border-radius: 10px !important;
+    border: 2px solid var(--gold) !important;
+    box-shadow: 0 6px 20px rgba(92,0,0,.5) !important;
+}
+.leaflet-popup-tip { background: var(--bordeaux) !important; }
+.leaflet-popup-content {
+    margin: 10px 14px !important;
+    font-size: .9rem;
+    font-family: 'Cormorant Garamond', serif;
+}
+.leaflet-popup-close-button { color: var(--gold) !important; }
+
+/* Spinner chargement carte */
+.map-loader {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 480px;
+    gap: 14px; color: var(--bordeaux);
+    font-family: 'Cinzel', serif; font-size: .9rem;
+}
+.map-loader-spinner {
+    width: 46px; height: 46px;
+    border: 4px solid rgba(92,0,0,.15);
+    border-top-color: var(--bordeaux);
+    border-radius: 50%;
+    animation: spin .85s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Modal succès -->
+<div id="success-overlay" style="
+    display:none; position:fixed; inset:0;
+    background:rgba(40,0,0,.75);
+    z-index:99999;
+    align-items:center; justify-content:center;
+">
+    <div style="
+        background: linear-gradient(135deg, #5C0000, #3A0000);
+        border: 2px solid #C5A880;
+        border-radius: 18px;
+        padding: 40px 50px;
+        text-align: center;
+        color: #C5A880;
+        font-family: 'Cormorant Garamond', serif;
+        box-shadow: 0 30px 80px rgba(0,0,0,.5);
+        max-width: 420px;
+    ">
+        <i class="fa-solid fa-circle-check" style="font-size:3rem; margin-bottom:15px; display:block;"></i>
+        <div style="font-size:1.5rem; font-weight:700; margin-bottom:8px;">Voyage créé avec succès !</div>
+        <div style="font-size:1rem; opacity:.8;">Redirection en cours...</div>
+        <div style="margin-top:20px; height:4px; background:rgba(197,168,128,.2); border-radius:2px; overflow:hidden;">
+            <div id="success-bar" style="height:100%; width:0%; background:#C5A880; transition: width 2s linear;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper-container">
+    <div class="step active">
+        <div class="step-circle">1</div>
+        <div class="step-label">Imaginez et Pensez</div>
+    </div>
+    <div class="step-line active"></div>
+    <div class="step active">
+        <div class="step-circle">2</div>
+        <div class="step-label">Créez votre idée</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step inactive">
+        <div class="step-circle">3</div>
+        <div class="step-label">Planifier son séjour</div>
+    </div>
+</div>
+
+<!-- SPLIT LAYOUT -->
+<div class="split-layout">
+
+
+    <!-- FORMULAIRE -->
+    <div class="form-card">
+        <p class="form-card-title">Nouvelle Odyssée</p>
+        <p class="form-card-subtitle">Initiez une destination d'exception</p>
+
+        {% if not form.vars.valid and form.vars.submitted %}
+            <div class="form-errors">
+                {% for field in form %}
+                    {% for error in field.vars.errors %}
+                        <div class="form-error-item">
+                            <i class="fa-solid fa-circle-exclamation"></i> {{ error.message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {{ form_start(form, {
+            attr: { class: 'luxury-form', id: 'voyage-form', onsubmit: 'return validateForm()' }
+        }) }}
+
+       {# ── Titre ── #}
+<div class="form-group full-row">
+    <label for="{{ form.titre.vars.id }}">
+        <i class="fa-solid fa-feather-pointed"></i> Nom de l'Odyssée (minimum 25 caractères)
+    </label>
+    {{ form_widget(form.titre, {
+        attr: { 
+            oninput: "validateTitreEnDirect(this)"
+        }
+    }) }}
+    {{ form_errors(form.titre) }}
+    <span class="field-error" id="err-titre"></span>
+</div>
+
+            {# ── Continent ── #}
+            <div class="form-group">
+                <label for="{{ form.continent.vars.id }}">
+                    <i class="fa-solid fa-globe"></i> Région du monde
+                </label>
+                <div style="position:relative;">
+                    {{ form_widget(form.continent, {
+                        attr: { 
+                            onchange: "onContinentChange(this.value)",
+                            id: "continent-select"
+                        }
+                    }) }}
+                    <i class="fa-solid fa-chevron-down select-icon"></i>
+                </div>
+                {{ form_errors(form.continent) }}
+                <span class="field-error" id="err-continent"></span>
+            </div>
+
+            {# ── Destination : autocomplete + bouton map ── #}
+            <div class="form-group">
+                <label for="{{ form.destination.vars.id }}">
+                    <i class="fa-solid fa-location-dot"></i> Pays de destination
+                </label>
+                <div class="destination-wrapper">
+                    {{ form_widget(form.destination, {
+                        attr: {
+                            oninput:   "onDestinationInput(this.value)",
+                            onkeydown: "navigerSuggestions(event)",
+                            onfocus:   "onDestinationInput(this.value)",
+                            autocomplete: "off"
+                        }
+                    }) }}
+                    <button type="button" class="btn-open-map"
+                            onclick="ouvrirMap()" title="Choisir le pays sur la carte">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </button>
+                    <ul id="autocomplete-list" class="autocomplete-dropdown"></ul>
+                </div>
+                {{ form_errors(form.destination) }}
+                <span class="field-error" id="err-destination"></span>
+            </div>
+
+            {# ── Budget ── #}
+            <div class="form-group">
+                <label for="{{ form.budget_estime.vars.id }}">
+                    <i class="fa-solid fa-euro-sign"></i> Investissement estimé (€)
+                </label>
+                {{ form_widget(form.budget_estime, {
+                    attr: { oninput: "updateStat('prev-budget', this.value ? this.value + ' €' : null); validatePositif(this, 'err-budget')" }
+                }) }}
+                {{ form_errors(form.budget_estime) }}
+                <span class="field-error" id="err-budget"></span>
+            </div>
+
+            {# ── Durée ── #}
+            <div class="form-group">
+                <label for="{{ form.duree.vars.id }}">
+                    <i class="fa-regular fa-clock"></i> Temps d'immersion (jours)
+                </label>
+                {{ form_widget(form.duree, {
+                    attr: { oninput: "updateStat('prev-duree', this.value ? this.value + ' Jours' : null); validatePositif(this, 'err-duree')" }
+                }) }}
+                {{ form_errors(form.duree) }}
+                <span class="field-error" id="err-duree"></span>
+            </div>
+
+            {# ── Nb personnes ── #}
+            <div class="form-group">
+                <label for="{{ form.nb_personnes.vars.id }}">
+                    <i class="fa-solid fa-users"></i> Ampleur du groupe
+                </label>
+                {{ form_widget(form.nb_personnes, {
+                    attr: { oninput: "updateStat('prev-pers', this.value ? this.value + ' Pers.' : null); validatePositif(this, 'err-pers')" }
+                }) }}
+                {{ form_errors(form.nb_personnes) }}
+                <span class="field-error" id="err-pers"></span>
+            </div>
+
+            {# ── Image URL ── #}
+            <div class="form-group full-row">
+                <label for="{{ form.image_url.vars.id }}">
+                    <i class="fa-regular fa-image"></i> URL de la photo de couverture
+                </label>
+                {{ form_widget(form.image_url, {
+                    attr: { oninput: "updateBgFromUrl(this.value); validateImageUrl(this)" }
+                }) }}
+                {{ form_errors(form.image_url) }}
+                <span class="field-error" id="err-image"></span>
+                <span class="field-hint">Doit se terminer par .jpg, .jpeg ou .png</span>
+            </div>
+
+            {# ── Description ── #}
+            <div class="form-group full-row">
+                <label for="{{ form.description.vars.id }}">
+                    <i class="fa-solid fa-quote-left"></i> Récit du Voyage
+                    <span class="optional-badge">Facultatif</span>
+                </label>
+                {{ form_widget(form.description) }}
+            </div>
+
+            <div class="full-row form-actions">
+                <a href="{{ path('app_voyage_admin') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-arrow-right"></i> Planifier le séjour
+                </button>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+
+    <!-- PANNEAU PREVIEW -->
+    <div class="preview-panel">
+        <div class="preview-card">
+            <div class="preview-card-bg" id="preview-bg"
+                 style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=600&q=80');"></div>
+            <div class="preview-card-overlay"></div>
+            <div class="preview-card-content">
+                <div class="preview-badge" id="preview-continent-badge">
+                    <i class="fa-solid fa-globe"></i> Destination
+                </div>
+                <div class="preview-title" id="preview-title">Le Titre...</div>
+                <div class="preview-dest" id="preview-dest">Doura Mondo · Voyages d'Exception</div>
+            </div>
+        </div>
+
+        <div class="upload-zone" id="upload-zone">
+            <input type="file" accept="image/*" id="photo-upload" onchange="handleUpload(this)">
+            <i class="fa-regular fa-image" id="upload-icon"></i>
+            <div class="upload-label">Photo de couverture</div>
+            <div class="upload-hint" id="upload-hint">Cliquez pour choisir une image</div>
+        </div>
+
+        <div class="preview-stats">
+            <div class="preview-stats-title">
+                <i class="fa-solid fa-chart-simple"></i> Aperçu
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-lbl">Budget</span>
+                        <span class="stat-val empty" id="prev-budget">—</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fa-regular fa-clock"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-lbl">Durée</span>
+                        <span class="stat-val empty" id="prev-duree">—</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-lbl">Voyageurs</span>
+                        <span class="stat-val empty" id="prev-pers">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════════════════════ #}
+{#  MODAL CARTE LEAFLET                                           #}
+{# ═══════════════════════════════════════════════════════════════ #}
+<div id="map-overlay" class="map-overlay">
+    <div class="map-modal">
+        <div class="map-modal-header">
+            <div>
+                <div class="map-modal-badge">Sélection Géographique</div>
+                <h2 class="map-modal-title">Choisissez votre destination sur la carte</h2>
+            </div>
+            <button type="button" class="map-modal-close" onclick="fermerMap()">&#x2715;</button>
+        </div>
+        <div class="map-continent-hint" id="map-continent-hint">
+            <i class="fa-solid fa-circle-info"></i>
+            Sélectionnez d'abord un continent dans le formulaire
+        </div>
+        <div id="leaflet-map-container">
+            <div class="map-loader" id="map-loader">
+                <div class="map-loader-spinner"></div>
+                <span>Chargement de la carte...</span>
+            </div>
+            <div id="leaflet-map" style="display:none; flex:1; height:480px; width:100%;"></div>
+        </div>
+        <div class="map-modal-footer">
+            <span class="map-legend">
+                <span class="map-legend-dot active"></span> Pays du continent sélectionné
+            </span>
+            <span class="map-legend">
+                <span class="map-legend-dot hover"></span> Survol / sélection
+            </span>
+            <span class="map-legend">
+                <span class="map-legend-dot inactive"></span> Autre continent
+            </span>
+            <button type="button" class="map-btn-cancel" onclick="fermerMap()">
+                <i class="fa-solid fa-xmark"></i> Fermer
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+// ═══════════════════════════════════════════════════════════════════
+// BASE DE DONNÉES PAYS ↔ CONTINENT (étendue)
+// ═══════════════════════════════════════════════════════════════════
+const PAYS_CONTINENT = {
+    // Europe
+    "France":"Europe","Allemagne":"Europe","Italie":"Europe","Espagne":"Europe",
+    "Portugal":"Europe","Belgique":"Europe","Suisse":"Europe","Autriche":"Europe",
+    "Pays-Bas":"Europe","Royaume-Uni":"Europe","Irlande":"Europe","Suède":"Europe",
+    "Norvège":"Europe","Danemark":"Europe","Finlande":"Europe","Pologne":"Europe",
+    "Grèce":"Europe","Turquie":"Europe","Croatie":"Europe","Hongrie":"Europe",
+    "République Tchèque":"Europe","Roumanie":"Europe","Bulgarie":"Europe",
+    "Serbie":"Europe","Slovaquie":"Europe","Slovénie":"Europe","Albanie":"Europe",
+    "Luxembourg":"Europe","Malte":"Europe","Chypre":"Europe","Islande":"Europe",
+    "Monaco":"Europe","Liechtenstein":"Europe","Andorre":"Europe",
+    // Afrique
+    "Tunisie":"Afrique","Maroc":"Afrique","Algérie":"Afrique","Égypte":"Afrique",
+    "Sénégal":"Afrique","Mali":"Afrique","Côte d'Ivoire":"Afrique","Ghana":"Afrique",
+    "Nigeria":"Afrique","Cameroun":"Afrique","Kenya":"Afrique","Éthiopie":"Afrique",
+    "Tanzanie":"Afrique","Mozambique":"Afrique","Afrique du Sud":"Afrique",
+    "Zimbabwe":"Afrique","Namibie":"Afrique","Botswana":"Afrique","Zambie":"Afrique",
+    "Angola":"Afrique","Madagascar":"Afrique","Maurice":"Afrique","Réunion":"Afrique",
+    "Libye":"Afrique","Soudan":"Afrique","Tchad":"Afrique","Niger":"Afrique",
+    "Burkina Faso":"Afrique","Guinée":"Afrique","Congo":"Afrique",
+    "République Démocratique du Congo":"Afrique","Rwanda":"Afrique","Uganda":"Afrique",
+    // Asie
+    "Japon":"Asie","Chine":"Asie","Inde":"Asie","Thaïlande":"Asie","Vietnam":"Asie",
+    "Indonésie":"Asie","Malaisie":"Asie","Singapour":"Asie","Philippines":"Asie",
+    "Corée du Sud":"Asie","Corée du Nord":"Asie","Taiwan":"Asie","Hong Kong":"Asie",
+    "Cambodge":"Asie","Laos":"Asie","Myanmar":"Asie","Bangladesh":"Asie",
+    "Sri Lanka":"Asie","Népal":"Asie","Pakistan":"Asie","Afghanistan":"Asie",
+    "Iran":"Asie","Irak":"Asie","Syrie":"Asie","Liban":"Asie","Jordanie":"Asie",
+    "Israël":"Asie","Arabie Saoudite":"Asie","Émirats Arabes Unis":"Asie",
+    "Qatar":"Asie","Koweït":"Asie","Bahreïn":"Asie","Oman":"Asie","Yémen":"Asie",
+    "Kazakhstan":"Asie","Ouzbékistan":"Asie","Azerbaïdjan":"Asie","Géorgie":"Asie",
+    "Arménie":"Asie","Mongolie":"Asie","Maldives":"Asie","Bhoutan":"Asie",
+    // Amériques
+    "Canada":"Amériques","États-Unis":"Amériques","Mexique":"Amériques",
+    "Brésil":"Amériques","Argentine":"Amériques","Chili":"Amériques",
+    "Colombie":"Amériques","Pérou":"Amériques","Bolivie":"Amériques",
+    "Équateur":"Amériques","Venezuela":"Amériques","Uruguay":"Amériques",
+    "Paraguay":"Amériques","Guyana":"Amériques","Suriname":"Amériques",
+    "Panama":"Amériques","Costa Rica":"Amériques","Guatemala":"Amériques",
+    "Honduras":"Amériques","El Salvador":"Amériques","Nicaragua":"Amériques",
+    "Cuba":"Amériques","Jamaïque":"Amériques","Haïti":"Amériques",
+    "République Dominicaine":"Amériques","Porto Rico":"Amériques",
+    // Océanie
+    "Australie":"Océanie","Nouvelle-Zélande":"Océanie","Fidji":"Océanie",
+    "Papouasie-Nouvelle-Guinée":"Océanie","Vanuatu":"Océanie","Samoa":"Océanie",
+    "Tonga":"Océanie","Kiribati":"Océanie","Palaos":"Océanie"
+};
+
+// Noms anglais (GeoJSON) → noms français
+const EN_TO_FR = {
+    // Europe
+    "France":"France","Germany":"Allemagne","Italy":"Italie","Spain":"Espagne",
+    "Portugal":"Portugal","Belgium":"Belgique","Switzerland":"Suisse","Austria":"Autriche",
+    "Netherlands":"Pays-Bas","United Kingdom":"Royaume-Uni","Ireland":"Irlande",
+    "Sweden":"Suède","Norway":"Norvège","Denmark":"Danemark","Finland":"Finlande",
+    "Poland":"Pologne","Greece":"Grèce","Turkey":"Turquie","Croatia":"Croatie",
+    "Hungary":"Hongrie","Czech Republic":"République Tchèque","Romania":"Roumanie",
+    "Bulgaria":"Bulgarie","Serbia":"Serbie","Slovakia":"Slovaquie","Slovenia":"Slovénie",
+    "Albania":"Albanie","Luxembourg":"Luxembourg","Malta":"Malte","Cyprus":"Chypre",
+    "Iceland":"Islande","Monaco":"Monaco","Liechtenstein":"Liechtenstein",
+    // Afrique
+    "Tunisia":"Tunisie","Morocco":"Maroc","Algeria":"Algérie","Egypt":"Égypte",
+    "Senegal":"Sénégal","Mali":"Mali","Ivory Coast":"Côte d'Ivoire","Ghana":"Ghana",
+    "Nigeria":"Nigeria","Cameroon":"Cameroun","Kenya":"Kenya","Ethiopia":"Éthiopie",
+    "Tanzania":"Tanzanie","Mozambique":"Mozambique","South Africa":"Afrique du Sud",
+    "Zimbabwe":"Zimbabwe","Namibia":"Namibie","Botswana":"Botswana","Zambia":"Zambie",
+    "Angola":"Angola","Madagascar":"Madagascar","Libya":"Libye","Sudan":"Soudan",
+    "Chad":"Tchad","Niger":"Niger","Rwanda":"Rwanda","Uganda":"Uganda",
+    "Democratic Republic of the Congo":"République Démocratique du Congo",
+    "Republic of the Congo":"Congo",
+    // Asie
+    "Japan":"Japon","China":"Chine","India":"Inde","Thailand":"Thaïlande",
+    "Vietnam":"Vietnam","Indonesia":"Indonésie","Malaysia":"Malaisie",
+    "Singapore":"Singapour","Philippines":"Philippines","South Korea":"Corée du Sud",
+    "North Korea":"Corée du Nord","Taiwan":"Taiwan","Cambodia":"Cambodge",
+    "Laos":"Laos","Myanmar":"Myanmar","Bangladesh":"Bangladesh","Sri Lanka":"Sri Lanka",
+    "Nepal":"Népal","Pakistan":"Pakistan","Afghanistan":"Afghanistan","Iran":"Iran",
+    "Iraq":"Irak","Syria":"Syrie","Lebanon":"Liban","Jordan":"Jordanie",
+    "Israel":"Israël","Saudi Arabia":"Arabie Saoudite",
+    "United Arab Emirates":"Émirats Arabes Unis","Qatar":"Qatar","Kuwait":"Koweït",
+    "Bahrain":"Bahreïn","Oman":"Oman","Yemen":"Yémen","Kazakhstan":"Kazakhstan",
+    "Uzbekistan":"Ouzbékistan","Azerbaijan":"Azerbaïdjan","Georgia":"Géorgie",
+    "Armenia":"Arménie","Mongolia":"Mongolie","Maldives":"Maldives","Bhutan":"Bhoutan",
+    // Amériques
+    "Canada":"Canada","United States of America":"États-Unis","Mexico":"Mexique",
+    "Brazil":"Brésil","Argentina":"Argentine","Chile":"Chili","Colombia":"Colombie",
+    "Peru":"Pérou","Bolivia":"Bolivie","Ecuador":"Équateur","Venezuela":"Venezuela",
+    "Uruguay":"Uruguay","Paraguay":"Paraguay","Guyana":"Guyana","Suriname":"Suriname",
+    "Panama":"Panama","Costa Rica":"Costa Rica","Guatemala":"Guatemala",
+    "Honduras":"Honduras","Cuba":"Cuba","Jamaica":"Jamaïque","Haiti":"Haïti",
+    "Dominican Republic":"République Dominicaine",
+    "United States":"États-Unis","U.S.A.":"États-Unis","USA":"États-Unis",
+    "UK":"Royaume-Uni","Great Britain":"Royaume-Uni",
+    "South Korea":"Corée du Sud","Korea":"Corée du Sud",
+    "Czechia":"République Tchèque","Czech Rep.":"République Tchèque",
+    "Dem. Rep. Congo":"République Démocratique du Congo",
+    "Congo":"Congo","Republic of Congo":"Congo",
+    "Côte d'Ivoire":"Côte d'Ivoire","Cote d'Ivoire":"Côte d'Ivoire",
+    "Tanzania":"Tanzanie","United Republic of Tanzania":"Tanzanie",
+    "Dominican Rep.":"République Dominicaine",
+    "S. Sudan":"Soudan du Sud","South Sudan":"Soudan du Sud",
+    "Eq. Guinea":"Guinée Équatoriale","Equatorial Guinea":"Guinée Équatoriale",
+    "Papua New Guinea":"Papouasie-Nouvelle-Guinée",
+    "New Zealand":"Nouvelle-Zélande","Fiji":"Fidji",
+    "Vanuatu":"Vanuatu","Samoa":"Samoa","Tonga":"Tonga",
+    "Kiribati":"Kiribati","Palau":"Palaos"
+};
+
+// Vues par continent (centre + zoom)
+const CONTINENT_VIEW = {
+    "Europe":    { center: [51.0,  10.0], zoom: 4 },
+    "Afrique":   { center: [ 5.0,  20.0], zoom: 3 },
+    "Asie":      { center: [35.0,  90.0], zoom: 3 },
+    "Amériques": { center: [10.0, -80.0], zoom: 3 },
+    "Océanie":   { center:[-22.0, 140.0], zoom: 4 }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// FONCTION POUR RÉCUPÉRER LE CONTINENT (ROBUSTE)
+// ═══════════════════════════════════════════════════════════════════
+function getCurrentContinent() {
+    // Essayer plusieurs façons de récupérer le champ continent
+    let continentField = document.getElementById('continent');
+    
+    if (!continentField || !continentField.value) {
+        continentField = document.querySelector('[name="voyage[continent]"]');
+    }
+    
+    if (!continentField || !continentField.value) {
+        continentField = document.querySelector('select[name*="continent"]');
+    }
+    
+    if (!continentField || !continentField.value) {
+        continentField = document.querySelector('#continent-select');
+    }
+    
+    const value = continentField ? continentField.value : '';
+    console.log('🌍 Continent récupéré :', value);
+    
+    // Ignorer le placeholder
+    if (value && value !== '' && value !== 'Choisir...') {
+        return value;
+    }
+    
+    return '';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTOCOMPLETE — filtrage local
+// ═══════════════════════════════════════════════════════════════════
+const PAYS_LISTE = Object.keys(PAYS_CONTINENT).sort();
+let acActiveIndex = -1;
+
+function onDestinationInput(query) {
+    const list  = document.getElementById('autocomplete-list');
+    const contChoisi = getCurrentContinent();
+
+    if (!query || query.length < 1) {
+        fermerAutocomplete();
+        return;
+    }
+
+    const normalized = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const filtered = PAYS_LISTE.filter(p => {
+        const pNorm = p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return pNorm.startsWith(normalized);
+    }).slice(0, 8);
+
+    const filtered2 = filtered.length > 0 ? filtered : PAYS_LISTE.filter(p => {
+        const pNorm = p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return pNorm.includes(normalized);
+    }).slice(0, 8);
+
+    if (filtered2.length === 0) { fermerAutocomplete(); return; }
+
+    list.innerHTML = '';
+    acActiveIndex = -1;
+
+    filtered2.forEach(pays => {
+        const cont = PAYS_CONTINENT[pays] || '';
+        const incompatible = contChoisi && cont && cont !== contChoisi;
+        const li = document.createElement('li');
+        if (incompatible) li.classList.add('incompatible');
+
+        li.innerHTML = `<span>${pays}</span><span class="continent-badge">${cont}</span>`;
+        li.title = incompatible ? `${pays} est en ${cont}, pas en ${contChoisi}` : `Sélectionner ${pays}`;
+
+        li.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (incompatible) {
+                const errEl = document.getElementById('err-destination');
+                if (errEl) errEl.textContent = `❌ ${pays} appartient à ${cont}, pas à ${contChoisi}`;
+                return;
+            }
+            selectionnerPays(pays);
+        });
+
+        list.appendChild(li);
+    });
+
+    list.style.display = 'block';
+}
+
+function navigerSuggestions(e) {
+    const list  = document.getElementById('autocomplete-list');
+    const items = list ? list.querySelectorAll('li:not(.incompatible)') : [];
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acActiveIndex = Math.min(acActiveIndex + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acActiveIndex = Math.max(acActiveIndex - 1, 0);
+    } else if (e.key === 'Enter' && acActiveIndex >= 0) {
+        e.preventDefault();
+        items[acActiveIndex].dispatchEvent(new MouseEvent('mousedown'));
+        return;
+    } else if (e.key === 'Escape') {
+        fermerAutocomplete();
+        return;
+    } else {
+        return;
+    }
+
+    items.forEach((item, i) => {
+        item.classList.toggle('active', i === acActiveIndex);
+        if (i === acActiveIndex) item.scrollIntoView({ block: 'nearest' });
+    });
+}
+
+let acSelecting = false; // flag pour bloquer le blur pendant une sélection
+
+function fermerAutocomplete() {
+    setTimeout(() => {
+        if (acSelecting) return; // ne pas fermer si une sélection est en cours
+        const list = document.getElementById('autocomplete-list');
+        if (list) list.style.display = 'none';
+        acActiveIndex = -1;
+    }, 150);
+}
+
+function selectionnerPays(pays) {
+    acSelecting = true; // bloquer le blur
+
+    let destField = document.getElementById('destination');
+    if (!destField) destField = document.querySelector('[name*="destination"]');
+    if (destField) {
+        destField.value = pays;
+    }
+
+    // Fermer immédiatement la liste AVANT de dispatcher l'event input
+    const list = document.getElementById('autocomplete-list');
+    if (list) list.style.display = 'none';
+    acActiveIndex = -1;
+
+    // Mettre à jour l'aperçu
+    const previewDest = document.getElementById('preview-dest');
+    if (previewDest) previewDest.textContent = pays;
+
+    // Valider le pays
+    validerPays(pays);
+
+    acSelecting = false; // libérer le flag
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VALIDATION CONTINENT / PAYS
+// ═══════════════════════════════════════════════════════════════════
+function onContinentChange(val) {
+    const badge = document.getElementById('preview-continent-badge');
+    if (badge) badge.innerHTML = `<i class="fa-solid fa-globe"></i> ${val || 'Destination'}`;
+
+    let destInput = document.getElementById('destination');
+    if (!destInput) destInput = document.querySelector('[name*="destination"]');
+    if (destInput && destInput.value.trim()) {
+        validerPays(destInput.value.trim());
+    }
+
+    const errCont = document.getElementById('err-continent');
+    if (errCont && val) errCont.textContent = '';
+
+    if (leafletMap && document.getElementById('map-overlay').classList.contains('actif')) {
+        appliquerStyleContinent(val);
+        appliquerZoomContinent(val);
+        
+        const hint = document.getElementById('map-continent-hint');
+        if (hint && val) {
+            hint.innerHTML = `<i class="fa-solid fa-check-circle"></i> ✅ Continent sélectionné : <strong>${val}</strong> — Cliquez sur un pays pour le sélectionner.`;
+            hint.style.color = '#2e7d32';
+            hint.style.background = 'rgba(46,125,50,0.1)';
+        }
+    }
+}
+
+function validerPays(pays) {
+    const contChoisi = getCurrentContinent();
+    const contDuPays = PAYS_CONTINENT[pays];
+    const errEl = document.getElementById('err-destination');
+    let destInput = document.getElementById('destination');
+    if (!destInput) destInput = document.querySelector('[name*="destination"]');
+
+    if (!contChoisi) {
+        if (errEl) { errEl.className = 'field-error'; errEl.textContent = '⚠ Sélectionnez d\'abord un continent'; }
+        return false;
+    }
+
+    if (!contDuPays) {
+        if (errEl) { errEl.className = 'field-error'; errEl.textContent = `⚠ "${pays}" non reconnu dans notre base`; }
+        if (destInput) destInput.classList.remove('input-error');
+        return true;
+    }
+
+    if (contChoisi !== contDuPays) {
+        if (errEl) {
+            errEl.className = 'field-error';
+            errEl.textContent = `❌ ${pays} est en ${contDuPays}, pas en ${contChoisi}`;
+        }
+        if (destInput) destInput.classList.add('input-error');
+        return false;
+    }
+
+    if (errEl) { errEl.className = 'field-error field-ok'; errEl.textContent = `✓ ${pays} — ${contDuPays}`; }
+    if (destInput) destInput.classList.remove('input-error');
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CARTE LEAFLET
+// ═══════════════════════════════════════════════════════════════════
+let leafletMap = null;
+let geoLayer = null;
+let geoJsonCache = null;
+
+function ouvrirMap() {
+    const overlay = document.getElementById('map-overlay');
+    if (!overlay) return;
+    
+    const cont = getCurrentContinent();
+    console.log('🗺️ Ouverture carte - Continent :', cont);
+    
+    const hint = document.getElementById('map-continent-hint');
+    if (hint) {
+        if (cont) {
+            hint.innerHTML = `<i class="fa-solid fa-check-circle"></i> ✅ Continent sélectionné : <strong>${cont}</strong> — Cliquez sur un pays pour le sélectionner.`;
+            hint.style.color = '#2e7d32';
+            hint.style.background = 'rgba(46,125,50,0.1)';
+        } else {
+            hint.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ⚠️ Veuillez d\'abord sélectionner un continent dans le formulaire (Afrique, Europe, Asie, Amériques ou Océanie)';
+            hint.style.color = '#7A0000';
+            hint.style.background = 'rgba(122,0,0,0.1)';
+        }
+    }
+    
+    overlay.classList.add('actif');
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(() => {
+        if (leafletMap) {
+            appliquerStyleContinent(cont);
+            appliquerZoomContinent(cont);
+            leafletMap.invalidateSize();
+        } else {
+            initCarteLeaflet(cont);
+        }
+    }, 80);
+}
+
+function initCarteLeaflet(contInitial) {
+    const mapDiv = document.getElementById('leaflet-map');
+    const loader = document.getElementById('map-loader');
+
+    if (loader) loader.style.display = 'flex';
+    if (mapDiv) mapDiv.style.display = 'none';
+
+    leafletMap = L.map('leaflet-map', {
+        zoomControl: true,
+        attributionControl: false,
+        minZoom: 2,
+        maxZoom: 8,
+        worldCopyJump: true
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO'
+    }).addTo(leafletMap);
+
+    const GEOJSON_URL_1 = 'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson';
+    const GEOJSON_URL_2 = 'https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/DATA/world.geojson';
+
+    const fetchGeoJSON = () =>
+        fetch(GEOJSON_URL_1)
+            .then(r => { if (!r.ok) throw new Error('src1'); return r.json(); })
+            .catch(() =>
+                fetch(GEOJSON_URL_2)
+                    .then(r => { if (!r.ok) throw new Error('src2'); return r.json(); })
+            );
+
+    const source = geoJsonCache ? Promise.resolve(geoJsonCache) : fetchGeoJSON();
+    let cont = contInitial;
+    if (!cont) cont = getCurrentContinent();
+    
+    console.log('🗺️ Init carte avec continent :', cont);
+
+    source
+        .then(data => {
+            geoJsonCache = data;
+
+            geoLayer = L.geoJSON(data, {
+                style: feature => stylePays(feature, cont),
+                onEachFeature: (feature, layer) => {
+                    const nomEN = feature.properties?.NAME || feature.properties?.ADMIN || feature.properties?.name || '';
+                    const nomFR = EN_TO_FR[nomEN] || nomEN;
+                    const contPays = PAYS_CONTINENT[nomFR] || '';
+
+                    layer.bindTooltip(nomFR, {
+                        sticky: true,
+                        direction: 'top',
+                        offset: [0, -4],
+                        className: 'country-tooltip',
+                        opacity: 1
+                    });
+
+                    layer.on('mouseover', function() {
+                        const cCont = getCurrentContinent();
+                        const cActif = !cCont || contPays === cCont;
+                        if (!cActif) return;
+                        this.setStyle({
+                            fillColor: '#C5A880',
+                            fillOpacity: 0.85,
+                            color: '#5C0000',
+                            weight: 2.5
+                        });
+                        this.bringToFront();
+                    });
+
+                    layer.on('mouseout', function() {
+                        const cCont = getCurrentContinent();
+                        this.setStyle(stylePays(feature, cCont));
+                    });
+
+                    // CLIC SUR LE PAYS - FERMETURE IMMÉDIATE
+                    layer.on('click', function(e) {
+                        if (e && e.originalEvent) {
+                            e.originalEvent.stopPropagation();
+                        }
+                        
+                        const continentFormulaire = getCurrentContinent();
+                        const hint = document.getElementById('map-continent-hint');
+
+                        if (!continentFormulaire) {
+                            if (hint) {
+                                hint.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ❗ Sélectionnez d\'abord un continent dans le formulaire';
+                                hint.style.color = '#7A0000';
+                            }
+                            return;
+                        }
+
+                        if (contPays && contPays !== continentFormulaire) {
+                            if (hint) {
+                                hint.innerHTML = `<i class="fa-solid fa-xmark"></i> ❌ <strong>${nomFR}</strong> est en <em>${contPays}</em>, pas en <em>${continentFormulaire}</em>`;
+                                hint.style.color = '#7A0000';
+                            }
+                            return;
+                        }
+
+                        // ✅ Sélection valide - remplir le champ UNIQUEMENT avec le nom du pays
+// ✅ Sélection valide - remplir le champ
+let destField = document.getElementById('destination');
+if (!destField) destField = document.querySelector('[name*="destination"]');
+
+if (destField) {
+    destField.value = nomFR;
+    destField.dispatchEvent(new Event('input', { bubbles: true }));
+    destField.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// 🔥 FERMER L'AUTOCOMPLÉTION 🔥
+const autocompleteList = document.getElementById('autocomplete-list');
+if (autocompleteList) {
+    autocompleteList.style.display = 'none';
+}
+acActiveIndex = -1;
+
+// Mettre à jour l'aperçu
+const previewDest = document.getElementById('preview-dest');
+if (previewDest) previewDest.textContent = nomFR;
+
+// Valider (affiche le message de validation avec le continent mais ne le met pas dans le champ)
+validerPays(nomFR);
+                        
+                        if (hint) {
+                            hint.innerHTML = `<i class="fa-solid fa-check-circle"></i> ✅ <strong>${nomFR}</strong> sélectionné !`;
+                            hint.style.color = '#2e7d32';
+                        }
+                        
+                        setTimeout(() => {
+                            fermerMap();
+                        }, 400);
+                    });
+                }
+            }).addTo(leafletMap);
+
+            if (loader) loader.style.display = 'none';
+            if (mapDiv) mapDiv.style.display = 'block';
+            leafletMap.invalidateSize();
+
+            appliquerZoomContinent(cont);
+        })
+        .catch(err => {
+            console.error('Erreur GeoJSON :', err);
+            if (loader) loader.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--bordeaux);font-size:2rem;"></i><span style="color:var(--bordeaux)">Erreur de chargement. Vérifiez votre connexion.</span>`;
+        });
+}
+
+function stylePays(feature, contActif) {
+    const nomEN = feature.properties?.NAME || feature.properties?.ADMIN || feature.properties?.name || '';
+    const nomFR = EN_TO_FR[nomEN] || nomEN;
+    const contPays = PAYS_CONTINENT[nomFR] || '';
+    const actif = !contActif || contPays === contActif;
+
+    return actif
+        ? { fillColor: '#8B0000', fillOpacity: 0.55, color: '#C5A880', weight: 1.2 }
+        : { fillColor: '#d4c9b8', fillOpacity: 0.35, color: '#b0a898', weight: 0.5 };
+}
+
+function appliquerStyleContinent(cont) {
+    if (!geoLayer) return;
+    geoLayer.eachLayer(layer => {
+        if (layer.feature) {
+            layer.setStyle(stylePays(layer.feature, cont));
+        }
+    });
+}
+
+function appliquerZoomContinent(cont) {
+    if (!leafletMap) return;
+    if (cont && CONTINENT_VIEW[cont]) {
+        const v = CONTINENT_VIEW[cont];
+        leafletMap.setView(v.center, v.zoom, { animate: true, duration: 0.8 });
+    } else {
+        leafletMap.setView([20, 0], 2, { animate: true });
+    }
+}
+
+function fermerMap() {
+    const overlay = document.getElementById('map-overlay');
+    if (overlay) overlay.classList.remove('actif');
+    document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VALIDATIONS GÉNÉRALES
+// ═══════════════════════════════════════════════════════════════════
+function validateTitreEnDirect(input) {
+    const errSpan = document.getElementById('err-titre');
+    const valeur = input.value;
+    const longueur = valeur.length;
+    
+    // Met à jour l'aperçu
+    updateTitle(valeur);
+    
+    // Cas 1 : Champ vide
+    if (longueur === 0) {
+        if (errSpan) {
+            errSpan.textContent = '';
+            errSpan.className = 'field-error';
+        }
+        input.classList.remove('input-error');
+        return false;
+    }
+    
+    // Cas 2 : Vérifier les caractères autorisés (lettres, espaces, tirets, apostrophes)
+    const regexCaracteres = /^[a-zA-ZÀ-ÿ\s\-\']+$/;
+    if (!regexCaracteres.test(valeur)) {
+        if (errSpan) {
+            errSpan.textContent = '⚠ Le titre doit contenir uniquement des lettres, espaces, tirets ou apostrophes';
+            errSpan.className = 'field-error';
+        }
+        input.classList.add('input-error');
+        return false;
+    }
+    
+    // Cas 3 : Vérifier la longueur minimale de 25 caractères
+    if (longueur < 25) {
+        if (errSpan) {
+            errSpan.textContent = `⚠ Le titre doit contenir au moins 25 caractères (actuellement : ${longueur}/25)`;
+            errSpan.className = 'field-error';
+        }
+        input.classList.add('input-error');
+        return false;
+    }
+    
+    // Cas 4 : ✅ Tout est valide
+    if (errSpan) {
+        errSpan.textContent = `✓ ${longueur}/25 caractères - Titre valide`;
+        errSpan.className = 'field-error field-ok';
+    }
+    input.classList.remove('input-error');
+    return true;
+}
+
+function validatePositif(input, errId) {
+    const err = document.getElementById(errId);
+    const val = parseFloat(input.value);
+    if (isNaN(val) || val < 1) {
+        if (err) err.textContent = '⚠ Valeur doit être > 0';
+        return false;
+    }
+    if (err) err.textContent = '';
+    return true;
+}
+
+function validateImageUrl(input) {
+    const err = document.getElementById('err-image');
+    if (!input.value.trim()) { if (err) err.textContent = ''; return true; }
+    if (!/\.(jpg|jpeg|png)$/i.test(input.value)) {
+        if (err) err.textContent = '⚠ Doit se terminer par .jpg, .jpeg ou .png';
+        return false;
+    }
+    if (err) err.textContent = '';
+    return true;
+}
+
+function validateForm() {
+    let valid = true;
+    
+    // 🔥 Récupérer le continent de manière plus robuste
+    let continentSelect = document.getElementById('continent');
+    if (!continentSelect) {
+        continentSelect = document.querySelector('[name="voyage[continent]"]');
+    }
+    if (!continentSelect) {
+        continentSelect = document.querySelector('select[name*="continent"]');
+    }
+    if (!continentSelect) {
+        continentSelect = document.querySelector('#continent-select');
+    }
+    
+    const continent = continentSelect ? continentSelect.value : '';
+    console.log('Continent récupéré :', continent); // Debug
+    
+    // 🔥 Récupérer la destination
+    let destInput = document.getElementById('destination');
+    if (!destInput) destInput = document.querySelector('[name*="destination"]');
+    const dest = destInput ? destInput.value.trim() : '';
+    
+    const errCont = document.getElementById('err-continent');
+    
+    // 🔥 Vérifier le continent - accepter "Europe", "Afrique", etc.
+    // Ne pas rejeter si c'est une valeur valide
+    const continentsValides = ['Europe', 'Afrique', 'Asie', 'Amériques', 'Océanie'];
+    const continentValide = continentsValides.includes(continent);
+    
+    if (!continent || !continentValide) {
+        if (errCont) errCont.textContent = '⚠ Choisissez un continent';
+        valid = false;
+        console.log('Continent invalide :', continent);
+    } else {
+        if (errCont) errCont.textContent = '';
+        console.log('Continent valide :', continent);
+    }
+    
+    // Vérifier la destination
+    if (!dest) {
+        const errDest = document.getElementById('err-destination');
+        if (errDest) errDest.textContent = '⚠ Entrez une destination';
+        valid = false;
+        console.log('Destination vide');
+    } else {
+        // Valider que le pays correspond au continent
+        const contDuPays = PAYS_CONTINENT[dest];
+        if (continent && contDuPays && contDuPays !== continent) {
+            const errDest = document.getElementById('err-destination');
+            if (errDest) errDest.textContent = `❌ ${dest} est en ${contDuPays}, pas en ${continent}`;
+            valid = false;
+            console.log('Continent du pays ne correspond pas');
+        } else {
+            const errDest = document.getElementById('err-destination');
+            if (errDest) errDest.textContent = '';
+        }
+    }
+    
+    console.log('Validation finale :', valid);
+    
+    // Afficher un message si le formulaire est invalide
+    if (!valid) {
+        const firstError = document.querySelector('.input-error, .field-error:not(:empty)');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return false;
+    }
+    // ✅ Valide → modal puis soumission
+    const overlay = document.getElementById('success-overlay');
+    overlay.style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('success-bar').style.width = '100%';
+    }, 50);
+    setTimeout(() => {
+        document.getElementById('voyage-form').submit();
+    }, 2100);
+
+    return false;
+    
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PREVIEW
+// ═══════════════════════════════════════════════════════════════════
+function updateTitle(val) {
+    const el = document.getElementById('preview-title');
+    if (el) el.textContent = val || 'Le Titre...';
+}
+
+function updateStat(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val) { el.textContent = val; el.classList.remove('empty'); }
+    else { el.textContent = '—'; el.classList.add('empty'); }
+}
+
+function updateBgFromUrl(url) {
+    const bg = document.getElementById('preview-bg');
+    if (bg && url && /\.(jpg|jpeg|png)$/i.test(url)) {
+        bg.style.backgroundImage = `url('${url}')`;
+    }
+}
+
+function handleUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const bg = document.getElementById('preview-bg');
+        if (bg) bg.style.backgroundImage = `url('${e.target.result}')`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    let destInput = document.getElementById('destination');
+    if (!destInput) destInput = document.querySelector('[name*="destination"]');
+    if (destInput) {
+        destInput.addEventListener('blur', () => fermerAutocomplete());
+    }
+    
+    // Initialiser le badge preview avec le continent par défaut
+    const initialCont = getCurrentContinent();
+    if (initialCont) {
+        const badge = document.getElementById('preview-continent-badge');
+        if (badge) badge.innerHTML = `<i class="fa-solid fa-globe"></i> ${initialCont}`;
+    }
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fermerMap();
+});
+
+console.log("✅ Doura Mondo — Carte + Autocomplete initialisés");
+</script>
+{% endblock %}

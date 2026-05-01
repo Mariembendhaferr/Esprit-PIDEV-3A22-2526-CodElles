@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doura Mondo – Nouvelle activité assignée</title>
+</head>
+<body style="margin:0; padding:0; background:#F2E8D9; font-family:'Segoe UI', Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F2E8D9; padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.1);">
+
+    {# ── Header ── #}
+    <tr>
+        <td style="background:linear-gradient(135deg, #3D0000, #8B0000); padding:32px 40px; text-align:center;">
+            <h1 style="color:#C9A84C; font-size:28px; margin:0; letter-spacing:3px;">🌍 DOURA MONDO</h1>
+            <p style="color:rgba(201,168,76,0.6); font-size:12px; margin:6px 0 0; letter-spacing:2px;">TOUR DU MONDE</p>
+        </td>
+    </tr>
+
+    {# ── Gold line ── #}
+    <tr>
+        <td style="background:linear-gradient(90deg, transparent, #C9A84C, #E8C070, #C9A84C, transparent); height:3px; padding:0;"></td>
+    </tr>
+
+    {# ── Body ── #}
+    <tr>
+        <td style="padding:40px;">
+
+            <p style="color:#8B0000; font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px;">Bonjour {{ fournisseur.nomFournisseur }},</p>
+
+            <h2 style="color:#3D0000; font-size:22px; margin:0 0 16px;">Une nouvelle activité vous a été assignée !</h2>
+
+            <p style="color:#666; font-size:14px; line-height:1.7; margin:0 0 24px;">
+                L'équipe <strong>Doura Mondo</strong> vous informe qu'une nouvelle activité touristique vous a été assignée sur notre plateforme. Veuillez consulter les détails ci-dessous et confirmer votre participation.
+            </p>
+
+            {# ── Activité card ── #}
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#FFF8F0; border-radius:12px; border:1.5px solid #F0DDD0; margin-bottom:28px;">
+                <tr>
+                    <td style="padding:24px;">
+                        <h3 style="color:#8B0000; font-size:18px; margin:0 0 16px; border-bottom:2px solid #F0DDD0; padding-bottom:12px;">
+                            📋 Détails de l'activité
+                        </h3>
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase; width:140px;">Nom</td>
+                                <td style="padding:6px 0; color:#333; font-size:14px; font-weight:700;">{{ activite.nomActivite }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase;">Catégorie</td>
+                                <td style="padding:6px 0; color:#333; font-size:14px;">{{ activite.categorieActivite|capitalize }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase;">Prix</td>
+                                <td style="padding:6px 0; color:#8B0000; font-size:14px; font-weight:700;">{{ activite.coutActivite }} DT</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase;">Durée</td>
+                                <td style="padding:6px 0; color:#333; font-size:14px;">⏱ {{ activite.dureeActivite }} minutes</td>
+                            </tr>
+                            {% if activite.localisationActivite %}
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase;">Destination</td>
+                                <td style="padding:6px 0; color:#333; font-size:14px;">📍 {{ activite.localisationActivite }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if activite.capaciteMaxActivite %}
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase;">Capacité</td>
+                                <td style="padding:6px 0; color:#333; font-size:14px;">👥 {{ activite.capaciteMaxActivite }} personnes max</td>
+                            </tr>
+                            {% endif %}
+                            {% if activite.descriptionActivite %}
+                            <tr>
+                                <td style="padding:6px 0; color:#999; font-size:12px; font-weight:700; text-transform:uppercase; vertical-align:top;">Description</td>
+                                <td style="padding:6px 0; color:#555; font-size:13px; line-height:1.6;">{{ activite.descriptionActivite|slice(0, 200) }}{% if activite.descriptionActivite|length > 200 %}...{% endif %}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            {# ── Action buttons ── #}
+            <p style="color:#333; font-size:14px; text-align:center; margin:0 0 20px; font-weight:600;">
+                Souhaitez-vous accepter ou refuser cette activité ?
+            </p>
+
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="center" style="padding:0 8px;">
+                        <a href="{{ urlAccepter }}"
+                           style="display:inline-block; background:linear-gradient(135deg,#1B5E20,#43A047); color:white; text-decoration:none; padding:14px 36px; border-radius:12px; font-size:15px; font-weight:700; letter-spacing:0.5px;">
+                            ✅ Accepter l'activité
+                        </a>
+                    </td>
+                    <td align="center" style="padding:0 8px;">
+                        <a href="{{ urlRefuser }}"
+                           style="display:inline-block; background:linear-gradient(135deg,#7A0000,#C0392B); color:white; text-decoration:none; padding:14px 36px; border-radius:12px; font-size:15px; font-weight:700; letter-spacing:0.5px;">
+                            ❌ Refuser l'activité
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="color:#999; font-size:11px; text-align:center; margin:24px 0 0; line-height:1.6;">
+                Ces liens sont à usage unique et expirent après votre réponse.<br>
+                Si vous n'êtes pas concerné par ce message, veuillez ignorer cet email.
+            </p>
+
+        </td>
+    </tr>
+
+    {# ── Footer ── #}
+    <tr>
+        <td style="background:#1a0000; padding:20px 40px; text-align:center;">
+            <p style="color:rgba(201,168,76,0.5); font-size:11px; margin:0; letter-spacing:1px;">
+                © 2025-2026 DOURA MONDO · Esprit School of Engineering<br>
+                Ce message est automatique, merci de ne pas y répondre.
+            </p>
+        </td>
+    </tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>

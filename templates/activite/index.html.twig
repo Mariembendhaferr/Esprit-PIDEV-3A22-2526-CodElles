@@ -1,0 +1,231 @@
+{% extends 'admin/base-admin.html.twig' %}
+{% block title %}Activités – Doura Mondo{% endblock %}
+
+{% block admin_content %}
+
+<div class="page-header">
+    <div>
+        <h1>Gestion des Activités</h1>
+        <p>{{ total }} activités enregistrées</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{{ path('app_activite_export_pdf', {
+            'search': search|default(''),
+            'categorie': categorie|default(''),
+            'sortPrix': sortPrix|default('')
+        }) }}" class="btn-outline" style="margin-right: 10px;">
+            <i class="fa-solid fa-file-pdf"></i> Exporter PDF
+        </a>
+
+        <a href="{{ path('app_activite_new') }}" class="btn-primary">
+            <i class="fa-solid fa-plus"></i> Nouvelle activité
+        </a>
+    </div>
+</div>
+
+<div class="gold-line"></div>
+
+{# ── Toolbar ── #}
+<form method="GET" action="{{ path('app_activite_index') }}" id="ff">
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" value="{{ search|default('') }}" placeholder="Rechercher une activité...">
+            {% if search|default('') %}
+                <a href="{{ path('app_activite_index', {'categorie': categorie|default(''), 'sortPrix': sortPrix|default('')}) }}" class="search-clear">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="divider-v"></div>
+
+        <div class="filter-wrap">
+            <i class="fa-solid fa-layer-group"></i>
+            <select name="categorie" class="filter-select" onchange="document.getElementById('ff').submit()">
+                <option value="">Toutes catégories</option>
+                {% set categories = {
+                    'sports':       'Sports',
+                    'culture':      'Culture',
+                    'nature':       'Nature',
+                    'aventure':     'Aventure',
+                    'gastronomie':  'Gastronomie',
+                    'bien-etre':    'Bien-être',
+                    'plage':        'Plage',
+                    'visite':       'Visite guidée'
+                } %}
+                {% for value, label in categories %}
+                    <option value="{{ value }}" {% if value == categorie|default('') %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-wrap">
+            <i class="fa-solid fa-tag"></i>
+            <select name="sortPrix" class="filter-select" onchange="document.getElementById('ff').submit()">
+                <option value="">Prix</option>
+                <option value="asc"  {% if sortPrix|default('') == 'asc'  %}selected{% endif %}>Prix croissant</option>
+                <option value="desc" {% if sortPrix|default('') == 'desc' %}selected{% endif %}>Prix décroissant</option>
+            </select>
+        </div>
+
+        {% if search|default('') or categorie|default('') or sortPrix|default('') %}
+            <a href="{{ path('app_activite_index') }}" class="btn-outline" style="padding:9px 14px; font-size:12px;">
+                <i class="fa-solid fa-xmark"></i> Reset
+            </a>
+        {% endif %}
+
+        <button type="submit" class="btn-primary" style="margin-left:auto;">
+            <i class="fa-solid fa-filter"></i> Filtrer
+        </button>
+    </div>
+</form>
+
+{# ── Table ── #}
+<div class="table-card">
+    <div class="table-card-header">
+        <span><i class="fa-solid fa-list"></i> Liste des activités</span>
+        <small>{{ activites|length }} sur {{ total }} résultats</small>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Durée</th>
+                <th>Destination</th>
+                <th>Capacité</th>
+                <th>Fournisseurs</th>
+                <th>Statut</th>
+                <!--<th>disponibilité</th>-->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for activite in activites %}
+            <tr>
+                <td class="td-name">{{ activite.nomActivite }}</td>
+                <td><span class="pill pill-cat">{{ activite.categorieActivite }}</span></td>
+                <td class="td-price">{{ activite.coutActivite }} DT</td>
+                <td><i class="fa-regular fa-clock" style="color:#C9A84C; margin-right:4px;"></i>{{ activite.dureeActivite }} min</td>
+                <td>
+                    {% if activite.localisationActivite %}
+                        <i class="fa-solid fa-location-dot" style="color:#8B0000; margin-right:4px;"></i>{{ activite.localisationActivite }}
+                    {% else %}—{% endif %}
+                </td>
+                <td>
+    {# Affiche "X / Y" avec X = places restantes, Y = capacité max #}
+    {{ activite.placesRestantes }} / {{ activite.capaciteMaxActivite }}
+</td>
+                <td>
+                    {% if activite.fournisseurs is not empty %}
+                        {% for f in activite.fournisseurs %}
+                            <span class="pill pill-spec" style="margin:1px;">{{ f.nomFournisseur }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color:#ccc;">—</span>
+                    {% endif %}
+                </td>
+                {#<td>
+                    {% if activite.disponibiliteActivite %}
+                        <span class="pill pill-dispo"><span class="dot dot-green"></span> Disponible</span>
+                    {% else %}
+                        <span class="pill pill-indispo"><span class="dot dot-red"></span> Indisponible</span>
+                    {% endif %}
+                </td>#}
+
+                <td>
+                    {% if activite.statutActivite == 'acceptee' %}
+                        <span class="pill pill-dispo"><span class="dot dot-green"></span> Acceptée</span>
+                    {% elseif activite.statutActivite == 'refusee' %}
+                        <span class="pill pill-indispo"><span class="dot dot-red"></span> Refusée</span>
+                    {% else %}
+                        <span class="pill" style="background:#FFF8E1; color:#F57F17; border:1px solid #FFE082;"><span class="dot" style="background:#FFA000;"></span> En attente</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <div class="actions">
+                        <a href="{{ path('app_activite_edit', {'id': activite.id}) }}" class="act-btn act-edit" title="Modifier">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <form method="post" action="{{ path('app_activite_delete', {'id': activite.id}) }}"
+                              onsubmit="return confirm('Supprimer « {{ activite.nomActivite }} » ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ activite.id) }}">
+                            <button type="submit" class="act-btn act-del" title="Supprimer">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8">
+                <div class="empty">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <p>Aucune activité trouvée</p>
+                </div>
+            </td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# ── Pagination ── #}
+{% if totalPages > 1 %}
+<div class="pagination-wrap">
+    <div class="pagination-info">
+        Affichage page {{ currentPage }} sur {{ totalPages }} ({{ total }} résultats)
+    </div>
+    <div class="pagination">
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_activite_index', {page: 1, search: search|default(''), categorie: categorie|default(''), sortPrix: sortPrix|default('')}) }}" class="paginator-btn" title="Première page">
+                <i class="fa-solid fa-chevron-left"></i><i class="fa-solid fa-chevron-left"></i>
+            </a>
+            <a href="{{ path('app_activite_index', {page: currentPage - 1, search: search|default(''), categorie: categorie|default(''), sortPrix: sortPrix|default('')}) }}" class="paginator-btn" title="Page précédente">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
+        {% endif %}
+
+        {% for p in range(max(1, currentPage - 2), min(totalPages, currentPage + 2)) %}
+            {% if p == currentPage %}
+                <span class="paginator-btn paginator-active">{{ p }}</span>
+            {% else %}
+                <a href="{{ path('app_activite_index', {page: p, search: search|default(''), categorie: categorie|default(''), sortPrix: sortPrix|default('')}) }}" class="paginator-btn">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_activite_index', {page: currentPage + 1, search: search|default(''), categorie: categorie|default(''), sortPrix: sortPrix|default('')}) }}" class="paginator-btn" title="Page suivante">
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
+            <a href="{{ path('app_activite_index', {page: totalPages, search: search|default(''), categorie: categorie|default(''), sortPrix: sortPrix|default('')}) }}" class="paginator-btn" title="Dernière page">
+                <i class="fa-solid fa-chevron-right"></i><i class="fa-solid fa-chevron-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% block javascripts %}
+<script>
+// Auto-refresh every 10 seconds to update statuses
+setTimeout(function() {
+    window.location.reload();
+}, 10000);
+
+// Show countdown
+let seconds = 10;
+const indicator = document.getElementById('refresh-indicator');
+if (indicator) {
+    setInterval(() => {
+        seconds--;
+        indicator.textContent = 'Actualisation dans ' + seconds + 's';
+        if (seconds <= 0) seconds = 10;
+    }, 1000);
+}
+</script>
+{% endblock %}
+{% endblock %}

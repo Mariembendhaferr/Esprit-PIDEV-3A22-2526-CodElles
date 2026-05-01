@@ -1,0 +1,38 @@
+<aside class="sidebar">
+    <div class="brand-logo">
+        <img src="{{ asset('images/logo.png') }}" alt="Doura Mondo"
+             style="width:130px; margin:0 auto; display:block;"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div style="display:none;">
+            <div class="brand-name">DOURA MONDO</div>
+            <div class="brand-sub">TOUR DU MONDE</div>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <div class="nav-label">Navigation</div>
+        <a href="#" class="nav-link"><i class="fa-solid fa-house"></i> Accueil</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-users"></i> Utilisateurs</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-plane"></i> Voyages</a>
+        <a href="{{ path('app_activite_index') }}"
+           class="nav-link {{ app.request.attributes.get('_route') starts with 'app_activite' ? 'active' : '' }}">
+            <i class="fa-solid fa-map-location-dot"></i> Activités
+        </a>
+        <a href="{{ path('admin_reservations') }}" class="nav-link {{ app.request.attributes.get('_route') == 'admin_reservations' ? 'active' : '' }}">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span>Réservations</span>
+        </a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-flag"></i> Réclamations</a>
+
+        <div class="nav-label" style="margin-top:8px;">Gestion</div>
+        <a href="{{ path('app_fournisseur_activite_index') }}"
+           class="nav-link {{ app.request.attributes.get('_route') starts with 'app_fournisseur' ? 'active' : '' }}">
+            <i class="fa-solid fa-building"></i> Fournisseurs
+        </a>
+        <a href="{{ path('app_activite_stats') }}" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Statistiques</a>
+    </nav>
+
+    <div class="nav-bottom">
+        <a href="#" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+    </div>
+</aside>

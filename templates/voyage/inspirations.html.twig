@@ -1,0 +1,528 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Doura Mondo — Inspirations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Style pour l'icône cœur des favoris */
+        .favorite-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .favorite-icon:hover {
+            transform: scale(1.1);
+            background: white;
+        }
+        .favorite-icon i {
+            font-size: 18px;
+            color: #8B2C2C;
+            transition: all 0.3s ease;
+        }
+        .favorite-icon.active i {
+            color: #ff4757;
+        }
+        .favorite-icon.active i {
+            animation: heartBeat 0.3s ease;
+        }
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Toast notification */
+        #favorite-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #8B2C2C;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .project-wrap {
+            position: relative;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- TICKER BAR -->
+    <div class="ticker-bar">
+        <div class="ticker-track">
+            <span class="ticker-item">🇯🇵 Japon <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇮🇹 Italie <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇲🇻 Maldives <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇹🇿 Tanzanie <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇵🇪 Pérou <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇫🇷 France <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇲🇦 Maroc <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇬🇷 Grèce <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇹🇭 Thaïlande <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇮🇸 Islande <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇧🇷 Brésil <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇦🇪 Émirats <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇵🇹 Portugal <span class="ticker-sep">✦</span></span>
+            <span class="ticker-item">🇮🇳 Inde <span class="ticker-sep">✦</span></span>
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <div class="inspi-hero-dual">
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-lg-6 hero-left">
+                    <div class="hero-ey-new">Collections Privées</div>
+                    <h1 class="hero-title-new">Nos Inspirations</h1>
+                    <div class="hero-title-divider"></div>
+                    <div class="hero-desc-new">
+                        <p>Laissez-vous envoûter par nos créations uniques et exclusives — des voyages d'exception minutieusement élaborés par nos maîtres artisans pour éveiller vos sens et dévoiler les merveilles insoupçonnées de notre planète.</p>
+                    </div>
+                    <div class="hero-mini-stats">
+                        <div class="hms-item">
+                            <div class="hms-num counter-anim" data-target="{{ nbVoyages }}">0</div>
+                            <div class="hms-lbl">Voyages</div>
+                        </div>
+                        <div class="hms-sep"></div>
+                        <div class="hms-item">
+                            <div class="hms-num counter-anim" data-target="{{ nbPays }}">0</div>
+                            <div class="hms-lbl">Pays</div>
+                        </div>
+                        <div class="hms-sep"></div>
+                        <div class="hms-item">
+                            <div class="hms-num counter-anim" data-target="{{ nbContinents }}">0</div>
+                            <div class="hms-lbl">Continents</div>
+                        </div>
+                        <div class="hms-sep"></div>
+                        <div class="hms-item">
+                            <div class="hms-num counter-anim decimal" data-target="{{ note }}">0.0</div>
+                            <div class="hms-lbl">Note</div>
+                        </div>
+                    </div>
+                    <a class="btn-hero-luxe" id="scrollToVoyagesBtn">Vivre l'Expérience</a>
+                </div>
+                <div class="col-lg-6 hero-right">
+                    <div class="globe-wrap">
+                        <div class="globe-halo"></div>
+                        <div class="globe-orbit"></div>
+                        <div class="globe-orbit"></div>
+                        <div class="globe-orbit"></div>
+                        <div class="globe-img"></div>
+                        <div class="globe-pin" style="top:50%;left:36%;"></div>
+                        <div class="globe-pin" style="top:42%;left:62%;"></div>
+                        <div class="globe-pin" style="top:70%;left:65%;"></div>
+                        <div class="globe-label l1">TUNISIE</div>
+                        <div class="globe-label l2">FRANCE</div>
+                        <div class="globe-label l3">JAPON</div>
+                        <div class="globe-label l4">Bali</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-wrapper">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <div class="filter-label"><i class="far fa-calendar-alt"></i> Durée</div>
+                <select class="filter-select" id="durationFilter">
+                    <option value="all" selected>Toutes durées</option>
+                    <option value="7">- de 7 jours</option>
+                    <option value="8-14">8 à 14 jours</option>
+                    <option value="15">+ de 15 jours</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label"><i class="fas fa-user-friends"></i> Voyageurs</div>
+                <select class="filter-select" id="peopleFilter">
+                    <option value="all" selected>Peu importe</option>
+                    <option value="1-2">1 à 2 personnes</option>
+                    <option value="3-4">3 à 4 personnes</option>
+                    <option value="5+">5+ personnes</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label"><i class="fas fa-wallet"></i> Budget</div>
+                <select class="filter-select" id="budgetFilter">
+                    <option value="all" selected>Tout budget</option>
+                    <option value="1">- de 3 000 DT</option>
+                    <option value="2">3 000 DT à 7 000 DT</option>
+                    <option value="3">7 000 DT à 15 000 DT</option>
+                    <option value="4">+ de 15 000 DT</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" id="filterBtn">Filtrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZONE TRI ET DEVISE -->
+    <div class="filter-actions">
+        <div class="sort-group">
+            <label><i class="fas fa-sort-amount-down-alt"></i> Trier par</label>
+            <select id="sortSelect">
+                <option value="default">Recommandé</option>
+                <option value="price-asc">Prix croissant</option>
+                <option value="price-desc">Prix décroissant</option>
+            </select>
+        </div>
+        <div class="currency-group">
+            <label><i class="fas fa-coins"></i> Devise</label>
+            <select id="currencySelect">
+                <option value="tnd" data-symbol="DT" selected>Dinar Tunisien (DT)</option>
+                <option value="eur" data-symbol="€">Euro (€)</option>
+                <option value="usd" data-symbol="$">Dollar US ($)</option>
+                <option value="gbp" data-symbol="£">Livre Sterling (£)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- SECTION CARTES -->
+    <div class="inspi-section voyages-target" id="offres">
+        <div class="container">
+            <div class="grid-header">
+                <div class="grid-count" id="voyageCount">Découvrez nos {{ voyages|length }} voyages d'exception</div>
+            </div>
+        </div>
+
+        <div class="inspi-grid-pacific">
+            <div class="row" id="cardsContainer">
+                {% if voyages|length > 0 %}
+                    {% for voyage in voyages %}
+                        <div class="col-md-4 ftco-animate" 
+                             data-id="{{ voyage.idVoyage }}"
+                             data-dest="{{ voyage.destination|lower }}" 
+                             data-people="{% if voyage.nbPersonnes <= 2 %}1-2{% elseif voyage.nbPersonnes <= 4 %}3-4{% else %}5+{% endif %}"
+                             data-budget="{% if voyage.budgetEstime < 3000 %}1{% elseif voyage.budgetEstime <= 7000 %}2{% elseif voyage.budgetEstime <= 15000 %}3{% else %}4{% endif %}"
+                             data-duration="{% if voyage.duree < 7 %}7{% elseif voyage.duree <= 14 %}8-14{% else %}15{% endif %}"
+                             data-price="{{ voyage.budgetEstime }}">
+                            <div class="project-wrap hotel">
+                                <div class="favorite-icon" onclick="toggleFavorite(event, {{ voyage.idVoyage }}, this)">
+                                    <i class="far fa-heart"></i>
+                                </div>
+                                <a href="{{ path('app_voyage_show', {'id': voyage.idVoyage}) }}" class="img" style="background-image: url('{{ voyage.imageUrl ? voyage.imageUrl : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80' }}');">
+                                    <span class="price">{{ voyage.budgetEstime|number_format(0, ',', ' ') }} DT</span>
+                                </a>
+                                <div class="text">
+                                    <h3><a href="{{ path('app_voyage_show', {'id': voyage.idVoyage}) }}">{{ voyage.titre }}</a></h3>
+                                    <div class="description">{{ voyage.description|slice(0, 100) }}{% if voyage.description|length > 100 %}...{% endif %}</div>
+                                    <div class="location"><i class="fas fa-map-marker-alt"></i> {{ voyage.destination }}, {{ voyage.continent }}</div>
+                                    <div class="card-stats">
+                                        <div class="stat-item"><i class="fas fa-user-friends"></i> <span>{{ voyage.nbPersonnes }} pers</span></div>
+                                        <div class="stat-item"><i class="far fa-clock"></i> <span>{{ voyage.duree }} jours</span></div>
+                                        <div class="stat-item"><i class="far fa-eye"></i> <span>{{ random(100, 500) }} vues</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center" style="padding: 80px 0;">
+                        <i class="fas fa-suitcase" style="font-size: 64px; color: #8B2C2C; margin-bottom: 20px;"></i>
+                        <h3 style="color: #4a3728;">Aucun voyage disponible</h3>
+                        <p style="color: #6f5e4a;">Revenez bientôt pour découvrir nos nouvelles inspirations.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast pour les favoris -->
+    <div id="favorite-toast"></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // ========== TAUX DE CHANGE (injectés par PHP) ==========
+        const exchangeRates = {{ taux|json_encode|raw }};
+
+        // ========== ANIMATION DES COMPTEURS ==========
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter-anim');
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const isDecimal = counter.classList.contains('decimal');
+                let count = 0;
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                const updateCount = () => {
+                    count += increment;
+                    if (count < target) {
+                        counter.innerText = isDecimal ? count.toFixed(1) : Math.floor(count);
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        counter.innerText = isDecimal ? target.toFixed(1) : target;
+                    }
+                };
+                updateCount();
+            });
+        }
+
+        // ========== STOCKER LES PRIX ORIGINAUX ==========
+        function storeOriginalPrices() {
+            document.querySelectorAll('.price').forEach(priceSpan => {
+                const priceText = priceSpan.textContent;
+                const match = priceText.match(/(\d[\d\s]*)/);
+                if (match) {
+                    const tndPrice = parseInt(match[0].replace(/\s/g, ''));
+                    priceSpan.setAttribute('data-price-tnd', tndPrice);
+                }
+            });
+        }
+
+        // ========== CONVERTIR LES PRIX SELON LA DEVISE ==========
+        function updateCurrency() {
+            const currencySelect = document.getElementById('currencySelect');
+            if (!currencySelect) return;
+            
+            const currency = currencySelect.value;
+            const rate = exchangeRates[currency];
+            const symbols = { tnd: 'DT', eur: '€', usd: '$', gbp: '£' };
+            const symbol = symbols[currency] || 'DT';
+            
+            document.querySelectorAll('.price').forEach(priceSpan => {
+                const tndPrice = parseInt(priceSpan.getAttribute('data-price-tnd'));
+                if (tndPrice) {
+                    if (currency === 'tnd') {
+                        priceSpan.textContent = `${tndPrice.toLocaleString()} ${symbol}`;
+                    } else {
+                        const convertedPrice = Math.round(tndPrice * rate);
+                        priceSpan.textContent = `${convertedPrice.toLocaleString()} ${symbol}`;
+                    }
+                }
+            });
+        }
+
+        // ========== FILTRAGE DES CARTES ==========
+        function initFilters() {
+            const filterBtn = document.getElementById('filterBtn');
+            const durationFilter = document.getElementById('durationFilter');
+            const peopleFilter = document.getElementById('peopleFilter');
+            const budgetFilter = document.getElementById('budgetFilter');
+            const cards = document.querySelectorAll('.col-md-4');
+            const voyageCountSpan = document.getElementById('voyageCount');
+
+            if (!filterBtn) return;
+
+            function filterCards() {
+                const durationValue = durationFilter.value;
+                const peopleValue = peopleFilter.value;
+                const budgetValue = budgetFilter.value;
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const cardDuration = card.getAttribute('data-duration');
+                    const cardPeople = card.getAttribute('data-people');
+                    const cardBudget = card.getAttribute('data-budget');
+                    
+                    let matchDuration = true;
+                    if (durationValue !== 'all') {
+                        if (durationValue === '7') matchDuration = cardDuration === '7';
+                        else if (durationValue === '8-14') matchDuration = cardDuration === '8-14';
+                        else if (durationValue === '15') matchDuration = cardDuration === '15';
+                    }
+                    
+                    const matchPeople = peopleValue === 'all' || cardPeople === peopleValue;
+                    const matchBudget = budgetValue === 'all' || cardBudget === budgetValue;
+                    
+                    if (matchDuration && matchPeople && matchBudget) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                voyageCountSpan.textContent = `Découvrez ${visibleCount} voyages d'exception`;
+            }
+
+            filterBtn.addEventListener('click', filterCards);
+        }
+
+        // ========== TRI DES CARTES ==========
+        function initSort() {
+            const sortSelect = document.getElementById('sortSelect');
+            const cardsContainer = document.getElementById('cardsContainer');
+            if (!sortSelect || !cardsContainer) return;
+            
+            function sortCards(order) {
+                const cards = Array.from(document.querySelectorAll('.col-md-4'));
+                
+                cards.sort((a, b) => {
+                    const priceA = parseInt(a.getAttribute('data-price') || '0');
+                    const priceB = parseInt(b.getAttribute('data-price') || '0');
+                    
+                    if (order === 'price-asc') {
+                        return priceA - priceB;
+                    } else if (order === 'price-desc') {
+                        return priceB - priceA;
+                    }
+                    return 0;
+                });
+                
+                if (order !== 'default') {
+                    cards.forEach(card => cardsContainer.appendChild(card));
+                }
+            }
+            
+            sortSelect.addEventListener('change', (e) => {
+                sortCards(e.target.value);
+            });
+        }
+
+        // ========== SCROLL VERS LES VOYAGES ==========
+        function initScrollButton() {
+            const scrollBtn = document.getElementById('scrollToVoyagesBtn');
+            const targetSection = document.getElementById('offres');
+            if (scrollBtn && targetSection) {
+                scrollBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            }
+        }
+
+        // ========== FAVORIS : TOAST ==========
+        function showFavoriteToast(message, isSuccess = true) {
+            let toast = document.getElementById('favorite-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'favorite-toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.background = isSuccess ? '#8B2C2C' : '#c0392b';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+            }, 3000);
+        }
+
+        // ========== FAVORIS : AJOUTER/SUPPRIMER ==========
+        function toggleFavorite(event, voyageId, element) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const icon = element.querySelector('i');
+            const isActive = element.classList.contains('active');
+            
+            if (!isActive) {
+                fetch(`/favori/ajouter/${voyageId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        element.classList.add('active');
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        showFavoriteToast(data.message, true);
+                    } else {
+                        showFavoriteToast(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showFavoriteToast('Une erreur est survenue', false);
+                });
+            } else {
+                fetch(`/favori/supprimer/${voyageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        element.classList.remove('active');
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        showFavoriteToast(data.message, true);
+                    } else {
+                        showFavoriteToast(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showFavoriteToast('Une erreur est survenue', false);
+                });
+            }
+        }
+
+        // ========== VÉRIFIER LES FAVORIS EXISTANTS ==========
+        function checkFavorisStatus() {
+            const cards = document.querySelectorAll('.col-md-4');
+            cards.forEach(card => {
+                const voyageId = card.getAttribute('data-id');
+                if (voyageId) {
+                    fetch(`/favori/verifier/${voyageId}`, {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.estFavori) {
+                            const favoriteIcon = card.querySelector('.favorite-icon');
+                            if (favoriteIcon) {
+                                favoriteIcon.classList.add('active');
+                                const icon = favoriteIcon.querySelector('i');
+                                icon.classList.remove('far');
+                                icon.classList.add('fas');
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Erreur vérification favori:', error));
+                }
+            });
+        }
+
+        // ========== INITIALISATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            storeOriginalPrices();
+            animateCounters();
+            initFilters();
+            initSort();
+            initScrollButton();
+            checkFavorisStatus(); // ← Vérifier les favoris au chargement
+            
+            const currencySelect = document.getElementById('currencySelect');
+            if (currencySelect) {
+                currencySelect.addEventListener('change', updateCurrency);
+            }
+        });
+
+        // Exposer les fonctions globalement
+        window.toggleFavorite = toggleFavorite;
+    </script>
+{% endblock %}

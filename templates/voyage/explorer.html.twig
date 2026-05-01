@@ -1,0 +1,604 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Explorer — Doura Mondo{% endblock %}
+
+{# ── CSS spécifique à cette page ─────────────────────────────── #}
+{% block stylesheets %}
+    <link href="{{ asset('css/explorer.css') }}" rel="stylesheet">
+    {# Leaflet.js — carte interactive open-source (gratuit, pas de clé API) #}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block body %}
+
+{# ══════════════════════════════════════════════════════════════
+   HERO SECTION
+══════════════════════════════════════════════════════════════ #}
+<section class="explorer-hero-lux">
+
+    <div class="hero-content-lux">
+        <div class="hero-subtitle-lux">Votre voyage d'exception</div>
+        <h1 class="hero-title-lux">
+            Nous vous aidons à choisir<br>
+            <span>et à mieux explorer le monde</span>
+        </h1>
+
+        {# ── Champ de recherche autocomplete LUXE ──────────────── #}
+        <div class="search-wrapper-lux" id="searchWrapper">
+            <div class="search-input-group-lux">
+                <i class="fas fa-map-marker-alt search-icon-lux"></i>
+                <input
+                    type="text"
+                    id="explorerSearchInput"
+                    class="search-input-lux"
+                    placeholder="Quelle destination vous fait rêver ? (ex : Paris, Kyoto…)"
+                    autocomplete="off"
+                    aria-label="Rechercher une destination"
+                    aria-autocomplete="list"
+                    aria-controls="autocompleteDropdown"
+                >
+            </div>
+
+            {# Dropdown suggestions — peuplé dynamiquement par JS #}
+            <div class="autocomplete-dropdown" id="autocompleteDropdown" role="listbox"></div>
+        </div>
+    </div>
+
+    {# ── Vague décorative + catégories ────────────────────────── #}
+    <div class="hero-wave-container">
+        <svg class="wave-svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path fill="#FAF7F2" fill-opacity="1"
+                  d="M0,60 C320,120 420,0 720,60 C1020,120 1120,0 1440,60 L1440,120 L0,120 Z"/>
+        </svg>
+
+        <div class="hero-categories-lux" id="categoriesBar">
+            {% for key, cat in categories %}
+                <button
+                    class="cat-circle-item"
+                    data-category="{{ key }}"
+                    type="button"
+                    aria-label="Filtrer par {{ cat.label }}"
+                >
+                    <div class="cat-icon-circle">
+                        <i class="fas {{ cat.icon }}"></i>
+                    </div>
+                    <span class="cat-label">{{ cat.label }}</span>
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+
+</section>
+
+{# ══════════════════════════════════════════════════════════════
+   ÉTAT VIDE — affiché tant qu'aucune recherche n'est lancée
+══════════════════════════════════════════════════════════════ #}
+<div class="explorer-empty-state" id="emptyState">
+    <div class="empty-state-icon"><i class="fas fa-compass"></i></div>
+    <div class="empty-state-title">Choisissez une destination</div>
+    <div class="empty-state-sub">
+        Saisissez une ville ou un pays, sélectionnez une catégorie…<br>
+        et laissez-vous guider.
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════════
+   SPLIT LAYOUT : RÉSULTATS + CARTE
+   Caché au chargement, révélé par JS après la 1ère recherche
+══════════════════════════════════════════════════════════════ #}
+<section class="split-layout d-none" id="splitLayout">
+
+    {# ── Panneau gauche : Liste ──────────────────────────────── #}
+    <div class="list-panel">
+        <div class="results-header" id="resultsHeader">
+            <h2 class="results-title" id="resultsTitle">Top <em id="resultsSubtitle"></em></h2>
+            <span class="results-count" id="resultsCount"></span>
+        </div>
+
+        <div id="resultsContainer">
+            {# Contenu injecté dynamiquement par JS #}
+        </div>
+    </div>
+
+    {# ── Panneau droit : Carte Leaflet ───────────────────────── #}
+    <div class="map-panel" id="mapPanel">
+
+       {# ── Barre de contrôles de la carte - version améliorée ── #}
+        <div class="map-filters" id="mapFilters">
+            <button class="map-filter-btn" data-tile="streets" type="button">Carte</button>
+            <button class="map-filter-btn active" data-tile="satellite" type="button">Satellite</button>
+        </div>
+
+        <div id="explorerMap"></div>
+    </div>
+
+</section>
+
+{% endblock %}
+
+{# ══════════════════════════════════════════════════════════════
+   JAVASCRIPT
+══════════════════════════════════════════════════════════════ #}
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ================================================================
+   DOURA MONDO · EXPLORER · Front-end Logic
+================================================================ */
+
+(function () {
+    'use strict';
+
+    /* ── URLS des routes Symfony (générées côté Twig) ──────────── */
+    const URL_AUTOCOMPLETE = '{{ path('app_explorer_autocomplete') }}';
+    const URL_RESULTS      = '{{ path('app_explorer_results') }}';
+
+    /* ── TILES pour Leaflet ──────────────────────────────────────── */
+    const TILES = {
+        streets: {
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attr: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        },
+        satellite: {
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attr: '© Esri — World Imagery',
+        },
+    };
+
+    /* ── ÉTAT de l'application ───────────────────────────────────── */
+    let state = {
+        location:         '',
+        category:         '',
+        places:           [],
+        activeMarkerIndex: null,
+    };
+
+    /* ── RÉFÉRENCES DOM ──────────────────────────────────────────── */
+    const searchInput        = document.getElementById('explorerSearchInput');
+    const dropdown           = document.getElementById('autocompleteDropdown');
+    const categoriesBar      = document.getElementById('categoriesBar');
+    const emptyState         = document.getElementById('emptyState');
+    const splitLayout        = document.getElementById('splitLayout');
+    const resultsContainer   = document.getElementById('resultsContainer');
+    const resultsTitle       = document.getElementById('resultsTitle');
+    const resultsSubtitle    = document.getElementById('resultsSubtitle');
+    const resultsCount       = document.getElementById('resultsCount');
+    const mapFilters         = document.getElementById('mapFilters');
+    const mapPanel           = document.getElementById('mapPanel');
+
+    /* ── CARTE LEAFLET ───────────────────────────────────────────── */
+    let map         = null;
+    let tileLayer   = null;
+    let markersGroup = null;
+
+    function initMap() {
+        if (map) return;
+        map = L.map('explorerMap', {
+            center: [20, 0],
+            zoom: 2,
+            zoomControl: true,
+        });
+        // Carte satellite par défaut
+        tileLayer = L.tileLayer(TILES.satellite.url, { attribution: TILES.satellite.attr }).addTo(map);
+        markersGroup = L.layerGroup().addTo(map);
+        
+        // Ajuster la hauteur de la carte après chaque rendu
+        setTimeout(() => {
+            map.invalidateSize();
+            adjustMapHeight();
+        }, 100);
+    }
+
+    // Fonction pour ajuster la hauteur de la carte = hauteur de la liste
+    function adjustMapHeight() {
+        const listPanel = document.querySelector('.list-panel');
+        if (listPanel && mapPanel) {
+            const listHeight = listPanel.offsetHeight;
+            mapPanel.style.height = listHeight + 'px';
+            setTimeout(() => map.invalidateSize(), 50);
+        }
+    }
+
+    function switchTile(tileKey) {
+        if (!map || !TILES[tileKey]) return;
+        map.removeLayer(tileLayer);
+        tileLayer = L.tileLayer(TILES[tileKey].url, { attribution: TILES[tileKey].attr }).addTo(map);
+    }
+
+    /* ── Marqueur personnalisé Leaflet ───────────────────────────── */
+    function createMarkerIcon(index, active = false) {
+        return L.divIcon({
+            className: '',
+            html: `<div class="lux-marker ${active ? 'active' : ''}"><span>${index + 1}</span></div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 36],
+            popupAnchor: [0, -38],
+        });
+    }
+
+    /* ── Contenu HTML du popup Leaflet ───────────────────────────── */
+    function buildPopupHtml(place) {
+        const img = place.image_url
+            ? `<img src="${escHtml(place.image_url)}" class="popup-img" alt="${escHtml(place.name)}">`
+            : '';
+        const rating = place.rating
+            ? `<span class="popup-rating"><i class="fas fa-star"></i>${place.rating.toFixed(1)}</span>`
+            : '';
+        return `
+            ${img}
+            <div class="popup-body">
+                <div class="popup-title">${escHtml(place.name)}</div>
+                <div class="popup-meta"><i class="fas fa-map-marker-alt"></i> ${escHtml(place.address || '')}</div>
+                <div class="popup-desc">${escHtml(place.description || '')}</div>
+                ${rating}
+            </div>`;
+    }
+
+    /* ── Rendu des marqueurs sur la carte ────────────────────────── */
+    function renderMarkers(places) {
+        if (!markersGroup) return;
+        markersGroup.clearLayers();
+        const bounds = [];
+
+        places.forEach((place, i) => {
+            if (place.lat == null || place.lng == null) return;
+
+            const marker = L.marker([place.lat, place.lng], {
+                icon: createMarkerIcon(i),
+            });
+
+            marker.bindPopup(buildPopupHtml(place), { maxWidth: 280 });
+            marker.on('click', () => setActiveCard(i));
+
+            markersGroup.addLayer(marker);
+            bounds.push([place.lat, place.lng]);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+        }
+        
+        setTimeout(() => {
+            map.invalidateSize();
+            adjustMapHeight();
+        }, 100);
+    }
+
+    /* ── Synchronisation carte <→ liste ─────────────────────────── */
+    function setActiveCard(index) {
+        state.activeMarkerIndex = index;
+
+        document.querySelectorAll('.place-card').forEach((card, i) => {
+            card.classList.toggle('active-card', i === index);
+        });
+
+        markersGroup.eachLayer((layer) => {
+            const span = layer.getElement()?.querySelector('.lux-marker span');
+            const layerIndex = span ? parseInt(span.textContent) - 1 : -1;
+            if (layerIndex >= 0) {
+                layer.setIcon(createMarkerIcon(layerIndex, layerIndex === index));
+                if (layerIndex === index) {
+                    layer.openPopup();
+                    map.panTo(layer.getLatLng(), { animate: true, duration: 0.5 });
+                }
+            }
+        });
+
+        const activeCard = document.querySelectorAll('.place-card')[index];
+        if (activeCard) {
+            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    /* ── Affichage des étoiles ──────────────────────────────────── */
+    function renderStars(rating) {
+        if (!rating) return '';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        let starsHtml = '';
+        
+        for (let i = 0; i < fullStars; i++) {
+            starsHtml += '<i class="fas fa-star"></i>';
+        }
+        if (hasHalfStar) {
+            starsHtml += '<i class="fas fa-star-half-alt"></i>';
+        }
+        const emptyStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < emptyStars; i++) {
+            starsHtml += '<i class="far fa-star"></i>';
+        }
+        
+        return `<div class="place-stars">${starsHtml} <span class="rating-value">${rating.toFixed(1)}</span></div>`;
+    }
+
+    /* ── RENDU DE LA LISTE DES RÉSULTATS ─────────────────────────── */
+    function renderResults(data) {
+        resultsTitle.innerHTML = `Top ${data.count} ${data.label} <em>à ${escHtml(data.location)}</em>`;
+        resultsCount.textContent = `${data.count} Établissement${data.count > 1 ? 's' : ''} trouvé${data.count > 1 ? 's' : ''}`;
+
+        if (data.places.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="results-error">
+                    Aucun résultat trouvé pour cette destination. Essayez un autre endroit.
+                </div>`;
+            return;
+        }
+
+        const html = data.places.map((place, i) => `
+            <div class="place-card" data-index="${i}" role="button" tabindex="0"
+                 aria-label="${escHtml(place.name)}">
+                <div class="place-number">${i + 1}</div>
+                <div class="place-content">
+                    <div class="place-info">
+                        <h3 class="place-name">${escHtml(place.name)}</h3>
+                        ${place.price ? `<div class="place-price">💰 ${escHtml(place.price)}</div>` : ''}
+                        <div class="place-meta">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="location-green">${escHtml(place.address || '')}</span>
+                            ${place.hours ? `<span class="sep">•</span> <span class="hours-green">${escHtml(place.hours)}</span>` : ''}
+                        </div>
+                        ${place.rating ? renderStars(place.rating) : ''}
+                        <p class="place-desc">${escHtml(place.description || 'Aucune description disponible.')}</p>
+                        ${place.attributes && place.attributes.length ? `
+                            <div class="place-attributes">
+                                ${place.attributes.map(attr => `<span class="attr-tag"><i class="fas fa-check-circle"></i> ${escHtml(attr)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${place.image_url
+                        ? `<div class="place-img-wrapper">
+                               <img src="${escHtml(place.image_url)}"
+                                    alt="${escHtml(place.name)}"
+                                    loading="lazy">
+                               ${place.rating
+                                    ? `<div class="place-rating">
+                                           <i class="fas fa-star"></i>
+                                           ${place.rating.toFixed(1)}
+                                           ${place.reviews_count ? `(${formatCount(place.reviews_count)})` : ''}
+                                       </div>`
+                                    : ''}
+                           </div>`
+                        : ''}
+                </div>
+            </div>
+        `).join('');
+
+        resultsContainer.innerHTML = `<div class="timeline-list">${html}</div>`;
+
+        resultsContainer.querySelectorAll('.place-card').forEach((card) => {
+            card.addEventListener('click', () => {
+                setActiveCard(parseInt(card.dataset.index));
+            });
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    setActiveCard(parseInt(card.dataset.index));
+                }
+            });
+        });
+        
+        // Ajuster la hauteur de la carte après le rendu des résultats
+        setTimeout(adjustMapHeight, 50);
+    }
+
+    /* ── FETCH PRINCIPAL ─────────────────────────────────────────── */
+    async function fetchResults(location, category) {
+        if (!location || !category) return;
+
+        emptyState.classList.add('d-none');
+        splitLayout.classList.remove('d-none');
+
+        resultsContainer.innerHTML = `
+            <div class="results-loading">Recherche en cours…</div>`;
+        resultsTitle.innerHTML = '';
+        resultsCount.textContent = '';
+
+        initMap();
+
+        const url = `${URL_RESULTS}?location=${encodeURIComponent(location)}&category=${encodeURIComponent(category)}`;
+
+        try {
+            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `Erreur serveur (${res.status})`);
+            }
+
+            const data = await res.json();
+            state.places = data.places;
+
+            renderResults(data);
+            renderMarkers(data.places);
+
+        } catch (err) {
+            resultsContainer.innerHTML = `
+                <div class="results-error">
+                    <strong>Oups !</strong> ${escHtml(err.message)}
+                </div>`;
+            console.error('[Explorer]', err);
+        }
+    }
+
+    /* ── AUTOCOMPLETE ────────────────────────────────────────────── */
+    let autocompleteTimer = null;
+    let highlightedIndex  = -1;
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(autocompleteTimer);
+        const q = searchInput.value.trim();
+
+        if (q.length < 2) {
+            closeDropdown();
+            return;
+        }
+
+        autocompleteTimer = setTimeout(() => fetchSuggestions(q), 280);
+    });
+
+    async function fetchSuggestions(q) {
+        dropdown.innerHTML = '<div class="autocomplete-loader">Recherche…</div>';
+        dropdown.classList.add('visible');
+
+        try {
+            const res  = await fetch(`${URL_AUTOCOMPLETE}?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.length === 0) {
+                closeDropdown();
+                return;
+            }
+
+            renderDropdown(data);
+        } catch {
+            closeDropdown();
+        }
+    }
+
+    function renderDropdown(suggestions) {
+        highlightedIndex = -1;
+        dropdown.innerHTML = suggestions.map((s, i) => `
+            <div class="autocomplete-item" data-index="${i}"
+                 data-value="${escHtml(s.description)}" role="option">
+                <div class="autocomplete-item-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="autocomplete-item-text">
+                    <div class="autocomplete-item-main">${highlightMatch(s.description, searchInput.value)}</div>
+                    <div class="autocomplete-item-sub">${getCountry(s.description)}</div>
+                </div>
+            </div>
+        `).join('');
+
+        dropdown.classList.add('visible');
+
+        dropdown.querySelectorAll('.autocomplete-item').forEach((item) => {
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectSuggestion(item.dataset.value);
+            });
+        });
+    }
+
+    function selectSuggestion(value) {
+        searchInput.value = value;
+        state.location    = value;
+        closeDropdown();
+
+        if (state.category) {
+            fetchResults(state.location, state.category);
+        }
+    }
+
+    searchInput.addEventListener('keydown', (e) => {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+            updateHighlight(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlightedIndex = Math.max(highlightedIndex - 1, 0);
+            updateHighlight(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightedIndex >= 0 && items[highlightedIndex]) {
+                selectSuggestion(items[highlightedIndex].dataset.value);
+            } else if (searchInput.value.trim()) {
+                state.location = searchInput.value.trim();
+                closeDropdown();
+                if (state.category) fetchResults(state.location, state.category);
+            }
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    function updateHighlight(items) {
+        items.forEach((el, i) =>
+            el.classList.toggle('highlighted', i === highlightedIndex)
+        );
+        if (items[highlightedIndex]) {
+            items[highlightedIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#searchWrapper')) closeDropdown();
+    });
+
+    function closeDropdown() {
+        dropdown.classList.remove('visible');
+        dropdown.innerHTML = '';
+        highlightedIndex = -1;
+    }
+
+    categoriesBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cat-circle-item');
+        if (!btn) return;
+
+        categoriesBar.querySelectorAll('.cat-circle-item').forEach((b) =>
+            b.classList.remove('selected')
+        );
+        btn.classList.add('selected');
+        state.category = btn.dataset.category;
+
+        if (state.location) {
+            fetchResults(state.location, state.category);
+        } else {
+            searchInput.focus();
+            searchInput.placeholder = 'Entrez maintenant votre destination…';
+        }
+    });
+
+    mapFilters.addEventListener('click', (e) => {
+        const btn = e.target.closest('.map-filter-btn');
+        if (!btn) return;
+        mapFilters.querySelectorAll('.map-filter-btn').forEach((b) =>
+            b.classList.remove('active')
+        );
+        btn.classList.add('active');
+        switchTile(btn.dataset.tile);
+    });
+
+    // Écouter les changements de taille de la liste pour ajuster la carte
+    const resizeObserver = new ResizeObserver(() => adjustMapHeight());
+    const listPanel = document.querySelector('.list-panel');
+    if (listPanel) {
+        resizeObserver.observe(listPanel);
+    }
+
+    /* ── UTILITAIRES ─────────────────────────────────────────────── */
+    function escHtml(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
+
+    function highlightMatch(text, query) {
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return escHtml(text).replace(
+            new RegExp(`(${escaped})`, 'gi'),
+            '<strong>$1</strong>'
+        );
+    }
+
+    function getCountry(description) {
+        const parts = description.split(',');
+        return parts.length > 1 ? parts[parts.length - 1].trim() : '';
+    }
+
+    function formatCount(n) {
+        return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n;
+    }
+
+    // Ajuster la hauteur au chargement et au redimensionnement
+    window.addEventListener('resize', () => {
+        setTimeout(adjustMapHeight, 100);
+    });
+
+})();
+</script>
+{% endblock %}

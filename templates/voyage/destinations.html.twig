@@ -1,0 +1,612 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Doura Mondo — Nos Destinations{% endblock %}
+
+{% block body %}
+    <!-- HERO 3D DYNAMIQUE -->
+    <div class="hero-3d-wrap">
+        <div class="hero-glow"></div>
+        <div class="floating-cards">
+            <div class="f-card"><img src="{{ asset('https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&q=80&w=600') }}" alt="Paris" loading="lazy"></div>
+            <div class="f-card"><img src="{{ asset('https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&q=80&w=600') }}" alt="Bali" loading="lazy"></div>
+            <div class="f-card"><img src="{{ asset('https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&q=80&w=600') }}" alt="Amsterdam" loading="lazy"></div>
+            <div class="f-card"><img src="{{ asset('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=600') }}" alt="Dubai" loading="lazy"></div>
+            <div class="f-card"><img src="{{ asset('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=600') }}" alt="Suisse" loading="lazy"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-ey">Explorer avec Élégance</div>
+            <h1 class="hero-title">Choisissez Votre<br><span>Destination</span></h1>
+
+
+
+
+
+            {# ===== BARRE DE RECHERCHE AVEC AUTOCOMPLETE ===== #}
+
+            <div class="hero-search">
+                <span class="hero-search-icon"><i class="fas fa-search"></i></span>
+                <div class="search-autocomplete-wrap">
+                    <input
+                        type="text"
+                        id="destination-input"
+                        placeholder="Où souhaitez-vous partir ?"
+                        autocomplete="off"
+                    >
+                    <ul id="autocomplete-list"></ul>
+                </div>
+                <button id="search-btn"></button>
+            </div>
+            {# ===== FIN BARRE DE RECHERCHE ===== #}
+    
+
+
+        </div>
+    </div>
+
+
+
+
+
+    <!-- SECTION 5 CARTES CONTINENTS -->
+
+    <div class="sect-continents">
+        <div class="container" style="position:relative;z-index:1;">
+            <div class="sc-intro">
+                <div class="sc-ey">Nos Continents</div>
+                <h2 class="sc-title">Explorez les <span>5 Continents</span></h2>
+                <p class="sc-sub">Cliquez sur un continent pour découvrir ses destinations d'exception.</p>
+            </div>
+            <div class="cards-container">
+                <svg class="wave-connector" viewBox="0 0 1100 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#9B7240" stop-opacity="0.1" />
+                            <stop offset="25%" stop-color="#6f0a0a" stop-opacity="0.45" />
+                            <stop offset="50%" stop-color="#9B7240" stop-opacity="0.55" />
+                            <stop offset="75%" stop-color="#6f0a0a" stop-opacity="0.45" />
+                            <stop offset="100%" stop-color="#9B7240" stop-opacity="0.1" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,30 C55,10 90,50 165,28 C210,16 235,42 310,30 C370,20 395,44 475,30 C535,18 565,46 640,30 C700,16 730,48 810,30 C870,15 900,46 980,30 C1030,18 1065,40 1100,30" stroke="url(#waveGrad)" stroke-width="1.4" fill="none" opacity="0.7" />
+                </svg>
+                <div class="cards-row">
+                    <a class="cc" href="#europe" onclick="goTo('europe')">
+                        <div class="cc-bg"></div>
+                        <div class="cc-inner">
+                            <div class="cc-svg"><svg viewBox="0 0 100 80" fill="none"><path d="M45,8 L52,6 L58,10 L62,8 L65,12 L68,10 L72,14 L70,18 L74,20 L72,24 L68,26 L70,30 L66,32 L62,30 L58,34 L54,32 L50,36 L46,34 L42,38 L38,36 L36,40 L32,38 L30,42 L34,44 L32,48 L36,50 L38,46 L42,48 L44,44 L48,46 L50,42 L54,44 L56,40 L60,42 L58,46 L62,48 L64,44 L68,46 L66,50 L70,52 L68,56 L72,58 L70,62 L66,60 L62,64 L58,62 L54,66 L50,64 L46,60 L42,62 L38,58 L34,60 L30,56 L28,52 L24,50 L26,46 L22,44 L24,40 L28,38 L26,34 L30,32 L28,28 L32,26 L34,22 L38,20 L36,16 L40,14 L42,10 Z" fill="#8B2C2C" opacity="0.75" /></svg></div>
+                            <div class="cc-name">Europe</div>
+                            <div class="cc-line"></div>
+                            <div class="cc-nb">42 Destinations</div>
+                        </div>
+                    </a>
+                    <a class="cc" href="#afrique" onclick="goTo('afrique')">
+                        <div class="cc-bg"></div>
+                        <div class="cc-inner">
+                            <div class="cc-svg"><svg viewBox="0 0 100 80" fill="none"><path d="M38,5 L50,4 L60,8 L68,14 L72,22 L70,30 L74,36 L72,44 L68,50 L64,58 L60,64 L56,70 L50,76 L44,70 L40,64 L36,58 L32,52 L28,46 L26,38 L28,30 L24,24 L28,16 L34,10 Z M20,20 L24,18 L26,22 L22,24 Z" fill="#8B2C2C" opacity="0.75" /></svg></div>
+                            <div class="cc-name">Afrique</div>
+                            <div class="cc-line"></div>
+                            <div class="cc-nb">38 Destinations</div>
+                        </div>
+                    </a>
+                    <a class="cc featured" href="#asie" onclick="goTo('asie')">
+                        <div class="cc-bg"></div>
+                        <div class="cc-inner">
+                            <div class="cc-svg"><svg viewBox="0 0 100 80" fill="none"><path d="M20,10 L32,8 L44,6 L56,8 L68,10 L78,16 L82,24 L80,32 L84,38 L80,44 L76,50 L72,44 L68,48 L64,44 L60,50 L56,46 L52,52 L48,48 L44,54 L40,50 L36,44 L32,48 L28,42 L24,36 L20,30 L16,24 L18,16 Z M72,52 L76,54 L78,60 L74,62 L70,58 Z" fill="#8B2C2C" opacity="0.75" /></svg></div>
+                            <div class="cc-name">Asie</div>
+                            <div class="cc-line"></div>
+                            <div class="cc-nb">55 Destinations</div>
+                        </div>
+                    </a>
+                    <a class="cc" href="#ameriques" onclick="goTo('ameriques')">
+                        <div class="cc-bg"></div>
+                        <div class="cc-inner">
+                            <div class="cc-svg"><svg viewBox="0 0 100 80" fill="none"><path d="M42,4 L50,6 L56,10 L58,16 L54,22 L58,28 L56,34 L52,38 L54,44 L50,50 L46,56 L42,62 L38,68 L34,74 L30,68 L28,62 L32,56 L30,50 L26,44 L28,38 L24,32 L26,26 L30,20 L28,14 L34,8 Z M54,22 L60,20 L64,24 L62,28 L58,28 Z" fill="#8B2C2C" opacity="0.75" /></svg></div>
+                            <div class="cc-name">Amériques</div>
+                            <div class="cc-line"></div>
+                            <div class="cc-nb">29 Destinations</div>
+                        </div>
+                    </a>
+                    <a class="cc" href="#oceanie" onclick="goTo('oceanie')">
+                        <div class="cc-bg"></div>
+                        <div class="cc-inner">
+                            <div class="cc-svg"><svg viewBox="0 0 100 80" fill="none"><path d="M20,30 L36,26 L52,28 L64,32 L70,40 L66,48 L58,52 L46,54 L34,50 L22,44 L16,38 Z M72,24 L80,22 L84,28 L80,32 L74,30 Z M60,58 L66,56 L68,62 L62,64 Z" fill="#8B2C2C" opacity="0.75" /></svg></div>
+                            <div class="cc-name">Océanie</div>
+                            <div class="cc-line"></div>
+                            <div class="cc-nb">12 Destinations</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EUROPE -->
+    <div class="cs" id="europe" style="background:#ffffff;">
+        <div class="container cs-inner">
+            <div class="csh">
+                <div class="csl">
+                    <div class="csey">Continent Européen</div>
+                    <div class="csti">L'<span>Europe</span></div>
+                    <div class="csd">
+                        <p>L'Europe est un continent d'une richesse infinie, où chaque pays révèle une identité culturelle unique forgée sur des millénaires d'histoire. Des ruelles pavées de Rome aux canaux enchanteurs de Venise, des fjords vertigineux de Norvège aux plages de sable blanc de Grèce, elle vous offre une palette d'expériences absolument inégalée, à chaque saison de l'année.</p>
+                        <p>Les grandes capitales européennes rivalisent d'élégance et de raffinement : Paris illumine ses boulevards Haussmanniens d'une lumière douce et incomparable, Londres mêle tradition royale et modernité bouillonnante, Vienne berce ses visiteurs de musique classique et de cafés centenaires. Chaque métropole est un monde à elle seule, une invitation permanente à la flânerie et à la découverte.</p>
+                        <p>Mais l'Europe se révèle aussi dans ses villages perchés, ses châteaux médiévaux, ses vignobles en terrasses et ses marchés aux saveurs locales. De la Toscane dorée à la Provence parfumée, de l'Andalousie envoûtante aux îles grecques baignées de lumière, de la côte dalmate croate aux lacs alpins suisses, le continent européen est une source inépuisable d'émerveillement.</p>
+                        <p class="qt">« L'Europe est un livre dont chaque pays est un chapitre différent — et chaque chapitre mérite d'être savouré lentement. »</p>
+                    </div>
+                </div>
+                <div class="csr">
+                    <div class="csnum">42</div>
+                    <div class="cslbl">Destinations</div>
+                </div>
+            </div>
+            <div class="gw" id="gw-europe">
+                <button class="gbtn prev" onclick="slide('europe',-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="gt">
+                    <div class="gs left"><img src="{{ asset('img/europe-1.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=700&q=80'" alt="Paris"><div class="gov"><div class="gpl">Paris, France</div><div class="gsub">La Ville Lumière</div></div></div>
+                    <div class="gs center"><img src="{{ asset('img/europe-2.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1555993539-1732b0258235?w=700&q=80'" alt="Santorin"><div class="gov"><div class="gpl">Santorin, Grèce</div><div class="gsub">Perle des Cyclades</div></div></div>
+                    <div class="gs right"><img src="{{ asset('img/europe-3.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?w=700&q=80'" alt="Amalfi"><div class="gov"><div class="gpl">Côte Amalfitaine</div><div class="gsub">Dolce Vita Italienne</div></div></div>
+                </div>
+                <button class="gbtn next" onclick="slide('europe',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="gdots" id="d-europe">
+                <div class="gdot" onclick="go('europe',0)"></div>
+                <div class="gdot on" onclick="go('europe',1)"></div>
+                <div class="gdot" onclick="go('europe',2)"></div>
+            </div>
+           <div class="pg">
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'France'}) }}"><img src="https://flagcdn.com/w40/fr.png" class="flag-img" alt="drapeau France"><span class="pn">France</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Italie'}) }}"><img src="https://flagcdn.com/w40/it.png" class="flag-img" alt="drapeau Italie"><span class="pn">Italie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Espagne'}) }}"><img src="https://flagcdn.com/w40/es.png" class="flag-img" alt="drapeau Espagne"><span class="pn">Espagne</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Grèce'}) }}"><img src="https://flagcdn.com/w40/gr.png" class="flag-img" alt="drapeau Grèce"><span class="pn">Grèce</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Portugal'}) }}"><img src="https://flagcdn.com/w40/pt.png" class="flag-img" alt="drapeau Portugal"><span class="pn">Portugal</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Suisse'}) }}"><img src="https://flagcdn.com/w40/ch.png" class="flag-img" alt="drapeau Suisse"><span class="pn">Suisse</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Autriche'}) }}"><img src="https://flagcdn.com/w40/at.png" class="flag-img" alt="drapeau Autriche"><span class="pn">Autriche</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Norvège'}) }}"><img src="https://flagcdn.com/w40/no.png" class="flag-img" alt="drapeau Norvège"><span class="pn">Norvège</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Islande'}) }}"><img src="https://flagcdn.com/w40/is.png" class="flag-img" alt="drapeau Islande"><span class="pn">Islande</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'République Tchèque'}) }}"><img src="https://flagcdn.com/w40/cz.png" class="flag-img" alt="drapeau République Tchèque"><span class="pn">République Tchèque</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Hongrie'}) }}"><img src="https://flagcdn.com/w40/hu.png" class="flag-img" alt="drapeau Hongrie"><span class="pn">Hongrie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Monaco'}) }}"><img src="https://flagcdn.com/w40/mc.png" class="flag-img" alt="drapeau Monaco"><span class="pn">Monaco</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Croatie'}) }}"><img src="https://flagcdn.com/w40/hr.png" class="flag-img" alt="drapeau Croatie"><span class="pn">Croatie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Turquie'}) }}"><img src="https://flagcdn.com/w40/tr.png" class="flag-img" alt="drapeau Turquie"><span class="pn">Turquie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Pays-Bas'}) }}"><img src="https://flagcdn.com/w40/nl.png" class="flag-img" alt="drapeau Pays-Bas"><span class="pn">Pays-Bas</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Royaume-Uni'}) }}"><img src="https://flagcdn.com/w40/gb.png" class="flag-img" alt="drapeau Royaume-Uni"><span class="pn">Royaume-Uni</span><i class="fas fa-arrow-right pa"></i></a>
+</div>
+        </div>
+    </div>
+
+    <!-- AFRIQUE -->
+    <div class="cs" id="afrique" style="background:linear-gradient(160deg,#faf7f2 0%,#f0e8d8 50%,#faf7f2 100%);">
+        <div class="container cs-inner">
+            <div class="csh">
+                <div class="csl">
+                    <div class="csey">Continent Africain</div>
+                    <div class="csti">L'<span>Afrique</span></div>
+                    <div class="csd">
+                        <p>L'Afrique est bien plus qu'une destination — c'est une expérience fondamentale, un retour aux sources de l'humanité. Des grandes plaines du Serengeti aux dunes ocre du Sahara, de la luxuriance des forêts équatoriales aux lagons turquoise de l'océan Indien, ce continent vous enveloppe d'une beauté brute et authentique qui ne ressemble à nulle autre.</p>
+                        <p>Les safaris en Tanzanie et au Kenya restent parmi les expériences les plus intenses qui soient : observer la grande migration du Serengeti, croiser un lion au crépuscule dans le Maasai Mara, ou entendre le silence absolu du bush au petit matin sont des moments qui s'impriment à jamais dans la mémoire.</p>
+                        <p>Mais l'Afrique c'est aussi la magie des villes impériales du Maroc, les épices envoûtantes de Zanzibar, le Cap et ses vignobles de rêve face à l'Atlantique, Madagascar et ses espèces uniques au monde, ou encore les Seychelles et leur paradis de granit rose et de corail vivant. Un continent aux multiples visages, chacun plus fascinant que le précédent.</p>
+                        <p class="qt">« L'Afrique vous entre dans la peau dès le premier regard — et ne vous quitte plus jamais vraiment. »</p>
+                    </div>
+                </div>
+                <div class="csr">
+                    <div class="csnum">38</div>
+                    <div class="cslbl">Destinations</div>
+                </div>
+            </div>
+            <div class="gw" id="gw-afrique">
+                <button class="gbtn prev" onclick="slide('afrique',-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="gt">
+                    <div class="gs left"><img src="{{ asset('img/afrique-1.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1516426122078-c23e76319801?w=700&q=80'" alt="Kenya"><div class="gov"><div class="gpl">Maasai Mara, Kenya</div><div class="gsub">Safari d'Exception</div></div></div>
+                    <div class="gs center"><img src="{{ asset('img/afrique-2.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=700&q=80'" alt="Maroc"><div class="gov"><div class="gpl">Marrakech, Maroc</div><div class="gsub">Ville Impériale</div></div></div>
+                    <div class="gs right"><img src="{{ asset('img/afrique-3.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=700&q=80'" alt="Zanzibar"><div class="gov"><div class="gpl">Zanzibar, Tanzanie</div><div class="gsub">Île aux Épices</div></div></div>
+                </div>
+                <button class="gbtn next" onclick="slide('afrique',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="gdots" id="d-afrique">
+                <div class="gdot" onclick="go('afrique',0)"></div>
+                <div class="gdot on" onclick="go('afrique',1)"></div>
+                <div class="gdot" onclick="go('afrique',2)"></div>
+            </div>
+            <div class="pg">
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Maroc'}) }}"><img src="https://flagcdn.com/w40/ma.png" class="flag-img" alt="drapeau Maroc"><span class="pn">Maroc</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Tunisie'}) }}"><img src="https://flagcdn.com/w40/tn.png" class="flag-img" alt="drapeau Tunisie"><span class="pn">Tunisie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Afrique du Sud'}) }}"><img src="https://flagcdn.com/w40/za.png" class="flag-img" alt="drapeau Afrique du Sud"><span class="pn">Afrique du Sud</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Kenya'}) }}"><img src="https://flagcdn.com/w40/ke.png" class="flag-img" alt="drapeau Kenya"><span class="pn">Kenya</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Tanzanie'}) }}"><img src="https://flagcdn.com/w40/tz.png" class="flag-img" alt="drapeau Tanzanie"><span class="pn">Tanzanie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Île Maurice'}) }}"><img src="https://flagcdn.com/w40/mu.png" class="flag-img" alt="drapeau Île Maurice"><span class="pn">Île Maurice</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Madagascar'}) }}"><img src="https://flagcdn.com/w40/mg.png" class="flag-img" alt="drapeau Madagascar"><span class="pn">Madagascar</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Namibie'}) }}"><img src="https://flagcdn.com/w40/na.png" class="flag-img" alt="drapeau Namibie"><span class="pn">Namibie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Éthiopie'}) }}"><img src="https://flagcdn.com/w40/et.png" class="flag-img" alt="drapeau Éthiopie"><span class="pn">Éthiopie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Seychelles'}) }}"><img src="https://flagcdn.com/w40/sc.png" class="flag-img" alt="drapeau Seychelles"><span class="pn">Seychelles</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Égypte'}) }}"><img src="https://flagcdn.com/w40/eg.png" class="flag-img" alt="drapeau Égypte"><span class="pn">Égypte</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Rwanda'}) }}"><img src="https://flagcdn.com/w40/rw.png" class="flag-img" alt="drapeau Rwanda"><span class="pn">Rwanda</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Zimbabwe'}) }}"><img src="https://flagcdn.com/w40/zw.png" class="flag-img" alt="drapeau Zimbabwe"><span class="pn">Zimbabwe</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Sénégal'}) }}"><img src="https://flagcdn.com/w40/sn.png" class="flag-img" alt="drapeau Sénégal"><span class="pn">Sénégal</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Botswana'}) }}"><img src="https://flagcdn.com/w40/bw.png" class="flag-img" alt="drapeau Botswana"><span class="pn">Botswana</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Ghana'}) }}"><img src="https://flagcdn.com/w40/gh.png" class="flag-img" alt="drapeau Ghana"><span class="pn">Ghana</span><i class="fas fa-arrow-right pa"></i></a>
+</div>
+        </div>
+    </div>
+
+    <!-- ASIE -->
+    <div class="cs" id="asie" style="background:#ffffff;">
+        <div class="container cs-inner">
+            <div class="csh">
+                <div class="csl">
+                    <div class="csey">Continent Asiatique</div>
+                    <div class="csti">L'<span>Asie</span></div>
+                    <div class="csd">
+                        <p>L'Asie est le continent des contrastes absolus : entre les temples millénaires de Kyoto et les skylines futuristes de Tokyo, entre la méditation zen des rizières de Bali et l'effervescence bouillonnante des marchés de Bangkok, il y a tout un univers à explorer. Le plus grand continent de la planète est aussi le plus diversifié — culturellement, spirituellement et gastronomiquement.</p>
+                        <p>Le Japon fascine par sa précision esthétique unique au monde : les jardins zen d'une rigueur absolue, les cerisiers en fleurs au printemps, la cérémonie du thé élevée au rang d'art total, la cuisine kaiseki d'une délicatesse infinie. L'Indonésie et ses îles enchanteresses — Bali, Lombok, Komodo — vous plongent dans une luxuriance tropicale entre temples hindous et volcans en activité.</p>
+                        <p>Les Maldives offrent ce que le monde a de plus proche du paradis : des eaux d'un turquoise irréel, des bungalows sur pilotis suspendus entre ciel et mer. Le Vietnam avec ses baies de calcaire, la Thaïlande et ses temples dorés, l'Inde et sa spiritualité multimillénaire — autant d'invitations irrésistibles à l'émerveillement total.</p>
+                        <p class="qt">« Voyager en Asie, c'est apprendre à voir le monde avec d'autres yeux — et ne plus jamais regarder les choses de la même façon. »</p>
+                    </div>
+                </div>
+                <div class="csr">
+                    <div class="csnum">55</div>
+                    <div class="cslbl">Destinations</div>
+                </div>
+            </div>
+            <div class="gw" id="gw-asie">
+                <button class="gbtn prev" onclick="slide('asie',-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="gt">
+                    <div class="gs left"><img src="{{ asset('img/asie-1.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=700&q=80'" alt="Japon"><div class="gov"><div class="gpl">Kyoto, Japon</div><div class="gsub">Mille Temples Sacrés</div></div></div>
+                    <div class="gs center"><img src="{{ asset('img/asie-2.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=700&q=80'" alt="Bali"><div class="gov"><div class="gpl">Bali, Indonésie</div><div class="gsub">Île des Dieux</div></div></div>
+                    <div class="gs right"><img src="{{ asset('img/asie-3.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1506461883276-594a12b11cf3?w=700&q=80'" alt="Thaïlande"><div class="gov"><div class="gpl">Bangkok, Thaïlande</div><div class="gsub">Capitale du Sourire</div></div></div>
+                </div>
+                <button class="gbtn next" onclick="slide('asie',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="gdots" id="d-asie">
+                <div class="gdot" onclick="go('asie',0)"></div>
+                <div class="gdot on" onclick="go('asie',1)"></div>
+                <div class="gdot" onclick="go('asie',2)"></div>
+            </div>
+            <div class="pg">
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Japon'}) }}"><img src="https://flagcdn.com/w40/jp.png" class="flag-img" alt="drapeau Japon"><span class="pn">Japon</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Thaïlande'}) }}"><img src="https://flagcdn.com/w40/th.png" class="flag-img" alt="drapeau Thaïlande"><span class="pn">Thaïlande</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Indonésie'}) }}"><img src="https://flagcdn.com/w40/id.png" class="flag-img" alt="drapeau Indonésie"><span class="pn">Indonésie (Bali)</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Vietnam'}) }}"><img src="https://flagcdn.com/w40/vn.png" class="flag-img" alt="drapeau Vietnam"><span class="pn">Vietnam</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Singapour'}) }}"><img src="https://flagcdn.com/w40/sg.png" class="flag-img" alt="drapeau Singapour"><span class="pn">Singapour</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Émirats Arabes Unis'}) }}"><img src="https://flagcdn.com/w40/ae.png" class="flag-img" alt="drapeau Émirats Arabes Unis"><span class="pn">Émirats Arabes Unis</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Maldives'}) }}"><img src="https://flagcdn.com/w40/mv.png" class="flag-img" alt="drapeau Maldives"><span class="pn">Maldives</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Inde'}) }}"><img src="https://flagcdn.com/w40/in.png" class="flag-img" alt="drapeau Inde"><span class="pn">Inde</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Chine'}) }}"><img src="https://flagcdn.com/w40/cn.png" class="flag-img" alt="drapeau Chine"><span class="pn">Chine</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Cambodge'}) }}"><img src="https://flagcdn.com/w40/kh.png" class="flag-img" alt="drapeau Cambodge"><span class="pn">Cambodge</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Sri Lanka'}) }}"><img src="https://flagcdn.com/w40/lk.png" class="flag-img" alt="drapeau Sri Lanka"><span class="pn">Sri Lanka</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Népal'}) }}"><img src="https://flagcdn.com/w40/np.png" class="flag-img" alt="drapeau Népal"><span class="pn">Népal</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Corée du Sud'}) }}"><img src="https://flagcdn.com/w40/kr.png" class="flag-img" alt="drapeau Corée du Sud"><span class="pn">Corée du Sud</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Malaisie'}) }}"><img src="https://flagcdn.com/w40/my.png" class="flag-img" alt="drapeau Malaisie"><span class="pn">Malaisie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Philippines'}) }}"><img src="https://flagcdn.com/w40/ph.png" class="flag-img" alt="drapeau Philippines"><span class="pn">Philippines</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Bhoutan'}) }}"><img src="https://flagcdn.com/w40/bt.png" class="flag-img" alt="drapeau Bhoutan"><span class="pn">Bhoutan</span><i class="fas fa-arrow-right pa"></i></a>
+</div>
+        </div>
+    </div>
+
+    <!-- AMÉRIQUES -->
+    <div class="cs" id="ameriques" style="background:linear-gradient(160deg,#faf7f2 0%,#f0e8d8 50%,#faf7f2 100%);">
+        <div class="container cs-inner">
+            <div class="csh">
+                <div class="csl">
+                    <div class="csey">Continent Américain</div>
+                    <div class="csti">Les <span>Amériques</span></div>
+                    <div class="csd">
+                        <p>Les Amériques forment un continent titan, s'étendant du Grand Nord canadien enneigé jusqu'à la Patagonie battue par les vents, en passant par les Caraïbes tropicales et les forêts amazoniennes les plus denses de la planète. Cette immensité recèle des paysages d'une diversité époustouflante : glaciers, canyons vertigineux, chutes d'eau titanesques, déserts salins d'une blancheur irréelle.</p>
+                        <p>Les États-Unis offrent un voyage à eux seuls : New York et sa skyline mythique, les grands parcs nationaux — Yellowstone, Grand Canyon, Yosemite — et leurs paysages de science-fiction. Le Canada envoûte avec ses lacs d'un bleu profond, ses forêts d'érables aux couleurs d'automne incandescentes et les aurores boréales magiques du Yukon.</p>
+                        <p>L'Amérique latine vibre d'une énergie vitale unique : le Machu Picchu suspendu dans les nuages andins, les tango enflammés de Buenos Aires, le carnaval de Rio qui électrise la planète, Cuba et ses couleurs vintage figées dans un temps suspendu. À chaque latitude, un rythme, une saveur, une âme différente.</p>
+                        <p class="qt">« Les Amériques, c'est l'espace comme liberté absolue — des horizons infinis pour une vie entière de voyages. »</p>
+                    </div>
+                </div>
+                <div class="csr">
+                    <div class="csnum">29</div>
+                    <div class="cslbl">Destinations</div>
+                </div>
+            </div>
+            <div class="gw" id="gw-ameriques">
+                <button class="gbtn prev" onclick="slide('ameriques',-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="gt">
+                    <div class="gs left"><img src="{{ asset('img/ameriques-1.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1512813195386-6cf811ad3542?w=700&q=80'" alt="NY"><div class="gov"><div class="gpl">New York, USA</div><div class="gsub">La Ville qui ne Dort Jamais</div></div></div>
+                    <div class="gs center"><img src="{{ asset('img/ameriques-2.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=700&q=80'" alt="Rio"><div class="gov"><div class="gpl">Rio de Janeiro, Brésil</div><div class="gsub">La Cidade Maravilhosa</div></div></div>
+                    <div class="gs right"><img src="{{ asset('img/ameriques-3.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?w=700&q=80'" alt="Patagonie"><div class="gov"><div class="gpl">Patagonie, Argentine</div><div class="gsub">Bout du Monde Magique</div></div></div>
+                </div>
+                <button class="gbtn next" onclick="slide('ameriques',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="gdots" id="d-ameriques">
+                <div class="gdot" onclick="go('ameriques',0)"></div>
+                <div class="gdot on" onclick="go('ameriques',1)"></div>
+                <div class="gdot" onclick="go('ameriques',2)"></div>
+            </div>
+           <div class="pg">
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'États-Unis'}) }}"><img src="https://flagcdn.com/w40/us.png" class="flag-img" alt="drapeau États-Unis"><span class="pn">États-Unis</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Brésil'}) }}"><img src="https://flagcdn.com/w40/br.png" class="flag-img" alt="drapeau Brésil"><span class="pn">Brésil</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Argentine'}) }}"><img src="https://flagcdn.com/w40/ar.png" class="flag-img" alt="drapeau Argentine"><span class="pn">Argentine</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Canada'}) }}"><img src="https://flagcdn.com/w40/ca.png" class="flag-img" alt="drapeau Canada"><span class="pn">Canada</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Mexique'}) }}"><img src="https://flagcdn.com/w40/mx.png" class="flag-img" alt="drapeau Mexique"><span class="pn">Mexique</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Cuba'}) }}"><img src="https://flagcdn.com/w40/cu.png" class="flag-img" alt="drapeau Cuba"><span class="pn">Cuba</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Colombie'}) }}"><img src="https://flagcdn.com/w40/co.png" class="flag-img" alt="drapeau Colombie"><span class="pn">Colombie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Pérou'}) }}"><img src="https://flagcdn.com/w40/pe.png" class="flag-img" alt="drapeau Pérou"><span class="pn">Pérou</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Chili'}) }}"><img src="https://flagcdn.com/w40/cl.png" class="flag-img" alt="drapeau Chili"><span class="pn">Chili</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Bolivie'}) }}"><img src="https://flagcdn.com/w40/bo.png" class="flag-img" alt="drapeau Bolivie"><span class="pn">Bolivie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Costa Rica'}) }}"><img src="https://flagcdn.com/w40/cr.png" class="flag-img" alt="drapeau Costa Rica"><span class="pn">Costa Rica</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Jamaïque'}) }}"><img src="https://flagcdn.com/w40/jm.png" class="flag-img" alt="drapeau Jamaïque"><span class="pn">Jamaïque</span><i class="fas fa-arrow-right pa"></i></a>
+</div>
+        </div>
+    </div>
+
+    <!-- OCÉANIE -->
+    <div class="cs" id="oceanie" style="background:#ffffff;">
+        <div class="container cs-inner">
+            <div class="csh">
+                <div class="csl">
+                    <div class="csey">Continent Océanien</div>
+                    <div class="csti">L'<span>Océanie</span></div>
+                    <div class="csd">
+                        <p>L'Océanie est le continent du bout du monde, celui que l'on imagine comme un paradis lointain et préservé — et qui tient absolument toutes ses promesses. Entre l'immensité austère de l'Outback australien, les fjords spectaculaires de Nouvelle-Zélande, les lagons de rêve de Polynésie française et les récifs coralliens de Papouasie, il y a là une concentration de merveilles naturelles absolument unique.</p>
+                        <p>L'Australie est un continent en soi : Sydney avec son opéra iconique face à la baie, la Grande Barrière de Corail et ses jardins sous-marins hallucinants, Uluru et sa présence spirituelle intense au cœur du désert rouge. La Nouvelle-Zélande, avec ses paysages de fantasy — volcans actifs, fjords profonds, glaciers qui descendent jusqu'à la mer — est un terrain de jeu inégalé.</p>
+                        <p>La Polynésie française et ses perles : Bora Bora et son lagon légendaire, Tahiti et ses danses traditionnelles, les Marquises sauvages et mystérieuses. Fidji et ses cent îles, le Vanuatu et ses volcans actifs. L'Océanie est le dernier grand territoire du rêve, intact, magique et souverain.</p>
+                        <p class="qt">« L'Océanie est cette dernière promesse que le monde fait aux voyageurs : qu'il existe encore des horizons vierges à découvrir. »</p>
+                    </div>
+                </div>
+                <div class="csr">
+                    <div class="csnum">12</div>
+                    <div class="cslbl">Destinations</div>
+                </div>
+            </div>
+            <div class="gw" id="gw-oceanie">
+                <button class="gbtn prev" onclick="slide('oceanie',-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="gt">
+                    <div class="gs left"><img src="{{ asset('img/oceanie-1.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80'" alt="NZ"><div class="gov"><div class="gpl">Queenstown, N.-Zélande</div><div class="gsub">Capital de l'Aventure</div></div></div>
+                    <div class="gs center"><img src="{{ asset('img/oceanie-2.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=700&q=80'" alt="Sydney"><div class="gov"><div class="gpl">Sydney, Australie</div><div class="gsub">Joyau du Pacifique Sud</div></div></div>
+                    <div class="gs right"><img src="{{ asset('img/oceanie-3.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=700&q=80'" alt="Bora Bora"><div class="gov"><div class="gpl">Bora Bora, Polynésie</div><div class="gsub">Lagon de Cristal</div></div></div>
+                </div>
+                <button class="gbtn next" onclick="slide('oceanie',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="gdots" id="d-oceanie">
+                <div class="gdot" onclick="go('oceanie',0)"></div>
+                <div class="gdot on" onclick="go('oceanie',1)"></div>
+                <div class="gdot" onclick="go('oceanie',2)"></div>
+            </div>
+            <div class="pg">
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Australie'}) }}"><img src="https://flagcdn.com/w40/au.png" class="flag-img" alt="drapeau Australie"><span class="pn">Australie</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Nouvelle-Zélande'}) }}"><img src="https://flagcdn.com/w40/nz.png" class="flag-img" alt="drapeau Nouvelle-Zélande"><span class="pn">Nouvelle-Zélande</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Polynésie française'}) }}"><img src="https://flagcdn.com/w40/pf.png" class="flag-img" alt="drapeau Polynésie française"><span class="pn">Polynésie française</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Fidji'}) }}"><img src="https://flagcdn.com/w40/fj.png" class="flag-img" alt="drapeau Fidji"><span class="pn">Fidji</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Vanuatu'}) }}"><img src="https://flagcdn.com/w40/vu.png" class="flag-img" alt="drapeau Vanuatu"><span class="pn">Vanuatu</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Papouasie-Nouvelle-Guinée'}) }}"><img src="https://flagcdn.com/w40/pg.png" class="flag-img" alt="drapeau Papouasie"><span class="pn">Papouasie-Nouvelle-Guinée</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Samoa'}) }}"><img src="https://flagcdn.com/w40/ws.png" class="flag-img" alt="drapeau Samoa"><span class="pn">Samoa</span><i class="fas fa-arrow-right pa"></i></a>
+    <a class="pi" href="{{ path('app_voyage_detail', {'nom': 'Nouvelle-Calédonie'}) }}"><img src="https://flagcdn.com/w40/nc.png" class="flag-img" alt="drapeau Nouvelle-Calédonie"><span class="pn">Nouvelle-Calédonie</span><i class="fas fa-arrow-right pa"></i></a>
+</div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+
+
+
+        /* ===== AUTOCOMPLETE DROPDOWN ===== */
+        .search-autocomplete-wrap {
+            position: relative;
+            flex: 1;
+            display: flex;
+        }
+        .search-autocomplete-wrap input {
+            width: 100%;
+        }
+        #autocomplete-list {
+            position: absolute;
+            top: calc(100% + 12px);
+            left: -45px; /* aligne avec l'icône loupe */
+            right: 0;
+            background: rgba(20, 6, 6, 0.97);
+            border: 1px solid rgba(155, 114, 64, 0.35);
+            border-top: 2px solid var(--or, #9B7240);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            list-style: none;
+            margin: 0;
+            padding: 4px 0;
+            display: none;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+        #autocomplete-list li {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 0.5px;
+            transition: background 0.2s, color 0.2s, padding-left 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        #autocomplete-list li:last-child {
+            border-bottom: none;
+        }
+        #autocomplete-list li:hover {
+            background: rgba(155, 114, 64, 0.15);
+            color: var(--or, #9B7240);
+            padding-left: 26px;
+        }
+        #autocomplete-list li .ac-flag {
+            font-style: normal;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        #autocomplete-list li.no-result {
+            color: rgba(255,255,255,0.3);
+            cursor: default;
+            font-size: 14px;
+            letter-spacing: 1px;
+            font-family: 'Montserrat', sans-serif;
+            font-style: normal;
+            text-transform: uppercase;
+        }
+        #autocomplete-list li.no-result:hover {
+            background: transparent;
+            color: rgba(255,255,255,0.3);
+            padding-left: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // ========== CAROUSEL LOGIC (inchangé) ==========
+        function goTo(id) {
+            event.preventDefault();
+            const el = document.getElementById(id);
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: "smooth" });
+        }
+
+        const S = {
+            europe: { c: 1, t: 3 },
+            afrique: { c: 1, t: 3 },
+            asie: { c: 1, t: 3 },
+            ameriques: { c: 1, t: 3 },
+            oceanie: { c: 1, t: 3 }
+        };
+
+        function render(n) {
+            const { c, t } = S[n];
+            const sl = document.querySelectorAll("#gw-" + n + " .gs");
+            const dt = document.querySelectorAll("#d-" + n + " .gdot");
+            const pv = (c - 1 + t) % t;
+            const nx = (c + 1) % t;
+            sl.forEach((s, i) => {
+                s.className = "gs";
+                if (i === c) s.classList.add("center");
+                else if (i === pv) s.classList.add("left");
+                else if (i === nx) s.classList.add("right");
+                else s.classList.add("hr");
+            });
+            dt.forEach((d, i) => d.classList.toggle("on", i === c));
+        }
+
+        function slide(n, d) {
+            S[n].c = (S[n].c + d + S[n].t) % S[n].t;
+            render(n);
+        }
+
+        function go(n, i) {
+            S[n].c = i;
+            render(n);
+        }
+
+        document.querySelectorAll(".gs").forEach(s => {
+            s.addEventListener("click", function () {
+                if (this.classList.contains("left") || this.classList.contains("right")) {
+                    const n = this.closest(".gw").id.replace("gw-", "");
+                    slide(n, this.classList.contains("left") ? -1 : 1);
+                }
+            });
+        });
+
+        Object.keys(S).forEach(render);
+
+
+
+
+
+        // ========== AUTOCOMPLETE PAYS — chargement unique au démarrage ==========
+
+
+        const input = document.getElementById('destination-input');
+        const list  = document.getElementById('autocomplete-list');
+        const btn   = document.getElementById('search-btn');
+
+        let tousLesPays = []; // sera rempli une seule fois
+
+        // On charge TOUS les pays une seule fois au chargement de la page
+        fetch('https://restcountries.com/v3.1/all?fields=name,translations,flags')
+            .then(res => res.json())
+            .then(data => {
+                tousLesPays = data.map(country => ({
+                    nom: country.translations?.fra?.common || country.name.common,
+                    flag: country.flags?.emoji || ''
+                }));
+                // Trier alphabétiquement
+                tousLesPays.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+            })
+            .catch(() => console.warn('Impossible de charger la liste des pays.'));
+
+        // Filtrage LOCAL instantané à chaque frappe
+        input.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // ignorer accents à la frappe
+
+            if (query.length < 1) {
+                list.innerHTML = '';
+                list.style.display = 'none';
+                return;
+            }
+
+            const resultats = tousLesPays.filter(p => {
+                const nomNorm = p.nom.toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return nomNorm.startsWith(query);
+            }).slice(0, 6);
+
+            list.innerHTML = '';
+
+            if (resultats.length === 0) {
+                list.innerHTML = '<li class="no-result">Aucun pays trouvé</li>';
+                list.style.display = 'block';
+                return;
+            }
+
+            resultats.forEach(pays => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="ac-flag">${pays.flag}</span><span>${pays.nom}</span>`;
+
+                li.addEventListener('click', () => {
+                    input.value = pays.nom;
+                    list.innerHTML = '';
+                    list.style.display = 'none';
+                });
+
+                list.appendChild(li);
+            });
+
+            list.style.display = 'block';
+        });
+
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', function (e) {
+            if (!input.contains(e.target) && !list.contains(e.target)) {
+                list.innerHTML = '';
+                list.style.display = 'none';
+            }
+        });
+
+
+
+        // Bouton Rechercher → redirection vers la page du pays
+        btn.addEventListener('click', function () {
+            const pays = input.value.trim();
+            if (pays) {
+                // On redirige vers /destination/nom_du_pays
+                window.location.href = "/destination/" + encodeURIComponent(pays);
+            }
+        });
+
+        // Touche Entrée = Rechercher
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') btn.click();
+        });
+        // ========== FIN AUTOCOMPLETE ==========
+
+
+        
+    </script>
+{% endblock %}

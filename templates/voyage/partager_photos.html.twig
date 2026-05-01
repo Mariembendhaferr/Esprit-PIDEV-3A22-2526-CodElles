@@ -1,0 +1,416 @@
+{# templates/voyage/partager_photos.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Partager vos Photos — Doura Mondo</title>
+    <meta name="description" content="Partagez vos photos de voyage avec la communauté Doura Mondo.">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/partager-photos.css') }}">
+
+    <style>
+        .ai-feedback {
+            display: none; align-items: center; gap: 10px;
+            margin-top: 12px; padding: 12px 16px; border-radius: 10px;
+            font-family: 'Montserrat', sans-serif; font-size: 0.85rem; font-weight: 500;
+        }
+        .ai-feedback.show { display: flex; }
+        .ai-feedback.loading { background: rgba(155,114,64,.08); border: 1px solid rgba(155,114,64,.25); color: #9B7240; }
+        .ai-feedback.approved { background: rgba(34,139,34,.08); border: 1px solid rgba(34,139,34,.3); color: #1e7e1e; }
+        .ai-feedback.rejected { background: rgba(180,40,40,.08); border: 1px solid rgba(180,40,40,.3); color: #8B2C2C; }
+        .ai-spinner { width:18px; height:18px; border:2px solid rgba(155,114,64,.25); border-top-color:#9B7240; border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .field-error { color: #8B2C2C; font-size: 0.8rem; margin-top: 5px; font-family: 'Montserrat', sans-serif; }
+        .flash-wrap { max-width: 540px; margin: 20px auto; }
+        .flash-success, .flash-warning {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px 18px; border-radius: 10px; margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif; font-size: 0.87rem;
+        }
+        .flash-success { background: rgba(34,139,34,.08); border: 1px solid rgba(34,139,34,.3); color: #1e7e1e; }
+        .flash-warning { background: rgba(180,40,40,.08); border: 1px solid rgba(180,40,40,.3); color: #8B2C2C; }
+        .btn-submit:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+        /* ✅ Cacher l'input file natif mais garder sa fonctionnalité */
+        .file-input-hidden { 
+            position: absolute; 
+            width: 1px; height: 1px; 
+            opacity: 0; 
+            pointer-events: none; 
+        }
+        /* ✅ Destination visuellement désactivée sans l'attribut disabled */
+        #community_post_destination.dest-locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero-community" id="heroCommunity">
+    <div class="bg-deco-circle-1" aria-hidden="true"></div>
+    <div class="bg-deco-circle-2" aria-hidden="true"></div>
+
+    <div class="community-profiles" id="communityProfiles">
+        <div class="profile-bubble size-md profile-1" style="opacity:0"><img src="{{ asset('img/fille.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-lg profile-2" style="opacity:0"><img src="{{ asset('img/fille1.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-lg profile-3" style="opacity:0"><img src="{{ asset('img/garcon.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-md profile-4" style="opacity:0"><img src="{{ asset('img/ranim.png') }}" alt=""></div>
+        <div class="profile-bubble size-sm profile-5" style="opacity:0"><img src="{{ asset('img/testimonial-2.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-sm profile-6" style="opacity:0"><img src="{{ asset('img/testimonial-3.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-lg profile-7" style="opacity:0"><img src="{{ asset('img/téléchargement (10).jpg') }}" alt=""></div>
+        <div class="profile-bubble size-md profile-8" style="opacity:0"><img src="{{ asset('img/téléchargement (12).jpg') }}" alt=""></div>
+        <div class="profile-bubble size-sm profile-9" style="opacity:0"><img src="{{ asset('img/testimonial-4.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-xs profile-10" style="opacity:0"><img src="{{ asset('img/testimonial-1.jpg') }}" alt=""></div>
+        <div class="profile-bubble size-xs profile-11" style="opacity:0"><img src="{{ asset('img/🇲🇦.jpg') }}" alt=""></div>
+        <div class="plus-badge plus-1"><i class="fas fa-plus"></i></div>
+        <div class="plus-badge plus-2"><i class="fas fa-plus"></i></div>
+        <div class="plus-badge plus-3"><i class="fas fa-plus"></i></div>
+        <div class="plus-badge plus-4"><i class="fas fa-plus"></i></div>
+        <div class="sparkle sparkle-1" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5Z"/></svg></div>
+        <div class="sparkle sparkle-2" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5Z"/></svg></div>
+        <div class="sparkle sparkle-3" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5Z"/></svg></div>
+        <div class="float-badge fbadge-1"><div class="float-badge-icon"><i class="fas fa-camera"></i></div><div><span class="float-badge-text">+34 photos</span><span class="float-badge-sub">cette semaine</span></div></div>
+        <div class="float-badge fbadge-2"><div class="float-badge-icon"><i class="fas fa-globe-americas"></i></div><div><span class="float-badge-text">12 pays</span><span class="float-badge-sub">découverts</span></div></div>
+        <div class="float-badge fbadge-3"><div class="float-badge-icon"><i class="fas fa-heart"></i></div><div><span class="float-badge-text">+2.8k likes</span><span class="float-badge-sub">communauté</span></div></div>
+        <div class="float-badge fbadge-4"><div class="float-badge-icon"><i class="fas fa-users"></i></div><div><span class="float-badge-text">+1.2k membres</span><span class="float-badge-sub">actifs</span></div></div>
+    </div>
+
+    <div class="hero-text">
+        <div class="hero-eyebrow">Rejoignez la communauté</div>
+        <h1 class="hero-title">Partagez vos <em>aventures</em><br>avec Doura Mondo</h1>
+        <p class="hero-desc">Rejoignez des milliers de voyageurs passionnés. Partagez vos découvertes, inspirez et soyez inspiré.</p>
+        <a href="#formSection" class="scroll-arrow">
+            <span class="scroll-arrow-text">Commencer</span>
+            <div class="scroll-arrow-icon"><i class="fas fa-chevron-down"></i></div>
+        </a>
+    </div>
+</section>
+
+<!-- Flash messages geres par overlay JS -->
+
+<!-- FORMULAIRE -->
+<section class="form-section" id="formSection">
+    <div class="form-container">
+
+        <div class="form-header">
+            <div class="form-header-tag">Votre expérience</div>
+            <h2>Partagez votre <em>moment</em></h2>
+            <p>Remplissez les détails de votre voyage et ajoutez votre plus belle photo.</p>
+            <p style="font-size:.8rem;color:#9B7240;margin-top:6px;">
+                <i class="fas fa-robot"></i> Notre IA vérifie que votre image est bien liée au voyage ou aux loisirs.
+            </p>
+        </div>
+
+        {{ form_start(form, {
+            attr: {
+                class: 'upload-form',
+                id: 'uploadForm',
+                enctype: 'multipart/form-data'
+            }
+        }) }}
+
+            {# ── Continent ── #}
+            <div class="fields-row">
+                <div class="field-group">
+                    <label class="field-label">
+                        <i class="fas fa-globe-africa"></i> Continent
+                    </label>
+                    {{ form_widget(form.continent) }}
+                    {% if form.continent.vars.errors|length > 0 %}
+                        <div class="field-error">{{ form_errors(form.continent) }}</div>
+                    {% endif %}
+                </div>
+
+                {# ── Destination — PAS de disabled, géré par CSS class via JS ── #}
+                <div class="field-group">
+                    <label class="field-label">
+                        <i class="fas fa-map-marker-alt"></i> Destination
+                    </label>
+                    {{ form_widget(form.destination) }}
+                    {% if form.destination.vars.errors|length > 0 %}
+                        <div class="field-error">{{ form_errors(form.destination) }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ── Photo ── #}
+            <div class="field-group">
+                <label class="field-label">
+                    <i class="fas fa-image"></i> Votre photo
+                </label>
+                <div class="upload-zone" id="uploadZone">
+                    {{ form_widget(form.photo) }}
+                    <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-zone-title">Glissez votre photo ici</div>
+                    <div class="upload-zone-sub">ou cliquez pour parcourir vos fichiers</div>
+                    <div class="upload-zone-hint">JPG, PNG · Max 5 Mo</div>
+                </div>
+                {% if form.photo.vars.errors|length > 0 %}
+                    <div class="field-error">{{ form_errors(form.photo) }}</div>
+                {% endif %}
+                <div class="preview-container" id="previewContainer"></div>
+
+                <div class="ai-feedback" id="aiFeedback">
+                    <div class="ai-spinner" id="aiSpinner" style="display:none"></div>
+                    <span id="aiFeedbackText"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btnSubmit" disabled>
+                Partager ma photo <i class="fas fa-paper-plane"></i>
+            </button>
+
+            <a href="{{ path('app_accueil') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> <span>Retour à l'accueil</span>
+            </a>
+
+        {{ form_end(form) }}
+    </div>
+</section>
+
+<script>
+const DESTINATIONS = {{ destinations_json|raw }};
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ── Animation profils ──────────────────────────────────────────
+    document.querySelectorAll('.profile-bubble').forEach((p, i) => {
+        setTimeout(() => { p.style.transition = 'opacity .6s ease'; p.style.opacity = '1'; }, 200 + i * 100);
+    });
+
+    const continentSelect   = document.getElementById('community_post_continent');
+    const destinationSelect = document.getElementById('community_post_destination');
+    const uploadZone        = document.getElementById('uploadZone');
+    const fileInput         = document.getElementById('community_post_photo');
+    const previewContainer  = document.getElementById('previewContainer');
+    const aiFeedback        = document.getElementById('aiFeedback');
+    const aiFeedbackText    = document.getElementById('aiFeedbackText');
+    const aiSpinner         = document.getElementById('aiSpinner');
+    const btnSubmit         = document.getElementById('btnSubmit');
+
+    // ── Cascade continent → destination ───────────────────────────
+    // ✅ On utilise une classe CSS au lieu de l'attribut disabled
+    function lockDestination() {
+        destinationSelect.classList.add('dest-locked');
+    }
+    function unlockDestination() {
+        destinationSelect.classList.remove('dest-locked');
+    }
+
+    function updateDestinations(continent) {
+        const dests = DESTINATIONS[continent] || [];
+        destinationSelect.innerHTML = '<option value="" disabled selected>Choisir une destination</option>';
+
+        if (dests.length === 0) {
+            lockDestination();
+            return;
+        }
+
+        dests.forEach(dest => {
+            const opt = document.createElement('option');
+            opt.value = dest;
+            opt.textContent = dest;
+            destinationSelect.appendChild(opt);
+        });
+
+        unlockDestination();
+    }
+
+    // Au chargement : verrouiller si pas de continent
+    if (continentSelect) {
+        if (continentSelect.value) {
+            updateDestinations(continentSelect.value);
+        } else {
+            lockDestination();
+        }
+
+        continentSelect.addEventListener('change', () => {
+            updateDestinations(continentSelect.value);
+        });
+    }
+
+    // ── Upload zone : clic + drag & drop ──────────────────────────
+    if (uploadZone && fileInput) {
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                fileInput.files = dt.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+    }
+
+    // ── Aperçu + appel IA ──────────────────────────────────────────
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert('La taille du fichier ne doit pas dépasser 5 Mo.');
+            return;
+        }
+
+        previewContainer.innerHTML = '';
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const item = document.createElement('div');
+            item.classList.add('preview-item');
+            item.innerHTML = `
+                <img src="${ev.target.result}" alt="Aperçu">
+                <button type="button" class="preview-remove" onclick="removePreview()">
+                    <i class="fas fa-times"></i>
+                </button>`;
+            previewContainer.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+        analyzeImage(file);
+    }
+
+    window.removePreview = function () {
+        previewContainer.innerHTML = '';
+        fileInput.value = '';
+        aiFeedback.className = 'ai-feedback';
+        btnSubmit.disabled = true;
+    };
+
+    // ── Appel AJAX modération ──────────────────────────────────────
+    async function analyzeImage(file) {
+        aiFeedback.className = 'ai-feedback loading show';
+        aiSpinner.style.display = 'block';
+        aiFeedbackText.textContent = 'Analyse IA en cours…';
+        btnSubmit.disabled = true;
+
+        const fd = new FormData();
+        fd.append('photo', file);
+
+        try {
+            const res  = await fetch('{{ path('app_community_moderate_preview') }}', {
+                method: 'POST',
+                body: fd,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+            const data = await res.json();
+            aiSpinner.style.display = 'none';
+
+            if (data.ok) {
+                aiFeedback.className = 'ai-feedback approved show';
+                aiFeedbackText.innerHTML = '<i class="fas fa-check-circle" style="margin-right:6px"></i>' + data.message;
+                btnSubmit.disabled = false;
+            } else {
+                aiFeedback.className = 'ai-feedback rejected show';
+                aiFeedbackText.innerHTML = '<i class="fas fa-times-circle" style="margin-right:6px"></i>' + data.message;
+                btnSubmit.disabled = true;
+            }
+        } catch {
+            aiSpinner.style.display = 'none';
+            aiFeedback.className = 'ai-feedback approved show';
+            aiFeedbackText.innerHTML = '<i class="fas fa-check-circle" style="margin-right:6px"></i> Vérification indisponible. Vous pouvez soumettre.';
+            btnSubmit.disabled = false;
+        }
+    }
+
+    // ── Smooth scroll ──────────────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+});
+</script>
+
+<!-- OVERLAY SUCCES -->
+<div id="successOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(26,10,10,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:24px;padding:52px 44px;text-align:center;max-width:460px;width:90%;box-shadow:0 40px 80px rgba(0,0,0,0.3);animation:popIn .4s cubic-bezier(.23,1,.32,1) both;">
+        <div style="width:76px;height:76px;background:linear-gradient(135deg,#8B2C2C,#6B1F1F);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;box-shadow:0 8px 30px rgba(139,44,44,0.35);">
+            <i class="fas fa-check" style="color:#fff;font-size:1.9rem;"></i>
+        </div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9B7240;font-family:Arial,sans-serif;font-weight:700;margin-bottom:10px;">Doura Mondo</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;color:#1a1a2e;font-weight:600;margin-bottom:14px;line-height:1.25;">Photo partag&eacute;e <em style="color:#8B2C2C;font-style:italic;">avec succ&egrave;s !</em></h2>
+        <p style="font-family:'Montserrat',sans-serif;font-size:.88rem;color:#4a4a5a;line-height:1.75;margin-bottom:28px;">Votre photo a bien &eacute;t&eacute; partag&eacute;e avec la communaut&eacute; Doura Mondo.<br>Elle est maintenant visible par tous les voyageurs. &#127912;</p>
+        <div style="height:4px;background:#EDE3D0;border-radius:4px;overflow:hidden;margin-bottom:14px;">
+            <div id="overlayProgress" style="height:100%;background:linear-gradient(90deg,#8B2C2C,#C4A882);border-radius:4px;width:0%;transition:width 3s linear;"></div>
+        </div>
+        <p style="font-family:'Montserrat',sans-serif;font-size:.73rem;color:#888899;">Redirection dans 3 secondes&hellip;</p>
+    </div>
+</div>
+
+<!-- OVERLAY WARNING -->
+<div id="warningOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(26,10,10,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:24px;padding:52px 44px;text-align:center;max-width:460px;width:90%;box-shadow:0 40px 80px rgba(0,0,0,0.3);animation:popIn .4s cubic-bezier(.23,1,.32,1) both;">
+        <div style="width:76px;height:76px;background:linear-gradient(135deg,#8B2C2C,#6B1F1F);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;box-shadow:0 8px 30px rgba(139,44,44,0.35);">
+            <i class="fas fa-times" style="color:#fff;font-size:1.9rem;"></i>
+        </div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9B7240;font-family:Arial,sans-serif;font-weight:700;margin-bottom:10px;">Doura Mondo</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;color:#1a1a2e;font-weight:600;margin-bottom:14px;line-height:1.25;">Photo <em style="color:#8B2C2C;font-style:italic;">non publi&eacute;e</em></h2>
+        <p id="warningMsg" style="font-family:'Montserrat',sans-serif;font-size:.88rem;color:#4a4a5a;line-height:1.75;margin-bottom:28px;"></p>
+        <button onclick="document.getElementById('warningOverlay').style.display='none';" style="background:linear-gradient(135deg,#8B2C2C,#6B1F1F);color:#fff;border:none;padding:12px 32px;border-radius:8px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:.85rem;font-weight:700;">R&eacute;essayer</button>
+    </div>
+</div>
+
+<style>
+@keyframes popIn { from{transform:scale(.85);opacity:0;} to{transform:scale(1);opacity:1;} }
+</style>
+
+<script>
+document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi en cours...';
+
+    var formData = new FormData(this);
+
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(response) {
+        return response.text().then(function(html) {
+            var isWarning = html.includes('flash-warning') || html.includes("n'a pas pu");
+
+            if (isWarning) {
+                var match = html.match(/Votre image[^<]{0,300}/);
+                document.getElementById('warningMsg').textContent = match ? match[0].trim() : "Votre image n'a pas pu etre publiee. Merci de partager uniquement des photos de voyages.";
+                document.getElementById('warningOverlay').style.display = 'flex';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Partager ma photo';
+            } else {
+                document.getElementById('successOverlay').style.display = 'flex';
+                setTimeout(function() { document.getElementById('overlayProgress').style.width = '100%'; }, 50);
+                setTimeout(function() { window.location.href = "{{ path('app_accueil') }}"; }, 3000);
+            }
+        });
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Partager ma photo';
+        alert('Une erreur est survenue. Veuillez reessayer.');
+    });
+});
+</script>
+
+</body>
+</html>

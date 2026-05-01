@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+{% block title %}Trouve ton activité parfaite – Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/clientActivite.css') }}">
+
+{% endblock %}
+
+{% block body %}
+<div class="match-page">
+{# Add this line at the top of your body block #}
+<div id="match-config" data-url="{{ path('app_client_match_ai') }}"></div>
+
+    <div id="setupView">
+        <div style="font-size:60px; margin-bottom:16px;">🎯</div>
+        <h1 class="setup-title">Trouve ton activité <span>parfaite</span></h1>
+        <p class="setup-subtitle">Choisis tes préférences, puis vote entre deux activités — 5 rounds, un seul gagnant !</p>
+
+        <div class="setup-card">
+            <h3>Personnalise ta recherche</h3>
+
+            <label class="setup-label">🌍 Destination</label>
+            <select class="setup-select" id="setupCountry">
+                <option value="">Toutes les destinations</option>
+                {% for loc in locations %}
+                    <option value="{{ loc }}">{{ loc }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="setup-label">🎨 Catégorie</label>
+            <select class="setup-select" id="setupCat">
+                <option value="">Toutes les catégories</option>
+                <option value="sports">🏃 Sports</option>
+                <option value="culture">🏛 Culture</option>
+                <option value="nature">🌿 Nature</option>
+                <option value="aventure">⛰ Aventure</option>
+                <option value="gastronomie">🍽 Gastronomie</option>
+                <option value="plage">🏖 Plage</option>
+                <option value="visite">🔭 Visites guidées</option>
+            </select>
+
+            <button class="setup-btn" id="startBtn" onclick="startGameWithCountdown()">
+                <i class="fa-solid fa-play"></i> Lancer le tournoi
+            </button>
+        </div>
+    </div>
+
+    <div id="gameView">
+        <div class="game-header">
+            <div class="game-title">⚔️ Qui choisiras-tu ?</div>
+            <div class="round-info">Round <span id="roundNum">1</span> / 5 — Clique sur l'activité qui t'attire le plus</div>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="duel-arena" id="duelArena">
+            <div class="duel-card" id="cardLeft" onclick="choose('left')">
+                <div class="choose-hint">⚡ Je choisis celle-ci !</div>
+            </div>
+            <div class="vs-label">VS</div>
+            <div class="duel-card" id="cardRight" onclick="choose('right')">
+                <div class="choose-hint">⚡ Je choisis celle-ci !</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="resultView">
+        <div style="font-size:60px; margin-bottom:8px;">🏆</div>
+        <h2 class="result-title">Ton activité parfaite !</h2>
+        <p class="result-subtitle">Sur 5 rounds de tournoi, voici celle qui t'a conquis</p>
+
+        <div class="result-card" id="resultCard"></div>
+
+        <div class="result-actions">
+            <a id="resultViewBtn" href="#" class="btn-result-primary">
+                <i class="fa-solid fa-eye"></i> Voir l'activité
+            </a>
+            <button class="btn-result-secondary" onclick="restartGame()">
+                <i class="fa-solid fa-rotate-right"></i> Rejouer
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+window.MATCH_AI_URL = "{{ path('app_client_match_ai') }}";
+const ALL = {{ activites|json_encode|raw }};
+</script>
+
+<script src="{{ asset('js/activite-matchGame.js') }}"></script>
+{% endblock %}

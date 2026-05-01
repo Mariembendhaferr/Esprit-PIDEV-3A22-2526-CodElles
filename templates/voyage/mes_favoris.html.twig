@@ -1,0 +1,370 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Favoris — Doura Mondo{% endblock %}
+
+{% block description %}Retrouvez vos voyages préférés sauvegardés sur Doura Mondo.{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('css/favoris.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+<!-- ══════════════════════════════════════════════
+     HERO — TITRE + POLAROÏDS
+══════════════════════════════════════════════ -->
+<section class="hero-section">
+
+    <!-- Cœurs décoratifs flottants -->
+    <div class="hero-hearts" id="heartsContainer" aria-hidden="true"></div>
+
+    <!-- Texte -->
+    <div class="hero-text-block">
+        <div class="hero-tag">Ma collection privée</div>
+        <h1 class="hero-main-title">
+            Mes Favoris
+            <em>Voyages d'exception</em>
+        </h1>
+        <p class="hero-subtitle-text">
+            Chaque destination ici bat au rythme de votre cœur.
+        </p>
+    </div>
+<!-- Fil avec polaroïds (dynamique avec images différentes) -->
+<div class="wire-container" aria-hidden="true">
+    <div class="polaroids-row">
+        {% for i in 0..4 %}
+            {% set favori = favoris[i] ?? null %}
+            <div class="polaroid-wrap">
+                <div class="pin"></div>
+                <div class="polaroid">
+                    {% if favori %}
+                        {% set voyage = favori.voyage %}
+                        <img src="{{ voyage.imageUrl ?? 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400&q=80' }}" alt="{{ voyage.titre }}">
+                        <div class="polaroid-caption">{{ voyage.titre|slice(0, 20) }}{% if voyage.titre|length > 20 %}...{% endif %}</div>
+                        <div class="polaroid-sub">{{ voyage.destination }} · {{ voyage.continent }}</div>
+                    {% else %}
+                        {# Images par défaut différentes pour chaque position #}
+                        {% if i == 0 %}
+                            <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400&q=80" alt="Venise">
+                            <div class="polaroid-caption">Venise & Dolomites</div>
+                            <div class="polaroid-sub">Italie · Europe</div>
+                        {% elseif i == 1 %}
+                            <img src="https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=400&q=80" alt="Tokyo">
+                            <div class="polaroid-caption">Tokyo & Mont Fuji</div>
+                            <div class="polaroid-sub">Japon · Asie</div>
+                        {% elseif i == 2 %}
+                            <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400&q=80" alt="Kenya">
+                            <div class="polaroid-caption">Safari Kenya</div>
+                            <div class="polaroid-sub">Kenya · Afrique</div>
+                        {% elseif i == 3 %}
+                            <img src="https://images.unsplash.com/photo-1508193638397-1c4234db14d8?w=400&q=80" alt="Patagonie">
+                            <div class="polaroid-caption">Patagonie</div>
+                            <div class="polaroid-sub">Chili · Amériques</div>
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&q=80" alt="Santorin">
+                            <div class="polaroid-caption">Santorin</div>
+                            <div class="polaroid-sub">Grèce · Europe</div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     BARRE DE CONTRÔLE
+══════════════════════════════════════════════ -->
+<div class="control-bar">
+    <div class="control-left">
+
+        <!-- Date d'ajout -->
+        <div class="control-group">
+            <span class="control-group-label"><i class="fas fa-calendar-alt"></i> Date</span>
+            <select class="control-select" id="selectDate" onchange="applySort()" aria-label="Trier par date">
+                <option value="date-asc">Croissant ↑</option>
+                <option value="date-desc" selected>Décroissant ↓</option>
+            </select>
+        </div>
+
+        <div class="control-sep"></div>
+
+        <!-- Budget -->
+        <div class="control-group">
+            <span class="control-group-label"><i class="fas fa-euro-sign"></i> Budget</span>
+            <select class="control-select" id="selectBudget" onchange="applySort()" aria-label="Trier par budget">
+                <option value="">—</option>
+                <option value="budget-asc">Croissant ↑</option>
+                <option value="budget-desc">Décroissant ↓</option>
+            </select>
+        </div>
+
+        <div class="fav-counter-badge" id="counterBadge" title="Nombre de favoris">{{ favoris|length }}</div>
+    </div>
+    <button class="btn-clear" id="btnClearAll" onclick="clearAll()">
+        <i class="fas fa-trash-alt"></i> Tout effacer
+    </button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     GRILLE DES CARTES FAVORIS
+══════════════════════════════════════════════ -->
+<section class="section-cards">
+
+    <!-- État vide -->
+    <div class="empty-state" id="emptyState" {% if favoris is not empty %}style="display:none;"{% endif %}>
+        <div class="empty-icon"><i class="fas fa-heart"></i></div>
+        <h2 class="empty-title">Votre liste est <em>vide</em></h2>
+        <p class="empty-sub">Explorez nos destinations et ajoutez vos voyages préférés</p>
+        <a href="{{ path('app_destinations') }}" class="btn-explorer">Explorer les destinations</a>
+    </div>
+
+    <!-- Grille -->
+    <div class="cards-grid" id="cardsGrid">
+        {% for favori in favoris %}
+            {% set voyage = favori.voyage %}
+            <div class="fav-card visible" 
+                 data-id="{{ voyage.idVoyage }}" 
+                 data-date="{{ loop.index }}" 
+                 data-budget="{{ voyage.budgetEstime }}" 
+                 data-duree="{{ voyage.duree }}">
+                <div class="card-img-wrap">
+                    <img src="{{ voyage.imageUrl ?? 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=700&q=80' }}" alt="{{ voyage.titre }}">
+                    <div class="card-badge-dest">
+                        {{ voyage.titre }}
+                        <small>{{ voyage.destination }} · {{ voyage.continent }}</small>
+                    </div>
+                    <button class="btn-delete" onclick="deleteCard(this, {{ voyage.idVoyage }})" title="Supprimer des favoris" aria-label="Supprimer {{ voyage.titre }} des favoris">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body-lux">
+                    <div class="card-line"></div>
+                    <p class="card-desc">{{ voyage.description|default('Aucune description disponible') }}</p>
+                    <div class="card-infos">
+                        <div class="card-info-row">
+                            <div class="card-info-icon"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <span class="card-info-label">Durée du séjour</span>
+                                <span class="card-info-val">{{ voyage.duree }} jours</span>
+                            </div>
+                        </div>
+                        <div class="card-info-row">
+                            <div class="card-info-icon"><i class="fas fa-users"></i></div>
+                            <div>
+                                <span class="card-info-label">Nombre de personnes</span>
+                                <span class="card-info-val">{{ voyage.nbPersonnes }} personnes</span>
+                            </div>
+                        </div>
+                        <div class="card-info-row">
+                            <div class="card-info-icon"><i class="fas fa-euro-sign"></i></div>
+                            <div>
+                                <span class="card-info-label">Budget estimé</span>
+                                <span class="card-info-val">{{ voyage.budgetEstime|number_format(0, ',', ' ') }} €</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- TOAST -->
+<div class="toast-lux" id="toast">
+    <i class="fas fa-heart"></i>
+    <div class="toast-txt">
+        <strong id="toastTitle">Action</strong>
+        <span id="toastMsg">Message</span>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        /* ══════════════════════════════════════════════
+           DOURA MONDO · MES FAVORIS · JS
+        ══════════════════════════════════════════════ */
+
+        /* ─── Cœurs décoratifs flottants (9 cœurs élégants) ─── */
+        (function createHearts() {
+            const container = document.getElementById('heartsContainer');
+            if (!container) return;
+            const hearts = [
+                { left: 8,  top: 12, size: 16, color: '#8C0000', rot: '-8',  dur: 5.5, delay: 0   },
+                { left: 22, top: 55, size: 13, color: '#8C0000', rot: '12',  dur: 6.2, delay: 1.2 },
+                { left: 42, top: 20, size: 18, color: '#8C0000',  rot: '-5',  dur: 5,   delay: 0.6 },
+                { left: 55, top: 70, size: 11, color: '#8C0000',  rot: '15',  dur: 7,   delay: 2.5 },
+                { left: 70, top: 15, size: 14, color: '#8C0000', rot: '-12', dur: 6,   delay: 1.8 },
+                { left: 85, top: 45, size: 15, color: '#8C0000', rot: '6',   dur: 5.8, delay: 0.3 },
+                { left: 15, top: 78, size: 12, color: '#8C0000', rot: '-10', dur: 6.5, delay: 3   },
+                { left: 92, top: 25, size: 10, color: '#8C0000',  rot: '8',   dur: 7.2, delay: 4   },
+                { left: 50, top: 42, size: 17, color: '#8C0000', rot: '-3',  dur: 5.3, delay: 2   }
+            ];
+            hearts.forEach(h => {
+                const el = document.createElement('div');
+                el.className = 'deco-heart';
+                el.style.cssText = `
+                    left:${h.left}%; top:${h.top}%;
+                    width:${h.size}px; height:${h.size}px;
+                    --dur:${h.dur}s; --delay:${h.delay}s; --rot:${h.rot}deg; --op:${(0.3 + Math.random()*0.15).toFixed(2)};
+                `;
+                el.innerHTML = `<svg viewBox="0 0 24 24" width="${h.size}" height="${h.size}" fill="${h.color}">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                             2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09
+                             C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5
+                             c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>`;
+                container.appendChild(el);
+            });
+        })();
+
+        /* ─── Toast ─── */
+        let toastTimer;
+        function showToast(title, msg) {
+            const t = document.getElementById('toast');
+            if (!t) return;
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMsg').textContent   = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+        }
+
+        /* ─── Compteur ─── */
+        function updateCounter() {
+            const n = document.querySelectorAll('#cardsGrid .fav-card').length;
+            const counter = document.getElementById('counterBadge');
+            if (counter) counter.textContent = n;
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) {
+                if (n === 0) {
+                    emptyState.style.display = 'flex';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+        }
+
+        /* ─── Supprimer une carte (AJAX) ─── */
+        function deleteCard(btn, voyageId) {
+            const card = btn.closest('.fav-card');
+            const nameElem = card.querySelector('.card-badge-dest');
+            let name = '';
+            if (nameElem && nameElem.childNodes[0]) {
+                name = nameElem.childNodes[0].textContent.trim();
+            }
+            card.classList.add('removing');
+            setTimeout(() => {
+                fetch(`/favori/supprimer/${voyageId}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        card.remove();
+                        updateCounter();
+                        showToast('Voyage retiré', `"${name}" a été supprimé de vos favoris.`);
+                        if (document.querySelectorAll('#cardsGrid .fav-card').length === 0) {
+                            location.reload();
+                        }
+                    } else {
+                        showToast('Erreur', data.message);
+                        card.classList.remove('removing');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur', 'Une erreur est survenue');
+                    card.classList.remove('removing');
+                });
+            }, 450);
+        }
+
+        /* ─── Effacer tout (AJAX) ─── */
+        function clearAll() {
+            const cards = Array.from(document.querySelectorAll('#cardsGrid .fav-card'));
+            if (!cards.length) return;
+            
+            const voyageIds = cards.map(card => card.dataset.id);
+            
+            cards.forEach((c, i) => {
+                setTimeout(() => {
+                    c.classList.add('removing');
+                    setTimeout(() => c.remove(), 450);
+                }, i * 90);
+            });
+            
+            setTimeout(() => {
+                Promise.all(voyageIds.map(id => 
+                    fetch(`/favori/supprimer/${id}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                )).then(() => {
+                    updateCounter();
+                    showToast('Collection effacée', 'Tous vos favoris ont été supprimés.');
+                    setTimeout(() => location.reload(), 1000);
+                });
+            }, cards.length * 90 + 500);
+        }
+
+        /* ─── Tri ─── */
+        function applySort() {
+            const dateVal   = document.getElementById('selectDate')?.value;
+            const budgetVal = document.getElementById('selectBudget')?.value;
+
+            const activeSort = budgetVal || dateVal;
+
+            if (budgetVal && document.getElementById('selectDate')) {
+                document.getElementById('selectDate').value = '';
+            }
+
+            const grid  = document.getElementById('cardsGrid');
+            if (!grid) return;
+            const cards = Array.from(grid.querySelectorAll('.fav-card'));
+
+            cards.sort((a, b) => {
+                if (activeSort === 'date-asc')    return Number(a.dataset.date)   - Number(b.dataset.date);
+                if (activeSort === 'date-desc')   return Number(b.dataset.date)   - Number(a.dataset.date);
+                if (activeSort === 'budget-asc')  return Number(a.dataset.budget) - Number(b.dataset.budget);
+                if (activeSort === 'budget-desc') return Number(b.dataset.budget) - Number(a.dataset.budget);
+                return 0;
+            });
+
+            cards.forEach(c => {
+                c.classList.remove('visible');
+                c.style.transition = 'none';
+            });
+
+            cards.forEach((c, i) => {
+                grid.appendChild(c);
+                setTimeout(() => {
+                    c.style.transition = '';
+                    c.classList.add('visible');
+                }, 60 + i * 70);
+            });
+
+            showToast('Tri appliqué', `Les voyages ont été réorganisés.`);
+        }
+
+        /* ─── Apparition au scroll ─── */
+        if (window.IntersectionObserver) {
+            const io = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) e.target.classList.add('visible');
+                });
+            }, { threshold: 0.08 });
+            document.querySelectorAll('.fav-card').forEach(c => io.observe(c));
+        } else {
+            document.querySelectorAll('.fav-card').forEach(c => c.classList.add('visible'));
+        }
+
+        /* ─── Initialisation ─── */
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounter();
+        });
+    </script>
+{% endblock %}

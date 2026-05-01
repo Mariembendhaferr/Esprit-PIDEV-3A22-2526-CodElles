@@ -1,0 +1,361 @@
+<style>
+.modal-partage-luxe {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+}
+.modal-partage-luxe.active { display: block; }
+.modal-partage-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,5,5,0.75);
+    backdrop-filter: blur(4px);
+}
+.modal-partage-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    width: 90%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+    border-top: 3px solid #c9a96e;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+    animation: modalIn 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+@keyframes modalIn {
+    from { opacity:0; transform: translate(-50%,-48%) scale(0.97); }
+    to   { opacity:1; transform: translate(-50%,-50%) scale(1); }
+}
+.modal-partage-close {
+    position: absolute; top:16px; right:16px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    width:36px; height:36px; border-radius:50%;
+    cursor:pointer; color:#fff; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+    transition: all 0.3s; z-index:10;
+}
+.modal-partage-close:hover { background:#c9a96e; color:#1a0f0f; border-color:#c9a96e; transform:rotate(90deg); }
+.modal-partage-header {
+    background: linear-gradient(135deg, #8B2C2C 0%, #6d2020 100%);
+    padding: 40px 32px 32px;
+    text-align:center; color:#fff;
+    position: relative;
+    overflow: hidden;
+}
+.modal-partage-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201,169,110,0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+.modal-partage-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a96e, #c9a96e, transparent);
+}
+.modal-partage-icon {
+    width: 60px; height: 60px;
+    border: 1px solid rgba(201,169,110,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 22px;
+    color: #c9a96e;
+    background: rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+}
+.modal-partage-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 1;
+}
+.modal-partage-title span {
+    color: #c9a96e;
+    font-style: normal;
+}
+.modal-partage-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: rgba(255,255,255,0.75);
+    margin: 0;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+.modal-partage-subtitle::before,
+.modal-partage-subtitle::after {
+    content: '✦';
+    margin: 0 12px;
+    color: #c9a96e;
+    font-size: 12px;
+    font-style: normal;
+}
+.modal-partage-voyage-info {
+    display:flex; gap:16px; padding:20px 24px;
+    border-bottom:1px solid #e8ddd0; background:#fdfaf6;
+}
+.partage-voyage-image {
+    width:72px; height:72px; flex-shrink:0;
+    overflow:hidden; border:1px solid #c9a96e;
+}
+.partage-voyage-image img { width:100%; height:100%; object-fit:cover; }
+.partage-voyage-details { flex:1; }
+.partage-voyage-details h4 {
+    font-family:'Playfair Display',serif; font-size:16px;
+    font-weight:700; color:#1a0f0f; margin:0 0 6px; font-style:italic;
+}
+.partage-voyage-details p {
+    font-family:'Cormorant Garamond',serif; font-size:14px;
+    color:#8a6a58; margin:2px 0;
+}
+.partage-voyage-details p i { color:#8B2C2C; margin-right:5px; }
+.modal-partage-lien { padding:20px 24px; border-bottom:1px solid #e8ddd0; }
+.partage-lien-label {
+    font-family:'Cinzel',serif; font-size:8px; letter-spacing:4px;
+    text-transform:uppercase; color:#8B2C2C; display:block; margin-bottom:10px;
+}
+.partage-lien-label i { color:#c9a96e; margin-right:6px; }
+.partage-lien-copy { display:flex; gap:8px; }
+.partage-lien-copy input {
+    flex:1; border:1px solid #e8ddd0; padding:10px 14px;
+    font-family:'Cormorant Garamond',serif; font-size:13px;
+    color:#5a4535; background:#fdfaf6; outline:none;
+}
+.partage-lien-copy input:focus { border-color:#c9a96e; }
+.btn-copy-lien {
+    padding:10px 16px; background:#8B2C2C; color:#fff; border:none;
+    font-family:'Cinzel',serif; font-size:8px; letter-spacing:2px;
+    text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:background 0.3s;
+}
+.btn-copy-lien:hover { background:#c9a96e; color:#1a0f0f; }
+.modal-partage-qr {
+    padding:20px 24px; border-bottom:1px solid #e8ddd0;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    background:#fdfaf6;
+}
+.qr-label {
+    font-family:'Cinzel',serif; font-size:8px; letter-spacing:4px;
+    text-transform:uppercase; color:#8B2C2C;
+}
+.qr-label i { color:#c9a96e; margin-right:6px; }
+#qrCodeContainer {
+    padding:10px;
+    border:1px solid #e8ddd0;
+    background:#fff;
+    display:inline-block;
+    transition: all 0.3s ease;
+}
+#qrCodeContainer:hover {
+    border-color: #c9a96e;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+#qrCodeContainer img { display:block; }
+.modal-partage-reseaux { padding:20px 24px; border-bottom:1px solid #e8ddd0; }
+.reseaux-label {
+    font-family:'Cinzel',serif; font-size:8px; letter-spacing:4px;
+    text-transform:uppercase; color:#8B2C2C; display:block; margin-bottom:14px;
+    text-align:center;
+}
+.reseaux-icons { display:flex; justify-content:center; gap:12px; }
+.reseaux-icon {
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; color:#fff; text-decoration:none;
+    transition:transform 0.3s, opacity 0.3s;
+}
+.reseaux-icon:hover { transform:translateY(-3px); opacity:0.85; }
+.reseaux-icon.facebook  { background:#1877F2; }
+.reseaux-icon.whatsapp  { background:#25D366; }
+.reseaux-icon.twitter   { background:#000; }
+.reseaux-icon.linkedin  { background:#0A66C2; }
+.modal-partage-footer { padding:16px 24px; }
+.btn-partage-email {
+    width:100%; padding:14px; background:transparent;
+    border:1px solid #8B2C2C; color:#8B2C2C;
+    font-family:'Cinzel',serif; font-size:8px; letter-spacing:3px;
+    text-transform:uppercase; cursor:pointer; transition:all 0.3s;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.btn-partage-email:hover { background:#8B2C2C; color:#fff; }
+</style>
+
+<div id="modalPartage" class="modal-partage-luxe">
+    <div class="modal-partage-overlay" onclick="fermerModalPartage()"></div>
+    <div class="modal-partage-container">
+        <button class="modal-partage-close" onclick="fermerModalPartage()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        {# HEADER AMÉLIORÉ AVEC NOUVEAU TITRE ÉLÉGANT #}
+        <div class="modal-partage-header">
+            <div class="modal-partage-icon">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3 class="modal-partage-title">
+    <span style="color: #fff;">Partagez</span> <span style="color: #c9a96e;">nos idées</span>
+</h3>
+            <p class="modal-partage-subtitle">
+                avec vos amis et proches
+            </p>
+        </div>
+        
+        <div class="modal-partage-voyage-info">
+            <div class="partage-voyage-image">
+                <img id="modalVoyageImage" src="" alt="">
+            </div>
+            <div class="partage-voyage-details">
+                <h4 id="modalVoyageTitre">Chargement...</h4>
+                <p id="modalVoyageDestination"><i class="fas fa-map-marker-alt"></i> Chargement...</p>
+                <p id="modalVoyagePrix"><i class="fas fa-tag"></i> Chargement...</p>
+            </div>
+        </div>
+        <div class="modal-partage-lien">
+            <label class="partage-lien-label"><i class="fas fa-link"></i> Lien du voyage</label>
+            <div class="partage-lien-copy">
+                <input type="text" id="lienPartage" value="" readonly>
+                <button class="btn-copy-lien" onclick="copierLien()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+        <div class="modal-partage-qr">
+            <span class="qr-label"><i class="fas fa-qrcode"></i> Scanner pour partager</span>
+            <div id="qrCodeContainer"></div>
+        </div>
+        <div class="modal-partage-reseaux">
+            <span class="reseaux-label">Partager sur :</span>
+            <div class="reseaux-icons">
+                <a href="#" id="facebookShareBtn" target="_blank" class="reseaux-icon facebook" rel="noopener noreferrer">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" id="whatsappShareBtn" target="_blank" class="reseaux-icon whatsapp" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a href="#" id="twitterShareBtn" target="_blank" class="reseaux-icon twitter" rel="noopener noreferrer">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" id="linkedinShareBtn" target="_blank" class="reseaux-icon linkedin" rel="noopener noreferrer">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+            </div>
+        </div>
+        <div class="modal-partage-footer">
+            <button class="btn-partage-email" onclick="partagerParEmail()">
+                <i class="fas fa-envelope"></i> Partager par email
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentVoyageData = null;
+
+async function ouvrirModalPartage(voyageId) {
+    const modal = document.getElementById('modalPartage');
+    if (!modal) return;
+
+    modal.style.display = 'block';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('modalVoyageTitre').textContent = 'Chargement...';
+    document.getElementById('modalVoyageDestination').innerHTML = '<i class="fas fa-map-marker-alt"></i> Chargement...';
+    document.getElementById('modalVoyagePrix').innerHTML = '<i class="fas fa-tag"></i> Chargement...';
+    document.getElementById('lienPartage').value = '';
+    document.getElementById('qrCodeContainer').innerHTML = '';
+
+    try {
+        const response = await fetch(`/api/partage/${voyageId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            document.getElementById('modalVoyageTitre').textContent = 'Erreur : ' + (data.error || 'inconnue');
+            return;
+        }
+
+        currentVoyageData = data;
+
+        document.getElementById('modalVoyageImage').src = data.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=100&q=80';
+        document.getElementById('modalVoyageImage').alt = data.titre;
+        document.getElementById('modalVoyageTitre').textContent = data.titre;
+        document.getElementById('modalVoyageDestination').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.destination}, ${data.continent}`;
+
+        const prix = parseFloat(data.prix) || 0;
+        document.getElementById('modalVoyagePrix').innerHTML = `<i class="fas fa-tag"></i> À partir de ${prix.toLocaleString('fr-TN')} DT / pers.`;
+
+        document.getElementById('lienPartage').value = data.url;
+
+        if (data.qrCodeDataUri) {
+            const img = document.createElement('img');
+            img.src = data.qrCodeDataUri;
+            img.style.width = '150px';
+            img.style.height = '150px';
+            document.getElementById('qrCodeContainer').appendChild(img);
+        }
+
+        document.getElementById('facebookShareBtn').href = data.facebookShareUrl;
+        document.getElementById('whatsappShareBtn').href = data.whatsappShareUrl;
+        document.getElementById('twitterShareBtn').href = data.twitterShareUrl;
+        document.getElementById('linkedinShareBtn').href = data.linkedinShareUrl;
+
+    } catch (error) {
+        console.error('Erreur chargement partage:', error);
+        document.getElementById('modalVoyageTitre').textContent = 'Erreur de chargement';
+        document.getElementById('modalVoyageDestination').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + error.message;
+    }
+}
+
+function fermerModalPartage() {
+    const modal = document.getElementById('modalPartage');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        currentVoyageData = null;
+    }
+}
+
+function copierLien() {
+    const input = document.getElementById('lienPartage');
+    if (!input || !input.value) return;
+    navigator.clipboard.writeText(input.value).catch(() => {
+        input.select();
+        document.execCommand('copy');
+    });
+    const btn = document.querySelector('.btn-copy-lien');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+    btn.style.background = '#c9a96e';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+}
+
+function partagerParEmail() {
+    if (!currentVoyageData) return;
+    const sujet = encodeURIComponent(currentVoyageData.mailSubject);
+    const corps = encodeURIComponent(currentVoyageData.mailBody);
+    window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fermerModalPartage();
+});
+</script>

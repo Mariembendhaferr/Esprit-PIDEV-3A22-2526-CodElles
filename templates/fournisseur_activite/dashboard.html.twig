@@ -1,0 +1,194 @@
+{% extends 'admin/base-admin.html.twig' %}
+{% block title %}Dashboard – {{ fournisseur.nomFournisseur }}{% endblock %}
+
+{% block admin_content %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ fournisseur.nomFournisseur }}</h1>
+        <p>
+            {% if fournisseur.specialiteFournisseur %}
+                <span class="pill pill-spec">{{ fournisseur.specialiteFournisseur }}</span>
+            {% endif %}
+        </p>
+    </div>
+    <div class="page-header-right">
+        <a href="{{ path('app_fournisseur_activite_index') }}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+<div class="gold-line"></div>
+
+{# ── Stat Cards ── #}
+<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
+
+    <div style="background:linear-gradient(135deg,#8B0000,#C0392B); color:white; border-radius:14px; padding:20px; position:relative; overflow:hidden; box-shadow:0 4px 16px rgba(139,0,0,0.3);">
+        <i class="fa-solid fa-map-location-dot" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:40px; opacity:0.2;"></i>
+        <div style="font-size:32px; font-weight:800;">{{ stats.totalActivites }}</div>
+        <div style="font-size:12px; opacity:0.85; margin-top:4px;">Activités totales</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1B5E20,#43A047); color:white; border-radius:14px; padding:20px; position:relative; overflow:hidden; box-shadow:0 4px 16px rgba(27,94,32,0.3);">
+        <i class="fa-solid fa-circle-check" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:40px; opacity:0.2;"></i>
+        <div style="font-size:32px; font-weight:800;">{{ stats.activitesAcceptees }}</div>
+        <div style="font-size:12px; opacity:0.85; margin-top:4px;">Activités acceptées</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#C9A84C,#E67E22); color:white; border-radius:14px; padding:20px; position:relative; overflow:hidden; box-shadow:0 4px 16px rgba(201,168,76,0.3);">
+        <i class="fa-solid fa-coins" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:40px; opacity:0.2;"></i>
+        <div style="font-size:32px; font-weight:800;">{{ stats.revenuTotal|number_format(0,'.',',') }} DT</div>
+        <div style="font-size:12px; opacity:0.85; margin-top:4px;">Revenu potentiel</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#4A148C,#7B1FA2); color:white; border-radius:14px; padding:20px; position:relative; overflow:hidden; box-shadow:0 4px 16px rgba(74,20,140,0.3);">
+        <i class="fa-solid fa-clock" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:40px; opacity:0.2;"></i>
+        <div style="font-size:32px; font-weight:800;">{{ stats.dureeMoyenne|round }}</div>
+        <div style="font-size:12px; opacity:0.85; margin-top:4px;">Durée moy. (min)</div>
+    </div>
+
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    {# ── Infos fournisseur ── #}
+    <div>
+        <div style="background:white; border-radius:16px; box-shadow:0 4px 24px rgba(139,0,0,0.07); overflow:hidden;">
+            <div style="background:linear-gradient(135deg,#3D0000,#8B0000); padding:14px 20px; color:white; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-building"></i> Profil Fournisseur
+            </div>
+            <div style="padding:20px;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #F5EDEA;">
+                        <td style="padding:10px 0; color:#999; font-size:11px; font-weight:700; text-transform:uppercase; width:130px;">Email</td>
+                        <td style="padding:10px 0; font-size:13px;"><i class="fa-solid fa-envelope" style="color:#C9A84C; margin-right:6px;"></i>{{ fournisseur.emailFournisseur }}</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #F5EDEA;">
+                        <td style="padding:10px 0; color:#999; font-size:11px; font-weight:700; text-transform:uppercase;">Téléphone</td>
+                        <td style="padding:10px 0; font-size:13px;"><i class="fa-solid fa-phone" style="color:#C9A84C; margin-right:6px;"></i>{{ fournisseur.telephoneFournisseur }}</td>
+                    </tr>
+                    {% if fournisseur.adresseFournisseur %}
+                    <tr style="border-bottom:1px solid #F5EDEA;">
+                        <td style="padding:10px 0; color:#999; font-size:11px; font-weight:700; text-transform:uppercase;">Adresse</td>
+                        <td style="padding:10px 0; font-size:13px;"><i class="fa-solid fa-location-dot" style="color:#8B0000; margin-right:6px;"></i>{{ fournisseur.adresseFournisseur }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if fournisseur.websiteFournisseur %}
+                    <tr>
+                        <td style="padding:10px 0; color:#999; font-size:11px; font-weight:700; text-transform:uppercase;">Site Web</td>
+                        <td style="padding:10px 0; font-size:13px;">
+                            <a href="{{ fournisseur.websiteFournisseur }}" target="_blank" class="link-website">
+                                <i class="fa-solid fa-globe"></i> Visiter
+                            </a>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {# ── Graphique par catégorie ── #}
+        <div style="background:white; border-radius:16px; box-shadow:0 4px 24px rgba(139,0,0,0.07); overflow:hidden; margin-top:20px;">
+            <div style="background:linear-gradient(135deg,#3D0000,#8B0000); padding:14px 20px; color:white; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-chart-pie"></i> Activités par catégorie
+            </div>
+            <div style="padding:20px;">
+                <canvas id="catChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ── Liste des activités ── #}
+    <div>
+        <div style="background:white; border-radius:16px; box-shadow:0 4px 24px rgba(139,0,0,0.07); overflow:hidden;">
+            <div style="background:linear-gradient(135deg,#3D0000,#8B0000); padding:14px 20px; color:white; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-list"></i> Activités assignées
+            </div>
+            <div style="max-height:460px; overflow-y:auto;">
+                {% if fournisseur.activites is not empty %}
+                    {% for a in fournisseur.activites %}
+                        <div style="padding:14px 20px; border-bottom:1px solid #F8F0EC; display:flex; align-items:center; justify-content:space-between; transition:background 0.15s;"
+                             onmouseover="this.style.background='#FDF6F0'" onmouseout="this.style.background='white'">
+                            <div>
+                                <a href="{{ path('app_client_activity_show', {'id': a.id}) }}"
+                                   style="font-weight:700; color:#2A1010; font-size:14px; text-decoration:none;">
+                                    {{ a.nomActivite }}
+                                </a>
+                                <p style="margin:3px 0 0; font-size:12px; color:#999;">
+                                    <span class="pill pill-cat" style="font-size:10px;">{{ a.categorieActivite }}</span>
+                                    &nbsp;⏱ {{ a.dureeActivite }} min
+                                </p>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:800; color:#8B0000; font-size:14px;">{{ a.coutActivite }} DT</div>
+                                <div style="margin-top:4px;">
+                                    {% if a.statutActivite == 'acceptee' %}
+                                        <span class="pill pill-dispo" style="font-size:10px;">✓ Acceptée</span>
+                                    {% elseif a.statutActivite == 'refusee' %}
+                                        <span class="pill pill-indispo" style="font-size:10px;">✗ Refusée</span>
+                                    {% else %}
+                                        <span class="pill" style="background:#FFF8E1;color:#F57F17;border:1px solid #FFE082;font-size:10px;">En attente</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty" style="padding:40px;">
+                        <i class="fa-solid fa-inbox"></i>
+                        <p>Aucune activité assignée</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ── Dernière activité ── #}
+        {% if stats.derniereActivite %}
+        <div style="background:white; border-radius:16px; box-shadow:0 4px 24px rgba(139,0,0,0.07); overflow:hidden; margin-top:20px;">
+            <div style="background:linear-gradient(135deg,#C9A84C,#E67E22); padding:14px 20px; color:white; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-star"></i> Dernière activité ajoutée
+            </div>
+            <div style="padding:20px; display:flex; align-items:center; gap:14px;">
+                <div style="width:48px; height:48px; background:linear-gradient(135deg,#8B0000,#C0392B); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="fa-solid fa-map-location-dot" style="color:white; font-size:20px;"></i>
+                </div>
+                <div>
+                    <a href="{{ path('app_client_activity_show', {'id': stats.derniereActivite.id}) }}"
+                       style="font-weight:700; color:#2A1010; font-size:15px; text-decoration:none;">
+                        {{ stats.derniereActivite.nomActivite }}
+                    </a>
+                    <p style="margin:4px 0 0; font-size:13px; color:#8B0000; font-weight:700;">{{ stats.derniereActivite.coutActivite }} DT</p>
+                    <p style="margin:2px 0 0; font-size:12px; color:#999;">📍 {{ stats.derniereActivite.localisationActivite ?? '—' }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const catData = {{ stats.parCategorie|json_encode|raw }};
+const labels  = Object.keys(catData);
+const values  = Object.values(catData);
+
+new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+        labels,
+        datasets: [{
+            data: values,
+            backgroundColor: ['#8B0000','#C0392B','#C9A84C','#E67E22','#1B5E20','#4A148C','#0D47A1','#37474F'],
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
+    }
+});
+</script>
+
+{% endblock %}

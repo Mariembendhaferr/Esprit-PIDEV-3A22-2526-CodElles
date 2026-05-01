@@ -1,0 +1,1585 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Doura Mondo — {{ voyage.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --rouge: #8B2C2C;
+            --or: #c9a96e;
+            --noir: #1a0f0f;
+            --creme: #faf7f2;
+        }
+
+
+
+        /* =============================================
+           HERO FULLSCREEN EXACT MATCH (IMAGE)
+        ============================================= */
+        
+        .hero-fullscreen {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            min-height: 700px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        html { scroll-behavior: smooth; }
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, rgba(10,5,5,0.75) 0%, rgba(10,5,5,0.35) 55%, rgba(0,0,0,0.05) 100%);
+            z-index: 1;
+        }
+
+        .hero-layout {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 50px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 60px;
+        }
+
+        /* --- Text du Titre --- */
+        .hero-text {
+            max-width: 500px;
+        }
+        /* Google Fonts import */
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+        .hero-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--or);
+            margin-bottom: 18px;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.3s forwards;
+            letter-spacing: 7px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .hero-eyebrow::before,
+        .hero-eyebrow::after {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--or));
+        }
+        .hero-eyebrow::after {
+            background: linear-gradient(90deg, var(--or), transparent);
+        }
+        .hero-main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(44px, 5.5vw, 88px);
+            font-weight: 700;
+            font-style: italic;
+            color: #fff;
+            line-height: 1.05;
+            margin: 0 0 28px 0;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.5s forwards;
+            letter-spacing: -0.5px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.4);
+        }
+        .hero-main-title .title-accent {
+            color: var(--or);
+            font-style: normal;
+            font-family: 'Cinzel', serif;
+            font-size: 0.55em;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 6px;
+            text-shadow: none;
+        }
+        .hero-desc {
+            display: none; /* removed per redesign */
+        }
+        /* ── Luxury Explore Button ── */
+        .btn-explore {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            background: transparent;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 0;
+            border: none;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.9s forwards;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        .btn-explore .btn-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 40px;
+            border: 1px solid rgba(201,169,110,0.6);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .btn-explore .btn-inner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--or), #b8923a);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .btn-explore:hover .btn-inner {
+            border-color: var(--or);
+            color: var(--noir);
+            letter-spacing: 7px;
+        }
+        .btn-explore:hover .btn-inner::before {
+            opacity: 1;
+        }
+        .btn-explore .btn-inner span {
+            position: relative;
+            z-index: 1;
+        }
+        .btn-explore .btn-inner i {
+            position: relative;
+            z-index: 1;
+            font-size: 12px;
+            transition: transform 0.4s ease;
+        }
+        .btn-explore:hover .btn-inner i {
+            transform: translateY(4px);
+        }
+        /* Gold diamond ornament beside button */
+        .btn-explore-wrap {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.9s forwards;
+        }
+        .btn-ornament {
+            font-size: 10px;
+            color: var(--or);
+            opacity: 0.7;
+        }
+
+        /* --- 3 Cards Alignées LUXURY VERSION --- */
+        .hero-cards-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeUp 1s 0.6s forwards;
+            gap: 24px;
+        }
+        .cards-track {
+            display: flex;
+            gap: 14px;
+        }
+        .slide-card {
+            width: 160px;
+            height: 260px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.5s ease;
+            border: 1px solid rgba(201,169,110,0.2);
+        }
+        /* Middle card pops up */
+        .slide-card:nth-child(2) {
+            transform: translateY(-16px);
+            border-color: rgba(201,169,110,0.5);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.3);
+        }
+        .slide-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .slide-card:nth-child(2):hover {
+            transform: translateY(-22px);
+        }
+        .slide-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s ease;
+        }
+        .slide-card:hover img {
+            transform: scale(1.08);
+        }
+        /* Colored overlay per-card like image 2 */
+        .slide-card .card-overlay {
+            position: absolute;
+            inset: 0;
+            opacity: 0.45;
+            transition: opacity 0.4s ease;
+        }
+        .slide-card:hover .card-overlay {
+            opacity: 0.25;
+        }
+        .slide-card:nth-child(1) .card-overlay { background: #1a6b8a; }
+        .slide-card:nth-child(2) .card-overlay { background: #c9a96e; }
+        .slide-card:nth-child(3) .card-overlay { background: #6b3a8a; }
+        /* Icon + Label block like image 2 */
+        .slide-card .card-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 2;
+        }
+        .slide-card .card-icon {
+            font-size: 22px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.5);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+        }
+        .slide-card .card-label {
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            line-height: 1.5;
+        }
+        .slide-card .card-sublabel {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            font-style: italic;
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            margin-top: 6px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        .slider-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 11px;
+        }
+        .slider-btn:hover {
+            background: rgba(201,169,110,0.3);
+            border-color: var(--or);
+        }
+
+        /* =============================================
+           SECTION INFOS + DOURA MONDO — CLAIR & ÉLÉGANT
+        ============================================= */
+        .below-hero {
+            background: #fff;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-top: 1px solid #e8ddd0;
+        }
+
+        /* Gauche : Doura Mondo — fond BLANC */
+        .doura-mondo-side {
+            background: #ffffff;
+            padding: 72px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid #e8ddd0;
+            position: relative;
+        }
+        .doura-mondo-side::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 15%; bottom: 15%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--or), transparent);
+        }
+
+        /* Droite : Infos voyage — fond BLANC redesigné */
+        .voyage-info-card {
+            background: #ffffff;
+            padding: 56px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            overflow: hidden;
+        }
+        .voyage-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--rouge), var(--or), var(--rouge));
+        }
+
+        /* ── Doura Mondo text ── */
+        .dm-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--or);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .dm-eyebrow::before { content:''; width:28px; height:1px; background: var(--or); }
+        .dm-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--noir);
+            line-height: 1.25;
+            margin-bottom: 0;
+        }
+        .dm-title span { color: var(--rouge); }
+        .dm-divider {
+            width: 48px;
+            height: 1px;
+            background: linear-gradient(90deg, var(--or), transparent);
+            margin: 24px 0 28px;
+        }
+        .dm-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 19px;
+            color: #6b5040;
+            line-height: 1.95;
+            margin-bottom: 36px;
+        }
+        .dm-values { display: flex; flex-direction: column; gap: 22px; }
+        .dm-value-item { display: flex; align-items: flex-start; gap: 18px; }
+        .dm-value-icon {
+            width: 42px; height: 42px;
+            flex-shrink: 0;
+            border: 1px solid var(--or);
+            display: flex; align-items: center; justify-content: center;
+            background: #fff;
+        }
+        .dm-value-icon i { color: var(--or); font-size: 15px; }
+        .dm-value-title {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--noir);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .dm-value-desc { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: #8a6a58; line-height: 1.65; }
+
+        /* ── Voyage Info card — nouveau design élégant ── */
+        .vic-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--rouge);
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 7px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        .vic-header-badge i { font-size: 10px; color: var(--or); }
+        .vic-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--rouge);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .vic-eyebrow::before { content:''; width:28px; height:1px; background: var(--rouge); }
+        .vic-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--noir);
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+        .vic-dest {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-style: italic;
+            color: #a08060;
+            margin-bottom: 20px;
+        }
+        .vic-divider { width:48px; height:2px; background: var(--rouge); margin-bottom:24px; }
+
+        /* Description voyage */
+        .vic-description {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            color: #5a4535;
+            line-height: 1.85;
+            margin-bottom: 28px;
+            padding: 18px 22px;
+            border-left: 3px solid var(--or);
+            background: #fdfaf6;
+            font-style: italic;
+        }
+
+        /* Stats row */
+        .vic-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .vic-stat-box {
+            background: #fdfaf6;
+            border: 1px solid #e8ddd0;
+            padding: 18px 20px;
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+        .vic-stat-box:hover { border-color: var(--or); }
+        .vic-stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--rouge);
+        }
+        .vic-item {
+            padding: 20px 24px;
+            background: rgba(255,255,255,0.55);
+            border: 1.5px solid var(--rouge);
+        }
+        .vic-item:nth-child(2) { border-left: none; }
+        .vic-stat-label {
+            font-family: 'Cinzel', serif;
+            font-size: 7px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #9B7240;
+            margin-bottom: 6px;
+        }
+        .vic-stat-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--noir);
+            font-style: italic;
+        }
+        .vic-stat-val small { font-size: 13px; color: var(--or); font-style: normal; font-family: 'Cinzel', serif; }
+        .vic-item-label {
+            font-family: 'Cinzel', serif;
+            font-size: 7px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--rouge);
+            opacity: 0.7;
+            margin-bottom: 6px;
+        }
+        .vic-item-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--rouge);
+            font-style: italic;
+        }
+        .vic-item-val small { font-size: 14px; color: var(--or); font-style: normal; font-family: 'Cinzel', serif; }
+        .vic-price-row {
+            padding: 22px 24px;
+            background: var(--rouge);
+            border: none;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .vic-price-row::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(201,169,110,0.15);
+            transform: translate(30%, 30%);
+        }
+        .vic-price-label {
+            font-family: 'Cinzel', serif;
+            font-size: 7px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.65);
+            margin-bottom: 8px;
+        }
+        .vic-price-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 52px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+        }
+        .vic-price-amount small { font-size: 24px; color: var(--or); }
+        .vic-price-note {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            font-style: italic;
+            color: rgba(255,255,255,0.55);
+            margin-top: 6px;
+        }
+        /* Lien "À propos du prix" */
+        .vic-price-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-style: italic;
+            color: var(--rouge);
+            text-decoration: none;
+            margin-bottom: 16px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            border-bottom: 1px solid rgba(139,44,44,0.25);
+            padding-bottom: 2px;
+            width: fit-content;
+        }
+        .vic-price-link:hover { opacity: 1; border-bottom-color: var(--rouge); }
+        .vic-price-link i { font-size: 11px; }
+
+        /* Boutons action row */
+        .vic-actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn-reserver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 18px 32px;
+            background: var(--rouge);
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.35s ease;
+            cursor: pointer;
+            border: 1px solid var(--rouge);
+        }
+        .btn-reserver:hover {
+            background: transparent;
+            color: var(--rouge);
+            border-color: var(--rouge);
+        }
+        .btn-partager {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px 22px;
+            background: transparent;
+            color: var(--or);
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.35s ease;
+            cursor: pointer;
+            border: 1px solid var(--or);
+            white-space: nowrap;
+        }
+        .btn-partager:hover {
+            background: var(--or);
+            color: #fff;
+        }
+        .btn-partager i { font-size: 12px; }
+
+        /* =============================================
+           BANDEAU ENGAGEMENT — raffiné sur crème
+        ============================================= */
+        .engagement-strip {
+            background: #ffffff;
+            padding: 22px 60px;
+            overflow: hidden;
+            position: relative;
+            border-top: 1px solid #e8ddd0;
+            border-bottom: 1px solid #e8ddd0;
+        }
+        .engagement-strip::before {
+            content:'';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--or), transparent);
+        }
+        .engagement-quotes {
+            display: flex;
+            gap: 60px;
+            white-space: nowrap;
+            animation: marquee 30s linear infinite;
+        }
+        .eq-line {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-style: italic;
+            color: #7a5a40;
+            flex-shrink: 0;
+        }
+        .eq-line::before { content: '✦'; color: var(--or); margin-right: 20px; font-style: normal; font-size: 10px; }
+        @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* =============================================
+           SERVICES CARDS — fond blanc, cartes rouge bordeaux
+        ============================================= */
+        .services-section {
+            background: #fff;
+            padding: 96px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .services-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 1px; height: 60px;
+            background: linear-gradient(to bottom, var(--or), transparent);
+        }
+        .services-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--or);
+            text-align: center;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            position: relative; z-index: 1;
+        }
+        .services-eyebrow::before,
+        .services-eyebrow::after { content: ''; width: 40px; height: 0.5px; background: var(--or); opacity: 0.7; }
+        .services-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 40px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--noir);
+            text-align: center;
+            margin-bottom: 64px;
+            position: relative; z-index: 1;
+        }
+        .services-title span { color: var(--rouge); }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative; z-index: 1;
+        }
+        /* Cartes : fond rouge bordeaux */
+        .service-card {
+            background: var(--rouge);
+            border: 1px solid rgba(201,169,110,0.2);
+            padding: 44px 32px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.45s cubic-bezier(0.25,0.46,0.45,0.94);
+            cursor: default;
+        }
+        /* Lueur dorée qui monte du bas au hover */
+        .service-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--or), transparent);
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+        }
+        .service-card:hover::after { transform: scaleX(1); }
+        /* Lueur de fond radiale au hover */
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 90%, rgba(201,169,110,0.14) 0%, transparent 65%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .service-card:hover::before { opacity: 1; }
+        .service-card:hover {
+            background: #7a2020;
+            border-color: rgba(201,169,110,0.5);
+            transform: translateY(-6px);
+            box-shadow: 0 28px 60px rgba(139,44,44,0.35);
+        }
+        .service-icon-wrap {
+            width: 58px; height: 58px;
+            border: 1px solid rgba(201,169,110,0.4);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 28px;
+            background: transparent;
+            transition: all 0.45s ease;
+        }
+        .service-card:hover .service-icon-wrap {
+            border-color: var(--or);
+            background: rgba(201,169,110,0.15);
+            transform: rotate(3deg) scale(1.05);
+        }
+        .service-icon-wrap i {
+            font-size: 22px;
+            color: var(--or);
+            transition: transform 0.45s ease;
+        }
+        .service-card:hover .service-icon-wrap i { transform: rotate(-3deg); }
+        .service-num {
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 3px;
+            color: rgba(201,169,110,0.7);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: block;
+            transition: color 0.3s ease;
+        }
+        .service-card:hover .service-num { color: var(--or); }
+        .service-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            font-style: italic;
+            color: #fff;
+            margin-bottom: 14px;
+        }
+        .service-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.75;
+            transition: color 0.3s ease;
+        }
+        .service-card:hover .service-desc { color: rgba(255,255,255,0.85); }
+        .service-divider {
+            width: 28px; height: 1px;
+            background: linear-gradient(90deg, rgba(201,169,110,0.5), transparent);
+            margin: 16px 0;
+            transition: width 0.4s ease;
+        }
+        .service-card:hover .service-divider { width: 48px; }
+
+        /* =============================================
+           PLAN JOURNALIER — titre rouge, colonnes hauteur égale
+        ============================================= */
+        .plan-section {
+            background: #ffffff;
+            padding: 96px 0 0 0;
+        }
+        .plan-header {
+            text-align: center;
+            margin-bottom: 64px;
+            padding: 0 40px;
+            position: relative;
+        }
+        .plan-header::before {
+            content: '';
+            position: absolute;
+            left: 50%; transform: translateX(-50%);
+            width: 1px; height: 40px;
+            background: linear-gradient(to bottom, var(--or), transparent);
+            top: -40px;
+        }
+        .plan-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--or);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .plan-eyebrow::before,
+        .plan-eyebrow::after { content: ''; width: 36px; height: 0.5px; background: var(--or); }
+        .plan-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 44px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--rouge);
+            margin-bottom: 12px;
+        }
+        .plan-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            color: #9B7240;
+            font-style: italic;
+        }
+
+        /* ── Grid plan : 3 colonnes à HAUTEUR FIXE ET ÉGALE ── */
+        .plan-grid {
+            display: grid;
+            grid-template-columns: 220px 460px 1fr;
+            gap: 0;
+            height: 620px;        /* hauteur fixe unique pour les 3 */
+            width: 100%;
+            overflow: hidden;     /* empêche tout débordement */
+            box-shadow: 0 -1px 0 #e8ddd0;
+        }
+
+        /* Colonne jours — ROUGE BORDEAUX */
+        .days-list {
+            background: var(--rouge);
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .days-list::-webkit-scrollbar { width: 3px; }
+        .days-list::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.5); }
+        .day-btn {
+            background: transparent;
+            border: none;
+            border-left: 2px solid transparent;
+            padding: 18px 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+        .day-btn:hover { background: rgba(0,0,0,0.1); border-left-color: rgba(201,169,110,0.5); }
+        .day-btn.active { background: rgba(0,0,0,0.18); border-left-color: var(--or); }
+        .day-num-circle {
+            width: 36px; height: 36px;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .day-btn.active .day-num-circle {
+            border-color: var(--or);
+            color: var(--or);
+            background: rgba(201,169,110,0.15);
+        }
+        .day-btn-label { display: flex; flex-direction: column; gap: 3px; }
+        .day-btn-title {
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+        .day-btn.active .day-btn-title { color: var(--or); }
+        .day-btn-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-style: italic;
+        }
+
+        /* Panel activité — hauteur 100%, sans overflow qui s'étire */
+        .day-panels-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #fff;
+            border-right: 1px solid #e8ddd0;
+            overflow: hidden;      /* CRITIQUE : bloque l'étirement */
+        }
+        .day-panel {
+            display: none;
+            flex-direction: column;
+            height: 100%;          /* exactement la hauteur du container */
+            overflow: hidden;
+        }
+        .day-panel.active { display: flex; }
+
+        /* Photo : hauteur fixe, ne grandit pas */
+        .day-photo {
+            position: relative;
+            height: 260px;
+            flex-shrink: 0;        /* ne se compresse pas */
+            overflow: hidden;
+        }
+        .day-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+        .day-panel:hover .day-photo img { transform: scale(1.04); }
+        .day-photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.52) 100%);
+        }
+        .day-photo-name {
+            position: absolute;
+            bottom: 22px; left: 28px;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.95);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+        .day-photo-name::after {
+            content: '';
+            display: block;
+            width: 28px; height: 1px;
+            background: var(--or);
+            margin-top: 6px;
+        }
+
+        /* Corps de l'activité : prend le reste, scroll interne si besoin */
+        .day-body {
+            background: #fff;
+            padding: 28px 32px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;      /* scroll interne uniquement */
+            min-height: 0;         /* CRITIQUE pour que flex fonctionne */
+        }
+        .day-title-blk {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--rouge);
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+        .day-activite-name {
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--or);
+            margin-bottom: 10px;
+        }
+        .day-activite-divider {
+            width: 32px; height: 1px;
+            background: linear-gradient(90deg, var(--or), transparent);
+            margin: 0 0 16px;
+        }
+        .day-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: #6b5040;
+            line-height: 1.85;
+        }
+
+        /* Carte — même hauteur que les autres colonnes */
+        .map-col {
+            background: #f0ece6;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #trip-map { width: 100%; height: 100%; position: absolute; inset: 0; }
+
+        @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+        
+        /* =============================================
+           RESPONSIVE
+        ============================================= */
+        @media (max-width:1100px) {
+            .hero-cards-side { display: none; }
+            .hero-text { left: 5%; right: 5%; text-align: center; max-width: none; }
+            .hero-eyebrow { justify-content: center; }
+            .below-hero { grid-template-columns:1fr; }
+            .services-grid { grid-template-columns:repeat(2,1fr); }
+            .plan-grid { grid-template-columns:200px 1fr; height: auto; }
+            .map-col { display:none; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== HERO FULLSCREEN ===== -->
+<div class="hero-fullscreen" id="heroSection">
+    <!-- Photo fixe -->
+    <div class="hero-bg">
+        <img src="/img/zz.jpg" alt="{{ voyage.titre }}">
+    </div>
+    <div class="hero-gradient"></div>
+
+    <div class="hero-layout">
+        <!-- GAUCHE : Texte central dynamique -->
+        <div class="hero-text">
+            <div class="hero-eyebrow">Découvrez votre séjour</div>
+            <h1 class="hero-main-title">{{ voyage.titre }}</h1>
+            <div class="btn-explore-wrap">
+                <span class="btn-ornament">✦</span>
+                <a href="#plan-journalier" class="btn-explore">
+                    <div class="btn-inner">
+                        <span>Explorer</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </a>
+                <span class="btn-ornament">✦</span>
+            </div>
+        </div>
+
+
+
+
+        <!-- DROITE : 3 cartes de type image alignees cote a cote -->
+
+        <div class="hero-cards-side">
+            <div class="cards-track" id="cardsTrack">
+                <!-- Javascript will render cards here -->
+            </div>
+            
+            <div class="slider-controls">
+                <button class="slider-btn prev" onclick="moveSimpleCarousel('prev')"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next" onclick="moveSimpleCarousel('next')"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ===== SECTION INFOS + DOURA MONDO ===== -->
+
+<div class="below-hero">
+    <!-- SWAP : GAUCHE = Doura Mondo -->
+    <div class="doura-mondo-side">
+        <div class="dm-eyebrow">Notre philosophie</div>
+        <div class="dm-title">Voyages d'exception<br>avec <span>Doura Mondo</span></div>
+        <div class="dm-divider"></div>
+        <p class="dm-text">
+            Chez Doura Mondo, chaque voyage est une œuvre façonnée à votre image. Nous ne proposons pas de circuits standardisés — nous orchestrons des expériences uniques, pensées dans leurs moindres détails, pour que chaque moment soit un souvenir gravé à jamais.
+        </p>
+        
+        <div class="dm-values">
+            <div class="dm-value-item">
+                <div class="dm-value-icon"><i class="fas fa-star"></i></div>
+                <div>
+                    <div class="dm-value-title">Excellence sur mesure</div>
+                    <div class="dm-value-desc">Chaque détail est pensé et orchestré pour vous offrir une expérience véritablement inoubliable, de l'hébergement aux activités.</div>
+                </div>
+            </div>
+            <div class="dm-value-item">
+                <div class="dm-value-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <div>
+                    <div class="dm-value-title">Expertise locale</div>
+                    <div class="dm-value-desc">Nos guides certifiés et partenaires locaux vous ouvrent les portes des cultures les plus authentiques, loin des sentiers battus.</div>
+                </div>
+            </div>
+            <div class="dm-value-item">
+                <div class="dm-value-icon"><i class="fas fa-shield-alt"></i></div>
+                <div>
+                    <div class="dm-value-title">Sécurité & sérénité</div>
+                    <div class="dm-value-desc">Voyagez l'esprit léger. Notre équipe reste joignable 24h/24 pendant tout votre séjour pour répondre à chacun de vos besoins.</div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+
+
+    <!-- SWAP : DROITE = Infos Voyage -->
+    <div class="voyage-info-card">
+        <div class="vic-header-badge"><i class="fas fa-suitcase-rolling"></i> Votre forfait exclusif</div>
+        <div class="vic-title">{{ voyage.titre }}</div>
+        <div class="vic-dest"><i class="fas fa-map-marker-alt" style="color:var(--rouge);font-size:11px;margin-right:6px;"></i>{{ voyage.destination }} · {{ voyage.continent }}</div>
+        <div class="vic-divider"></div>
+
+        <!-- Description du voyage -->
+        <div class="vic-description">
+            {{ voyage.description ? voyage.description : 'Une expérience de voyage unique et mémorable, soigneusement élaborée pour vous offrir le meilleur de la destination. Chaque détail a été pensé pour créer des souvenirs inoubliables.' }}
+        </div>
+
+        <!-- Stats Durée / Personnes -->
+        <div class="vic-stats">
+            <div class="vic-stat-box">
+                <div class="vic-stat-label">Durée</div>
+                <div class="vic-stat-val">{{ voyage.duree }} <small>jours</small></div>
+            </div>
+            <div class="vic-stat-box">
+                <div class="vic-stat-label">Personnes</div>
+                <div class="vic-stat-val">{{ voyage.nbPersonnes }} <small>pers.</small></div>
+            </div>
+        </div>
+
+        <!-- Prix -->
+        <div class="vic-price-row">
+            <div class="vic-price-label">Prix total du forfait</div>
+            <div class="vic-price-amount" id="prixAffiche">
+    {{ voyage.budgetEstime|number_format(0, ',', ' ') }} <small>DT</small>
+</div>
+            <div class="vic-price-note">Tarif total · Hors vols</div>
+        </div>
+
+        <a href="#" class="vic-price-link" onclick="ouvrirModalOptions({{ voyage.idVoyage }}); return false;">
+    <i class="fas fa-info-circle"></i> À propos du prix
+</a>
+
+        <!-- Boutons actions -->
+        <div class="vic-actions">
+            <a href="{{ path('app_reservation', {
+                'voyage_id': voyage.idVoyage, 
+                'destination': voyage.destination, 
+                'budget': voyage.budgetEstime, 
+                'duree': voyage.duree,
+                'nb_personnes': voyage.nbPersonnes
+            }) }}" class="btn-reserver">
+                <i class="fas fa-calendar-check"></i> Réserver ce forfait
+            </a>
+            <a href="#" class="btn-partager" onclick="partagerForfait(event)"><i class="fas fa-share-alt"></i> Partager</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- ===== 4 CARTES SERVICES ===== -->
+<section class="services-section">
+    <div class="services-eyebrow">Nos Prestations</div>
+    <h2 class="services-title">Ce qui est <span>inclus</span> dans votre forfait</h2>
+    <div class="services-grid">
+        <div class="service-card">
+            <div class="service-icon-wrap"><i class="fas fa-user-tie"></i></div>
+            <span class="service-num">01 · Accompagnement</span>
+            <div class="service-name">Guide Certifié</div>
+            <p class="service-desc">Un expert local bilingue vous accompagne tout au long de votre séjour.</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon-wrap"><i class="fas fa-concierge-bell"></i></div>
+            <span class="service-num">02 · Hébergement</span>
+            <div class="service-name">Hôtels de Prestige</div>
+            <p class="service-desc">Des établissements soigneusement sélectionnés pour leur excellence.</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon-wrap"><i class="fas fa-car"></i></div>
+            <span class="service-num">03 · Mobilité</span>
+            <div class="service-name">Transferts Privés</div>
+            <p class="service-desc">Véhicules premium avec chauffeur privé pour tous vos déplacements.</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon-wrap"><i class="fas fa-utensils"></i></div>
+            <span class="service-num">04 · Gastronomie</span>
+            <div class="service-name">Expériences Culinaires</div>
+            <p class="service-desc">Petits-déjeuners inclus et dîners dans des restaurants gastronomiques.</p>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+<!-- ===== PLAN JOURNALIER ===== -->
+
+<div class="plan-section" id="plan-journalier">
+    <div class="plan-header">
+        <div class="plan-eyebrow">Votre itinéraire</div>
+        <h2 class="plan-title">Le plan journalier pensé pour vous</h2>
+        <p class="plan-subtitle">Cliquez sur un jour pour découvrir les activités.</p>
+    </div>
+
+    <!-- GRID AVEC LONGUEURS FIXES -->
+    <div class="plan-grid">
+        <!-- COL 1 : Liste des jours (240px fixe) -->
+        <div class="days-list">
+            {% for jour in planJournaliers %}
+                <button class="day-btn {% if loop.first %}active{% endif %}" onclick="switchDay({{ jour.jour }}, this)">
+                    <div class="day-num-circle">{{ jour.jour }}</div>
+                    <div class="day-btn-label">
+                        <span class="day-btn-title">Jour {{ jour.jour }}</span>
+                        <span class="day-btn-sub">{{ jour.titreJour|slice(0, 18) }}</span>
+                    </div>
+                </button>
+            {% endfor %}
+        </div>
+
+        <!-- COL 2 : Panels Activités (480px fixe) -->
+        <div class="day-panels-container">
+            {% for jour in planJournaliers %}
+                <div class="day-panel {% if loop.first %}active{% endif %}" id="panel-{{ jour.jour }}">
+                    <div class="day-photo">
+    <img src="{{ jour.activite.imageActivite ? jour.activite.imageActivite : (voyage.imageUrl ? voyage.imageUrl : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&q=80') }}" 
+         alt="{{ jour.titreJour }}"
+         onerror="this.src='{{ voyage.imageUrl ? voyage.imageUrl : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&q=80' }}'">
+    <div class="day-photo-overlay"></div>
+
+
+    <div class="day-photo-name">Jour {{ jour.jour }}</div>
+</div>
+                    <!-- CONTENEUR BLANC -->
+                    <div class="day-body">
+                        <!-- TITRE EN BAS DANS LE CONTENEUR BLANC -->
+                        <div class="day-title-blk">{{ jour.titreJour }}</div>
+                        
+                        <div class="day-activite-name">
+                            {{ jour.activite ? jour.activite.nomActivite : 'Activité du jour' }}
+                        </div>
+                        <div class="day-activite-divider"></div>
+                        <p class="day-desc">
+                            {{ jour.activite ? jour.activite.descriptionActivite : 'Description à venir...' }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+
+        <!-- COL 3 : Map (1fr dynamique - Reste de l'espace) -->
+        <div class="map-col">
+            <div id="trip-map"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+
+
+
+  // Dans le bloc javascripts, après la fonction renderCarousel()
+function partagerForfait(e) {
+    if (e) e.preventDefault();
+    
+    // Récupérer l'ID du voyage depuis l'URL
+    const pathParts = window.location.pathname.split('/');
+    const voyageId = pathParts[pathParts.length - 1];
+    
+    // Vérifier que l'ID est un nombre
+    if (!voyageId || isNaN(parseInt(voyageId))) {
+        console.error('ID du voyage invalide');
+        return;
+    }
+    
+    // Appeler la fonction du modal
+    if (typeof ouvrirModalPartage === 'function') {
+        ouvrirModalPartage(voyageId);
+    } else {
+        console.error('La fonction ouvrirModalPartage n\'est pas définie');
+        alert('Fonction de partage non disponible');
+    }
+}
+
+
+
+
+
+        /* ===== PLAN JOURNALIER ===== */
+
+        function switchDay(num, btn) {
+            document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + num).classList.add('active');
+            btn.classList.add('active');
+            
+            // Focus sur la carte pour le jour sélectionné
+            if (typeof focusOnDay === 'function') {
+                focusOnDay(num);
+            }
+        }
+
+        /* ===== CARROUSEL CARTES ===== */
+
+        const galleryImages = {{ galleryImages|json_encode|raw }};
+        
+        const themes = [
+            { label: 'Paysages', sublabel: 'Nature', icon: 'fa-mountain' },
+            { label: 'Culture', sublabel: 'Patrimoine', icon: 'fa-landmark' },
+            { label: 'Gastronomie', sublabel: 'Saveurs', icon: 'fa-utensils' },
+            { label: 'Aventure', sublabel: 'Expériences', icon: 'fa-hiking' },
+            { label: 'Art de vivre', sublabel: 'Authenticité', icon: 'fa-heart' },
+            { label: 'Architecture', sublabel: 'Design', icon: 'fa-building' },
+        ];
+        
+        let currentTrackIdx = 0;
+        
+        function renderCarousel() {
+            const track = document.getElementById('cardsTrack');
+            if (!track || galleryImages.length === 0) return;
+            
+            const visiblePhotos = [];
+            for (let i = 0; i < 3; i++) {
+                const idx = (currentTrackIdx + i) % galleryImages.length;
+                visiblePhotos.push(galleryImages[idx]);
+            }
+            
+            track.innerHTML = '';
+            const overlayColors = ['#1a6b8a', '#c9a96e', '#6b3a8a'];
+            
+            visiblePhotos.forEach((photo, idx) => {
+                const theme = themes[(currentTrackIdx + idx) % themes.length];
+                track.innerHTML += `
+                    <div class="slide-card" onclick="window.open('${photo.unsplash_url || '#'}', '_blank')">
+                        <img src="${photo.url}" alt="${photo.alt}" loading="lazy">
+                        <div class="card-overlay" style="background:${overlayColors[idx]}"></div>
+                        <div class="card-content">
+                            <div class="card-icon"><i class="fas ${theme.icon}"></i></div>
+                            <div class="card-label">${theme.label}</div>
+                            <div class="card-sublabel">${photo.photographer ? `📷 ${photo.photographer}` : theme.sublabel}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function moveSimpleCarousel(dir) {
+            if (dir === 'next') {
+                currentTrackIdx = (currentTrackIdx + 1) % galleryImages.length;
+            } else {
+                currentTrackIdx = (currentTrackIdx - 1 + galleryImages.length) % galleryImages.length;
+            }
+            renderCarousel();
+        }
+        
+
+
+
+        /* ===== CARTE LEAFLET AVEC POINTS DES ACTIVITÉS ===== */
+
+        // Les points viennent DIRECTEMENT de PHP (via le Repository)
+        const pointsCarte = {{ pointsCarte|json_encode|raw }};
+        
+        // Déterminer le centre initial de la carte
+        let defaultLat = 20, defaultLng = 0, defaultZoom = 2;
+        
+        if (pointsCarte.length > 0) {
+            defaultLat = pointsCarte[0].lat;
+            defaultLng = pointsCarte[0].lng;
+            defaultZoom = 10;
+        }
+        
+        // Initialiser la carte
+        const map = L.map('trip-map').setView([defaultLat, defaultLng], defaultZoom);
+        
+        // Fond de carte
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap © CartoDB'
+        }).addTo(map);
+        
+        // Stockage des marqueurs
+        const markers = {};
+        
+        // Icône personnalisée
+        function createCustomIcon(isActive = false) {
+            const color = isActive ? '#8B2C2C' : '#9B7240';
+            const scale = isActive ? 'scale(1.2)' : 'scale(1)';
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    background: ${color};
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: white;
+                    border: 2px solid rgba(255,255,255,0.8);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    transform: ${scale};
+                    transition: transform 0.3s ease;
+                ">${isActive ? '📍' : '📍'}</div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 36],
+                popupAnchor: [0, -36]
+            });
+        }
+        
+
+        
+        // Ajouter les marqueurs pour chaque point
+        pointsCarte.forEach(point => {
+            const marker = L.marker([point.lat, point.lng], {
+                icon: createCustomIcon(false)
+            }).addTo(map);
+            
+            // Popup avec les informations
+            marker.bindPopup(`
+                <div style="font-family: 'Cormorant Garamond', serif; min-width: 180px;">
+                    <strong style="color: #8B2C2C; font-size: 14px;">Jour ${point.jour}</strong>
+                    <h4 style="margin: 8px 0 4px; font-size: 16px;">${point.titre}</h4>
+                    <p style="margin: 0; font-size: 13px; color: #6b5040;">${point.nomActivite}</p>
+                    <p style="margin: 8px 0 0; font-size: 12px; color: #9B7240;">${point.description ? point.description.substring(0, 80) + '...' : ''}</p>
+                </div>
+            `);
+            
+            markers[point.jour] = {
+                marker: marker,
+                lat: point.lat,
+                lng: point.lng,
+                titre: point.titre,
+                nomActivite: point.nomActivite
+            };
+        });
+        
+        // Tracer l'itinéraire (relier tous les points)
+        if (pointsCarte.length > 1) {
+            const routeCoords = pointsCarte.map(p => [p.lat, p.lng]);
+            L.polyline(routeCoords, {
+                color: '#8B2C2C',
+                weight: 2.5,
+                opacity: 0.4,
+                dashArray: '8, 8'
+            }).addTo(map);
+        }
+        
+        // Fonction pour zoomer sur un jour spécifique
+        function focusOnDay(jourNum) {
+            const point = markers[jourNum];
+            if (point) {
+                // Réinitialiser tous les marqueurs
+                Object.values(markers).forEach(m => {
+                    m.marker.setIcon(createCustomIcon(false));
+                });
+                // Activer le marqueur sélectionné
+                point.marker.setIcon(createCustomIcon(true));
+                // Voler vers le point
+                map.flyTo([point.lat, point.lng], 13, {
+                    duration: 1,
+                    easeLinearity: 0.5
+                });
+                // Ouvrir la popup
+                point.marker.openPopup();
+            }
+        }
+        
+        // Initialisation : zoom sur le premier jour
+        if (pointsCarte.length > 0) {
+            setTimeout(() => {
+                focusOnDay(pointsCarte[0].jour);
+            }, 500);
+        }
+        
+        // Initialisation du carrousel
+        renderCarousel();
+        
+        // Rafraîchir la carte après chargement
+        setTimeout(() => map.invalidateSize(), 500);
+        window.addEventListener('resize', () => map.invalidateSize());
+        function mettreAJourPrixCarte(prixTexte) {
+    const el = document.getElementById('prixAffiche');
+    if (!el) return;
+
+    // Extraire le nombre depuis le texte (ex: "3 500 DT")
+    const montant = prixTexte.replace(/[^\d]/g, '');
+    const montantNum = parseInt(montant, 10);
+
+    if (isNaN(montantNum)) return;
+
+    // Formater à la française : 3500 → "3 500"
+    const montantFormate = montantNum.toLocaleString('fr-FR');
+
+    // Animation flash doré avant mise à jour
+    el.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    el.style.transform = 'scale(1.08)';
+    el.style.opacity = '0.5';
+
+    setTimeout(() => {
+        el.innerHTML = montantFormate + ' <small>DT</small>';
+        el.style.transform = 'scale(1)';
+        el.style.opacity = '1';
+    }, 200);
+}
+    </script>
+    {% include '/voyage/modal_options.html.twig' %}
+     {% include 'voyage/modal_partage.html.twig' %}
+{% endblock %}
+

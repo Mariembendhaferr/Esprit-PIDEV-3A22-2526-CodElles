@@ -1,0 +1,467 @@
+/* ============================================
+   MODAL PARTAGE LUXE - DOURA MONDO
+   ============================================ */
+
+.modal-partage-luxe {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+}
+
+.modal-partage-luxe.active {
+    display: block;
+}
+
+.modal-partage-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 5, 5, 0.85);
+    backdrop-filter: blur(8px);
+}
+
+.modal-partage-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-top: 4px solid #c9a96e;
+    box-shadow: 0 50px 120px rgba(0, 0, 0, 0.5);
+    animation: modalIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Scrollbar personnalisée */
+.modal-partage-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-partage-container::-webkit-scrollbar-track {
+    background: #e8ddd0;
+}
+
+.modal-partage-container::-webkit-scrollbar-thumb {
+    background: #8B2C2C;
+}
+
+/* Bouton fermeture */
+.modal-partage-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.modal-partage-close:hover {
+    background: #c9a96e;
+    color: #1a0f0f;
+    border-color: #c9a96e;
+    transform: rotate(90deg);
+}
+
+/* ========== HEADER ROUGE AMÉLIORÉ ========== */
+.modal-partage-header {
+    background: linear-gradient(135deg, #8B2C2C 0%, #6d2020 100%);
+    padding: 40px 32px 32px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-partage-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201, 169, 110, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.modal-partage-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a96e, #c9a96e, transparent);
+}
+
+.modal-partage-icon {
+    width: 60px;
+    height: 60px;
+    border: 1px solid rgba(201, 169, 110, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 22px;
+    color: #c9a96e;
+    background: rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+/* ✨ NOUVEAU TITRE ÉLÉGANT ✨ */
+.modal-partage-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-partage-title span {
+    color: #c9a96e;
+    font-style: normal;
+}
+
+.modal-partage-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-partage-subtitle::before,
+.modal-partage-subtitle::after {
+    content: '✦';
+    margin: 0 12px;
+    color: #c9a96e;
+    font-size: 12px;
+    font-style: normal;
+}
+
+/* Section informations voyage */
+.modal-partage-voyage-info {
+    display: flex;
+    gap: 18px;
+    padding: 24px 28px;
+    border-bottom: 1px solid #e8ddd0;
+    background: #fdfaf6;
+}
+
+.partage-voyage-image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid #c9a96e;
+}
+
+.partage-voyage-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.partage-voyage-image:hover img {
+    transform: scale(1.05);
+}
+
+.partage-voyage-details {
+    flex: 1;
+}
+
+.partage-voyage-details h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a0f0f;
+    margin: 0 0 8px;
+    font-style: italic;
+}
+
+.partage-voyage-details p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #8a6a58;
+    margin: 4px 0;
+}
+
+.partage-voyage-details p i {
+    color: #8B2C2C;
+    margin-right: 6px;
+    width: 16px;
+}
+
+/* Section lien */
+.modal-partage-lien {
+    padding: 20px 28px;
+    border-bottom: 1px solid #e8ddd0;
+}
+
+.partage-lien-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.partage-lien-label i {
+    color: #c9a96e;
+    margin-right: 6px;
+}
+
+.partage-lien-copy {
+    display: flex;
+    gap: 10px;
+}
+
+.partage-lien-copy input {
+    flex: 1;
+    border: 1px solid #e8ddd0;
+    padding: 12px 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: #5a4535;
+    background: #fdfaf6;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.partage-lien-copy input:focus {
+    border-color: #c9a96e;
+}
+
+.btn-copy-lien {
+    padding: 12px 20px;
+    background: #8B2C2C;
+    color: #fff;
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.btn-copy-lien:hover {
+    background: #c9a96e;
+    color: #1a0f0f;
+}
+
+/* Section QR Code */
+.modal-partage-qr {
+    padding: 24px 28px;
+    border-bottom: 1px solid #e8ddd0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background: #fdfaf6;
+}
+
+.qr-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+}
+
+.qr-label i {
+    color: #c9a96e;
+    margin-right: 6px;
+}
+
+#qrCodeContainer {
+    padding: 12px;
+    border: 1px solid #e8ddd0;
+    background: #fff;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+#qrCodeContainer:hover {
+    border-color: #c9a96e;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+#qrCodeContainer img {
+    display: block;
+}
+
+/* Section réseaux sociaux */
+.modal-partage-reseaux {
+    padding: 24px 28px;
+    border-bottom: 1px solid #e8ddd0;
+}
+
+.reseaux-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+    display: block;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.reseaux-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.reseaux-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.reseaux-icon:hover {
+    transform: translateY(-4px);
+    opacity: 0.9;
+}
+
+.reseaux-icon.facebook {
+    background: #1877F2;
+}
+
+.reseaux-icon.whatsapp {
+    background: #25D366;
+}
+
+.reseaux-icon.twitter {
+    background: #000000;
+}
+
+.reseaux-icon.linkedin {
+    background: #0A66C2;
+}
+
+/* Footer email */
+.modal-partage-footer {
+    padding: 20px 28px 28px;
+}
+
+.btn-partage-email {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 1.5px solid #8B2C2C;
+    color: #8B2C2C;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.btn-partage-email:hover {
+    background: #8B2C2C;
+    color: #fff;
+}
+
+.btn-partage-email i {
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .modal-partage-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-partage-header {
+        padding: 30px 20px 24px;
+    }
+    
+    .modal-partage-title {
+        font-size: 22px;
+    }
+    
+    .modal-partage-subtitle {
+        font-size: 13px;
+    }
+    
+    .modal-partage-subtitle::before,
+    .modal-partage-subtitle::after {
+        margin: 0 6px;
+    }
+    
+    .modal-partage-voyage-info {
+        padding: 18px 20px;
+    }
+    
+    .partage-voyage-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .partage-voyage-details h4 {
+        font-size: 15px;
+    }
+    
+    .modal-partage-lien,
+    .modal-partage-qr,
+    .modal-partage-reseaux,
+    .modal-partage-footer {
+        padding: 18px 20px;
+    }
+    
+    .reseaux-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+}

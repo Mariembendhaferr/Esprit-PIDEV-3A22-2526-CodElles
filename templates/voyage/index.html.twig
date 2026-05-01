@@ -1,0 +1,509 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Doura Mondo - Voyages d'Exception{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/community.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<!-- Carousel Start -->
+<div class="container-fluid p-0 mb-5">
+    <div id="header-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="1500" data-bs-wrap="true">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img class="w-100" src="img/Where Autumnal Mountains Sings in Color.jpg" alt="Image" style="height:92vh; object-fit:cover;">
+                <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                    <div class="p-3 text-center animated fadeIn" style="max-width: 780px;">
+                        <div class="carousel-eyebrow animated slideInDown">Vivre l'Exceptionnel</div>
+                        <h1 class="carousel-title animated slideInDown">Votre Voyage,<br>Votre Signature</h1>
+                        <p class="carousel-sub animated slideInUp">Chaque itinéraire est une œuvre unique, façonnée selon vos désirs les plus secrets.</p>
+                        <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:16px;">
+                            <a href="{{ path('app_planifier') }}" class="btn-planifier">Planifiez votre voyage</a>
+                            <a href="{{ path('app_chatbot') }}" class="btn-aide">On vous aide à choisir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img class="w-100" src="img/Waterfall (1).jpg" alt="Image" style="height:92vh; object-fit:cover;">
+                <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+                    <div class="p-3 text-center animated fadeIn" style="max-width: 780px;">
+                        <div class="carousel-eyebrow animated slideInDown">Vivre l'Exceptionnel</div>
+                        <h1 class="carousel-title animated slideInDown">L'Aventure Pensée<br>Pour Vous</h1>
+                        <p class="carousel-sub animated slideInUp">Des expériences rares, des destinations d'exception — au rythme de vos passions.</p>
+                        <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:16px;">
+                            <a href="{{ path('app_planifier') }}" class="btn-planifier">Planifiez votre voyage</a>
+                            <a href="{{ path('app_chatbot') }}" class="btn-aide">On vous aide à choisir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#header-carousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#header-carousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+<!-- Carousel End -->
+
+<!-- About Start -->
+<div class="container-xxl py-5" style="background: #ffffff; padding-top: 90px !important; padding-bottom: 90px !important;">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6 wow fadeInLeft" data-wow-delay="0.1s">
+                <div class="about-eyebrow">À Propos</div>
+                <h1 class="about-title">Bienvenue chez<br><span>Doura Mondo</span></h1>
+                <div class="about-divider"></div>
+                <p class="about-desc">Spécialistes du voyage sur mesure depuis plus d'une décennie, nous orchestrons des expériences uniques pour les voyageurs les plus exigeants. Chaque destination est soigneusement sélectionnée, chaque séjour est pensé dans ses moindres détails pour correspondre à votre personnalité, vos passions et vos envies profondes.</p>
+                <p class="about-desc-2">« Nous ne vendons pas des voyages — nous créons des souvenirs inoubliables, façonnés à votre image, aux quatre coins du monde. »</p>
+                <div class="row g-3 pb-4">
+    <div class="col-sm-4 wow fadeIn" data-wow-delay="0.1s">
+        <div class="stat-card-luxe">
+            <i class="fa fa-globe"></i>
+            <h2 data-toggle="counter-up">{{ statsVoyages }}</h2>
+            <p>Voyages</p>
+        </div>
+    </div>
+    <div class="col-sm-4 wow fadeIn" data-wow-delay="0.3s">
+        <div class="stat-card-luxe">
+            <i class="fa fa-users-cog"></i>
+            <h2 data-toggle="counter-up">{{ statsExperts }}</h2>
+            <p>Experts</p>
+        </div>
+    </div>
+    <div class="col-sm-4 wow fadeIn" data-wow-delay="0.5s">
+        <div class="stat-card-luxe">
+            <i class="fa fa-heart"></i>
+            <h2 data-toggle="counter-up">23</h2>
+            <p>Clients</p>
+        </div>
+    </div>
+</div>
+                <a class="btn-about-luxe mt-2" href="">En savoir plus</a>
+            </div>
+            <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.2s">
+                <div class="row g-3">
+                    <div class="col-6 text-end">
+                        <img class="img-fluid rounded about-img-luxe w-80 wow zoomIn" data-wow-delay="0.1s" src="img/Colosseum Sunset View.jpg" style="margin-top: 30%; width: 85% !important; box-shadow: 8px 8px 30px rgba(139,44,44,0.18),0 2px 10px rgba(0,0,0,0.12);">
+                    </div>
+                    <div class="col-6 text-start">
+                        <img class="img-fluid rounded about-img-luxe w-100 wow zoomIn" data-wow-delay="0.2s" src="img/sq.jpg" style="box-shadow: -8px 8px 30px rgba(139,44,44,0.18),0 2px 10px rgba(0,0,0,0.12);">
+                    </div>
+                    <div class="col-4 text-end wow zoomIn" data-wow-delay="0.3s">
+                        <img class="img-fluid rounded about-img-luxe w-100" src="img/téléchargement (3).jpg" style="box-shadow: 6px 6px 25px rgba(139,44,44,0.15),0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                    <div class="col-4 wow zoomIn" data-wow-delay="0.4s">
+                        <img class="img-fluid rounded about-img-luxe w-100" src="img/Santorini at golden hour ✨.jpg" style="margin-top: -20px; box-shadow: 0 10px 30px rgba(139,44,44,0.2),0 2px 8px rgba(0,0,0,0.12);">
+                    </div>
+                    <div class="col-4 wow zoomIn" data-wow-delay="0.5s">
+                        <img class="img-fluid rounded about-img-luxe w-100" src="img/téléchargement (5).jpg" style="margin-top: 15px; box-shadow: -6px 6px 25px rgba(139,44,44,0.15),0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                    <div class="col-7 wow zoomIn" data-wow-delay="0.6s">
+                        <img class="img-fluid rounded about-img-luxe w-100" src="img/Sultanahmet Camii.jpg" style="margin-top: -15px; box-shadow: 8px 8px 30px rgba(139,44,44,0.18),0 2px 10px rgba(0,0,0,0.12);">
+                    </div>
+                    <div class="col-5 text-start wow zoomIn" data-wow-delay="0.7s">
+                        <img class="img-fluid rounded about-img-luxe w-100" src="img/Visit the Sydney Opera House_ A Traveler's Guide to Australia's Architectural Gem.jpg" style="margin-top: 10px; box-shadow: -6px 8px 25px rgba(139,44,44,0.15),0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+<!-- Destinations Start -->
+<div class="section-destinations">
+    <div class="deco-circle-tl"></div>
+    <div class="deco-circle-br"></div>
+    <div class="deco-diamond"></div>
+    <div class="deco-diamond-2"></div>
+    <svg class="deco-dots" width="120" height="120" viewBox="0 0 120 120">
+        <pattern id="dots" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.2" fill="#9B7240"/>
+        </pattern>
+        <rect width="120" height="120" fill="url(#dots)"/>
+    </svg>
+    <svg class="deco-lines" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid slice">
+        <line x1="0" y1="100" x2="1400" y2="100" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="0" y1="200" x2="1400" y2="200" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="0" y1="300" x2="1400" y2="300" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="0" y1="400" x2="1400" y2="400" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="0" y1="500" x2="1400" y2="500" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="200" y1="0" x2="200" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="400" y1="0" x2="400" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="600" y1="0" x2="600" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="800" y1="0" x2="800" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="1000" y1="0" x2="1000" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <line x1="1200" y1="0" x2="1200" y2="600" stroke="#9B7240" stroke-width="0.8"/>
+        <ellipse cx="700" cy="300" rx="500" ry="280" stroke="#8B2C2C" stroke-width="0.6" fill="none"/>
+        <ellipse cx="700" cy="300" rx="280" ry="280" stroke="#8B2C2C" stroke-width="0.6" fill="none"/>
+        <ellipse cx="700" cy="300" rx="100" ry="280" stroke="#8B2C2C" stroke-width="0.5" fill="none"/>
+    </svg>
+    <svg class="deco-map" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+        <path d="M480,120 L500,110 L520,115 L530,130 L510,145 L490,140 Z" fill="#8B2C2C"/>
+        <path d="M500,140 L515,135 L525,148 L515,158 L500,155 Z" fill="#8B2C2C"/>
+        <path d="M490,165 L510,160 L525,175 L530,210 L520,250 L505,270 L490,265 L480,240 L478,205 L482,180 Z" fill="#8B2C2C"/>
+        <path d="M280,110 L300,105 L315,115 L320,140 L310,165 L295,175 L280,170 L270,150 L272,125 Z" fill="#8B2C2C"/>
+        <path d="M290,185 L305,180 L315,195 L318,230 L308,260 L295,270 L282,260 L278,230 L280,200 Z" fill="#8B2C2C"/>
+        <path d="M540,100 L600,95 L650,105 L670,120 L660,140 L630,150 L590,148 L555,140 L540,125 Z" fill="#8B2C2C"/>
+        <path d="M600,150 L640,145 L660,160 L658,185 L635,195 L605,190 L595,170 Z" fill="#8B2C2C"/>
+        <path d="M680,260 L710,255 L725,268 L720,285 L700,290 L682,280 Z" fill="#8B2C2C"/>
+        <circle cx="498" cy="130" r="3" fill="#9B7240"/>
+        <circle cx="505" cy="170" r="2.5" fill="#9B7240"/>
+        <circle cx="610" cy="118" r="2.5" fill="#9B7240"/>
+        <circle cx="290" cy="135" r="2.5" fill="#9B7240"/>
+        <circle cx="700" cy="268" r="2.5" fill="#9B7240"/>
+        <path d="M498,130 Q550,80 610,118" stroke="#9B7240" stroke-width="0.8" fill="none" stroke-dasharray="4,3"/>
+        <path d="M498,130 Q395,90 290,135" stroke="#9B7240" stroke-width="0.8" fill="none" stroke-dasharray="4,3"/>
+        <path d="M610,118 Q655,190 700,268" stroke="#9B7240" stroke-width="0.8" fill="none" stroke-dasharray="4,3"/>
+    </svg>
+
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <div class="dest-eyebrow">Nos Destinations</div>
+            <h2 class="dest-main-title">Explorez Nos <span>Voyages</span></h2>
+            <p class="dest-main-sub">Des voyages d'exception, façonnés selon vos désirs les plus profonds.</p>
+        </div>
+        <div class="text-center wow fadeInUp" data-wow-delay="0.15s">
+            <a href="{{ path('app_inspirations') }}" class="btn-afficher-plus">Afficher plus de voyages</a>
+        </div>
+        <div class="row g-4">
+            {% if topVoyages is empty %}
+                <div class="col-12 text-center">
+                    <p>Aucun voyage disponible pour le moment.</p>
+                </div>
+            {% else %}
+                {% for voyage in topVoyages %}
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="{{ 0.1 + (loop.index0 * 0.2) }}s">
+                    <div class="dest-card-luxe">
+                        <div class="dest-img-wrap">
+                            <img src="{{ voyage.imageUrl ? asset(voyage.imageUrl) : asset('img/default-voyage.jpg') }}" alt="{{ voyage.titre }}">
+                            <div class="dest-price-badge">À partir de {{ voyage.budgetEstime|number_format(0, ',', ' ') }} DT</div>
+                        </div>
+                        <div class="dest-card-body-luxe">
+                            <div class="dest-card-top">
+                                <h5>{{ voyage.titre }}</h5>
+                                <div class="dest-stars">
+                                    {# Avis statiques : 5 étoiles par défaut #}
+                                    ★★★★★
+                                </div>
+                            </div>
+                            <div class="dest-card-line"></div>
+                            <p>
+                                {% if voyage.destination %}
+                                    <strong>{{ voyage.destination }}</strong><br>
+                                {% endif %}
+                                {{ voyage.description|length > 80 ? voyage.description|slice(0, 80) ~ '...' : voyage.description }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a class="dest-btn-detail" href="{{ path('app_voyage_show', {'id': voyage.idVoyage}) }}">Détails</a>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ voyage.duree }} jours
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- Destinations End -->
+
+
+<!-- ===== SECTION COMMUNAUTÉ ===== -->
+<section class="community-section" id="communitySection">
+    <div class="deco-circle-1" aria-hidden="true"></div>
+    <div class="deco-circle-2" aria-hidden="true"></div>
+
+    <div class="section-header">
+        <div class="section-eyebrow">Communauté Voyageurs</div>
+        <h1 class="section-main-title">Partagez vos <em>beaux moments</em><br>avec Doura Mondo</h1>
+        <p class="section-subtitle">Immortalisez vos plus belles aventures et inspirez les voyageurs du monde entier.</p>
+    </div>
+
+    <div class="filmstrip-wrapper">
+        <div class="filmstrip-container" id="filmstripContainer">
+            <div class="deco-annotation annotation-left" aria-hidden="true">
+                <span class="annotation-text">Souvenirs<br>inoubliables</span>
+                <span class="annotation-arrow">
+                    <svg viewBox="0 0 36 36"><path d="M6 8 C12 22, 24 28, 32 20" stroke-linecap="round"/><path d="M28 16 L32 20 L26 22" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+            </div>
+            <div class="deco-annotation annotation-right" aria-hidden="true">
+                <span class="annotation-text">Explorez le<br>monde</span>
+                <span class="annotation-arrow">
+                    <svg viewBox="0 0 36 36"><path d="M30 8 C24 22, 12 28, 4 20" stroke-linecap="round"/><path d="M8 16 L4 20 L10 22" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+            </div>
+
+            <button class="nav-arrow nav-arrow-left" id="arrowLeft" aria-label="Précédent">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+           <div class="filmstrip-track" id="filmstripTrack">
+
+    {% set sizes = ['size-short', 'size-medium', 'size-tall'] %}
+
+    {% if communityPosts is empty %}
+        {# Fallback si aucune photo en base #}
+        <div class="film-photo size-medium" style="opacity:0">
+            <img src="{{ asset('img/Santorini at golden hour ✨.jpg') }}" alt="Santorin">
+            <div class="film-photo-info">
+                <div class="film-photo-location">
+                    <i class="fas fa-map-marker-alt"></i> Santorin, Grèce
+                </div>
+                <div class="film-photo-date">
+                    <i class="fas fa-calendar-alt"></i> Exemple
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {% for post in communityPosts %}
+            {# Alterner les tailles pour garder le design filmstrip #}
+            {% set size = sizes[loop.index0 % 3] %}
+            <div class="film-photo {{ size }}" style="opacity:0">
+                <img src="{{ asset(post.imageUrl) }}" alt="{{ post.destination }}">
+                <div class="film-photo-info">
+                    <div class="film-photo-continent">
+                        <i class="fas fa-globe-africa"></i> {{ post.continent|capitalize }}
+                    </div>
+                    <div class="film-photo-location">
+                        <i class="fas fa-map-marker-alt"></i> {{ post.destination }}
+                    </div>
+                    <div class="film-photo-date">
+                        <i class="fas fa-calendar-alt"></i> {{ post.approvedAt|date('d/m/Y') }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+                
+
+            <button class="nav-arrow nav-arrow-right" id="arrowRight" aria-label="Suivant">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="carousel-dots" id="carouselDots">
+        <div class="dot active" data-page="0"></div>
+        <div class="dot" data-page="1"></div>
+        <div class="dot" data-page="2"></div>
+    </div>
+
+    <div class="cta-wrapper">
+        <a href="{{ path('app_partager_photos') }}" class="btn-partager" id="btnPartager">
+    Partager votre expérience
+    <i class="fas fa-arrow-right"></i>
+</a>
+        <p class="cta-note"><i class="fas fa-camera"></i> Ajoutez jusqu'à 3 photos de vos voyages</p>
+        <div class="cta-annotation" aria-hidden="true">
+            <svg viewBox="0 0 28 28"><path d="M20 4 C14 16, 10 20, 6 24" stroke-linecap="round"/><path d="M10 22 L6 24 L8 18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cta-annotation-text">C'est gratuit !</span>
+        </div>
+    </div>
+
+  <div class="community-stats">
+    <div class="stat-item">
+        <div class="stat-number" data-target="{{ statsPhotos }}">0</div>
+        <div class="stat-label">Photos partagées</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number" data-target="{{ statsVoyageurs }}">0</div>
+        <div class="stat-label">Voyageurs actifs</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number" data-target="{{ statsDestinations }}">0</div>
+        <div class="stat-label">Destinations</div>
+    </div>
+</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const track = document.getElementById('filmstripTrack');
+    const arrowLeft = document.getElementById('arrowLeft');
+    const arrowRight = document.getElementById('arrowRight');
+    const dots = document.querySelectorAll('.dot');
+    
+    if (!track) return;
+    
+    const photos = track.querySelectorAll('.film-photo');
+    let currentPage = 0;
+    const totalPages = 3;
+
+    photos.forEach((photo, i) => {
+        setTimeout(() => {
+            photo.style.transition = 'opacity 0.7s ease, transform 0.7s cubic-bezier(0.23,1,0.32,1)';
+            photo.style.opacity = '1';
+        }, 150 + i * 80);
+    });
+
+    function goToPage(page) {
+        currentPage = ((page % totalPages) + totalPages) % totalPages;
+        const shift = currentPage * 350;
+        track.style.transform = `translateX(-${shift}px)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentPage));
+    }
+
+    if (arrowLeft) arrowLeft.addEventListener('click', () => goToPage(currentPage - 1));
+    if (arrowRight) arrowRight.addEventListener('click', () => goToPage(currentPage + 1));
+    dots.forEach(d => d.addEventListener('click', () => goToPage(parseInt(d.dataset.page))));
+
+    let autoTimer = setInterval(() => goToPage(currentPage + 1), 5000);
+    const container = document.getElementById('filmstripContainer');
+    if (container) {
+        container.addEventListener('mouseenter', () => clearInterval(autoTimer));
+        container.addEventListener('mouseleave', () => {
+            autoTimer = setInterval(() => goToPage(currentPage + 1), 5000);
+        });
+    }
+
+    const counters = document.querySelectorAll('.stat-number');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const target = parseInt(el.dataset.target);
+                const duration = 2000;
+                const start = Date.now();
+                function tick() {
+                    const progress = Math.min((Date.now() - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.floor(target * eased).toLocaleString('fr-FR');
+                    if (progress < 1) requestAnimationFrame(tick);
+                    else el.textContent = target.toLocaleString('fr-FR');
+                }
+                tick();
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.5 });
+    counters.forEach(c => observer.observe(c));
+});
+</script>
+
+<!-- Service Start -->
+<div class="section-services">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <div class="services-eyebrow">Nos Services</div>
+            <h2 class="services-main-title">Explorez Nos <span>Services</span></h2>
+            <p class="services-main-sub">Une expérience complète, pensée dans les moindres détails pour votre satisfaction absolue.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <a class="service-card-luxe" href=""><div class="service-icon-luxe"><i class="fa fa-hotel"></i></div><h5>Hôtels de Luxe</h5><div class="service-title-line"></div><p>Sélection des plus beaux établissements 5 étoiles pour un séjour d'exception.</p></a>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.2s">
+                <a class="service-card-luxe card-white" href=""><div class="service-icon-luxe"><i class="fa fa-utensils"></i></div><h5>Gastronomie Étoilée</h5><div class="service-title-line"></div><p>Découvrez les meilleures tables et restaurants étoilés du monde.</p></a>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <a class="service-card-luxe" href=""><div class="service-icon-luxe"><i class="fa fa-spa"></i></div><h5>Spa & Bien-être</h5><div class="service-title-line"></div><p>Moments de détente absolue dans les meilleurs spas du monde.</p></a>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.4s">
+                <a class="service-card-luxe card-white" href=""><div class="service-icon-luxe"><i class="fa fa-swimmer"></i></div><h5>Activités Sportives</h5><div class="service-title-line"></div><p>Expériences uniques : plongée, randonnée, golf et bien plus.</p></a>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <a class="service-card-luxe" href=""><div class="service-icon-luxe"><i class="fa fa-glass-cheers"></i></div><h5>Événements Privés</h5><div class="service-title-line"></div><p>Organisation de mariages, séminaires et événements d'exception.</p></a>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.6s">
+                <a class="service-card-luxe card-white" href=""><div class="service-icon-luxe"><i class="fa fa-concierge-bell"></i></div><h5>Conciergerie VIP</h5><div class="service-title-line"></div><p>Service personnalisé 24h/24 pour répondre à toutes vos exigences.</p></a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Service End -->
+
+<!-- Testimonial Start -->
+<div class="container-xxl testimonial my-5 py-5 bg-dark wow zoomIn" data-wow-delay="0.1s">
+    <div class="container">
+        <div class="owl-carousel testimonial-carousel py-5">
+            <div class="testimonial-item position-relative bg-white rounded overflow-hidden">
+                <p>"Une expérience inoubliable ! L'équipe de Doura Mondo a su créer un voyage sur mesure parfait. Chaque détail était pensé, je recommande vivement !"</p>
+                <div class="d-flex align-items-center">
+                    <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-1.jpg" style="width: 45px; height: 45px;">
+                    <div class="ps-3"><h6 class="fw-bold mb-1">Marie Laurent</h6><small>Voyageuse</small></div>
+                </div>
+                <i class="fa fa-quote-right fa-3x text-primary position-absolute end-0 bottom-0 me-4 mb-n1"></i>
+            </div>
+            <div class="testimonial-item position-relative bg-white rounded overflow-hidden">
+                <p>"Un service exceptionnel et une qualité irréprochable. Notre séjour aux Maldives restera gravé dans nos mémoires. Merci à toute l'équipe !"</p>
+                <div class="d-flex align-items-center">
+                    <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-2.jpg" style="width: 45px; height: 45px;">
+                    <div class="ps-3"><h6 class="fw-bold mb-1">Thomas Dubois</h6><small>Client fidèle</small></div>
+                </div>
+                <i class="fa fa-quote-right fa-3x text-primary position-absolute end-0 bottom-0 me-4 mb-n1"></i>
+            </div>
+            <div class="testimonial-item position-relative bg-white rounded overflow-hidden">
+                <p>"Le luxe à l'état pur ! Des conseillers à l'écoute, des hôtels magnifiques, une organisation parfaite. Nous reviendrons sans hésiter."</p>
+                <div class="d-flex align-items-center">
+                    <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-3.jpg" style="width: 45px; height: 45px;">
+                    <div class="ps-3"><h6 class="fw-bold mb-1">Sophie Martin</h6><small>Cliente satisfaite</small></div>
+                </div>
+                <i class="fa fa-quote-right fa-3x text-primary position-absolute end-0 bottom-0 me-4 mb-n1"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Testimonial End -->
+
+<!-- Team Start -->
+<div class="section-team">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <div class="team-eyebrow">Notre Équipe Codelle</div>
+            <h2 class="team-main-title">Rencontrez Nos <span>Experts</span></h2>
+            <p class="team-main-sub">Des passionnés du voyage à votre service, pour des expériences inoubliables.</p>
+        </div>
+        <div class="row g-4 justify-content-center mb-4">
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="team-card-luxe">
+                    <div class="team-img-wrap"><img src="img/benDhafer.png" alt="Ben Dhafer Mariem"><div class="team-overlay"><a class="team-social-btn" href=""><i class="fab fa-facebook-f"></i></a><a class="team-social-btn" href=""><i class="fab fa-instagram"></i></a><a class="team-social-btn" href=""><i class="fab fa-linkedin-in"></i></a></div></div>
+                    <div class="team-card-body"><h5>Ben Dhafer Mariem</h5><small>Conseillère Voyages</small></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s">
+                <div class="team-card-luxe">
+                    <div class="team-img-wrap"><img src="img/zeyneb.png" alt="Chouchéne Zeyneb"><div class="team-overlay"><a class="team-social-btn" href=""><i class="fab fa-facebook-f"></i></a><a class="team-social-btn" href=""><i class="fab fa-instagram"></i></a><a class="team-social-btn" href=""><i class="fab fa-linkedin-in"></i></a></div></div>
+                    <div class="team-card-body"><h5>Chouchéne Zeyneb</h5><small>Expert Voyages</small></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="team-card-luxe">
+                    <div class="team-img-wrap"><img src="img/ranim.png" alt="Rabbeh Ranim"><div class="team-overlay"><a class="team-social-btn" href=""><i class="fab fa-facebook-f"></i></a><a class="team-social-btn" href=""><i class="fab fa-instagram"></i></a><a class="team-social-btn" href=""><i class="fab fa-linkedin-in"></i></a></div></div>
+                    <div class="team-card-body"><h5>Rabbeh Ranim</h5><small>Conseillère Luxe</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.4s">
+                <div class="team-card-luxe">
+                    <div class="team-img-wrap"><img src="img/boufaden.png" alt="Boufaden Mariem"><div class="team-overlay"><a class="team-social-btn" href=""><i class="fab fa-facebook-f"></i></a><a class="team-social-btn" href=""><i class="fab fa-instagram"></i></a><a class="team-social-btn" href=""><i class="fab fa-linkedin-in"></i></a></div></div>
+                    <div class="team-card-body"><h5>Boufaden Mariem</h5><small>Responsable Clientèle</small></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="team-card-luxe">
+                    <div class="team-img-wrap"><img src="img/ghofrane.png" alt="Zoghlami Ghofrane"><div class="team-overlay"><a class="team-social-btn" href=""><i class="fab fa-facebook-f"></i></a><a class="team-social-btn" href=""><i class="fab fa-instagram"></i></a><a class="team-social-btn" href=""><i class="fab fa-linkedin-in"></i></a></div></div>
+                    <div class="team-card-body"><h5>Zoghlami Ghofrane</h5><small>Directrice Artistique</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Team End -->
+
+{% endblock %}

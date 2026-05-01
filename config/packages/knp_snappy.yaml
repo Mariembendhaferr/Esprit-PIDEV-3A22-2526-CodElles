@@ -1,0 +1,12 @@
+knp_snappy:
+    pdf:
+        enabled: true
+        binary: 'C:/Progra~1/wkhtmltopdf/bin/wkhtmltopdf.exe'
+        options:
+            page-size: A4
+            orientation: Landscape
+            encoding: UTF-8
+            margin-top: 10
+            margin-bottom: 10
+            margin-left: 10
+            margin-right: 10

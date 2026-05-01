@@ -1,0 +1,618 @@
+{# templates/voyage/modal_options.html.twig #}
+<div class="modal-options-luxe" id="modalOptions" style="display: none;">
+    <div class="modal-options-overlay" onclick="fermerModalOptions()"></div>
+    <div class="modal-options-container">
+        <button class="modal-options-close" onclick="fermerModalOptions()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-options-header">
+            <div class="modal-options-icon">
+                <i class="fas fa-gem"></i>
+            </div>
+            <h3 class="modal-options-title">Personnalisez votre voyage</h3>
+            <p class="modal-options-subtitle">Créez l'expérience sur mesure qui vous ressemble</p>
+        </div>
+        
+        <!-- Section inclus -->
+        <div class="options-section inclus-section">
+            <div class="options-section-header">
+                <i class="fas fa-check-circle"></i>
+                <span>Ce qui est déjà inclus</span>
+            </div>
+            <div class="inclus-grid" id="inclusGrid">
+                <!-- Dynamique via JS -->
+            </div>
+        </div>
+        
+        <!-- Section options payantes -->
+        <div class="options-section payantes-section">
+            <div class="options-section-header">
+                <i class="fas fa-plus-circle"></i>
+                <span>Améliorez votre expérience</span>
+            </div>
+            <div class="options-list" id="optionsList">
+                <!-- Dynamique via JS -->
+            </div>
+        </div>
+        
+        <!-- Résumé et prix -->
+        <div class="options-summary" id="optionsSummary">
+            <div class="summary-row">
+                <span class="summary-label">Prix de base</span>
+                <span class="summary-value" id="prixBase">0 DT</span>
+            </div>
+            <div class="summary-row" id="supplementsRow" style="display: none;">
+                <span class="summary-label">Suppléments</span>
+                <span class="summary-value" id="totalSupplements">0 DT</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value" id="prixTotal">0 DT</span>
+            </div>
+            <div class="summary-note" id="prixParPersonne"></div>
+        </div>
+        
+        <div class="modal-options-footer">
+            <button class="btn-options-cancel" onclick="fermerModalOptions()">
+                <i class="fas fa-arrow-left"></i> Retour
+            </button>
+            <button class="btn-options-submit" onclick="validerOptions()">
+                <i class="fas fa-check"></i> Personnaliser mon voyage
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ========== STYLES MODAL OPTIONS ========== */
+.modal-options-luxe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10001;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-options-luxe.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.modal-options-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+}
+
+.modal-options-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    background: linear-gradient(135deg, #fff 0%, #fef9f0 100%);
+    border-radius: 28px;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(139, 44, 44, 0.2);
+}
+
+.modal-options-luxe.active .modal-options-container {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-options-close {
+    position: sticky;
+    top: 15px;
+    right: 15px;
+    float: right;
+    width: 36px;
+    height: 36px;
+    background: rgba(139, 44, 44, 0.1);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #8B2C2C;
+    font-size: 16px;
+    z-index: 10;
+    margin: 15px 15px 0 0;
+}
+
+.modal-options-close:hover {
+    background: #8B2C2C;
+    color: white;
+    transform: rotate(90deg);
+}
+
+.modal-options-header {
+    text-align: center;
+    padding: 20px 30px 15px;
+    clear: both;
+}
+
+.modal-options-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    box-shadow: 0 8px 20px rgba(139, 44, 44, 0.3);
+}
+
+.modal-options-icon i {
+    font-size: 28px;
+    color: white;
+}
+
+.modal-options-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: #8B2C2C;
+    margin: 0 0 5px;
+}
+
+.modal-options-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #7a5c4a;
+    font-style: italic;
+}
+
+/* Sections */
+.options-section {
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(139, 44, 44, 0.08);
+}
+
+.options-section-header {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8B2C2C;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.options-section-header i {
+    font-size: 16px;
+}
+
+/* Grille des inclus */
+.inclus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.inclus-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(139, 44, 44, 0.05);
+    border-radius: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #1a0f0f;
+}
+
+.inclus-item i {
+    width: 24px;
+    color: #2e7d32;
+    font-size: 14px;
+}
+
+.inclus-item .item-desc {
+    font-size: 11px;
+    color: #7a5c4a;
+    margin-top: 2px;
+}
+
+/* Liste des options */
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    border: 1px solid rgba(139, 44, 44, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.option-item:hover {
+    border-color: #8B2C2C;
+    box-shadow: 0 5px 15px rgba(139, 44, 44, 0.1);
+}
+
+.option-item.selected {
+    border-color: #8B2C2C;
+    background: rgba(139, 44, 44, 0.03);
+}
+
+.option-check {
+    margin-right: 15px;
+}
+
+.option-check .checkbox-custom {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(139, 44, 44, 0.3);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.option-item.selected .checkbox-custom {
+    background: #8B2C2C;
+    border-color: #8B2C2C;
+}
+
+.option-item.selected .checkbox-custom i {
+    color: white;
+    font-size: 12px;
+}
+
+.option-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, rgba(139, 44, 44, 0.1), rgba(139, 44, 44, 0.05));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.option-icon i {
+    font-size: 20px;
+    color: #8B2C2C;
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-nom {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a0f0f;
+    margin-bottom: 4px;
+}
+
+.option-description {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    color: #7a5c4a;
+}
+
+.option-prix {
+    text-align: right;
+    min-width: 100px;
+}
+
+.option-prix .prix-valeur {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #8B2C2C;
+}
+
+.option-prix .prix-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    color: #7a5c4a;
+    text-transform: uppercase;
+}
+
+.badge-recommande {
+    background: #8B2C2C;
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 10px;
+    letter-spacing: 1px;
+}
+
+/* Résumé */
+.options-summary {
+    background: rgba(139, 44, 44, 0.05);
+    margin: 0 30px 20px;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+}
+
+.summary-row.total {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #8B2C2C;
+    padding-top: 12px;
+}
+
+.summary-divider {
+    height: 1px;
+    background: rgba(139, 44, 44, 0.15);
+    margin: 8px 0;
+}
+
+.summary-note {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    color: #7a5c4a;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Footer */
+.modal-options-footer {
+    display: flex;
+    gap: 15px;
+    padding: 20px 30px 30px;
+    border-top: 1px solid rgba(139, 44, 44, 0.08);
+}
+
+.btn-options-cancel {
+    flex: 1;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid rgba(139, 44, 44, 0.3);
+    border-radius: 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #7a5c4a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-options-cancel:hover {
+    border-color: #8B2C2C;
+    color: #8B2C2C;
+}
+
+.btn-options-submit {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #8B2C2C, #6B1E1E);
+    border: none;
+    border-radius: 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-options-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139, 44, 44, 0.4);
+}
+</style>
+
+<script>
+    let currentOptionsData = null;
+    let selectedOptions = [];
+    let prixBase = 0;
+    let nbPersonnes = 1;
+    
+    async function ouvrirModalOptions(voyageId) {
+        const modal = document.getElementById('modalOptions');
+        if (!modal) return;
+        
+        modal.style.display = 'block';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        try {
+            const response = await fetch(`/api/options/${voyageId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                currentOptionsData = data;
+                prixBase = data.prix_base;
+                nbPersonnes = data.nb_personnes || 1;
+                selectedOptions = [];
+                
+                // Afficher les inclus
+                const inclusGrid = document.getElementById('inclusGrid');
+                inclusGrid.innerHTML = data.inclus.map(item => `
+                    <div class="inclus-item">
+                        <i class="fas fa-${item.icon}"></i>
+                        <div>
+                            <div>${item.nom}</div>
+                            <div class="item-desc">${item.description}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Afficher les options payantes
+                const optionsList = document.getElementById('optionsList');
+                optionsList.innerHTML = data.options.map(option => `
+                    <div class="option-item" data-id="${option.id}" onclick="toggleOption('${option.id}')">
+                        <div class="option-check">
+                            <div class="checkbox-custom">
+                                <i class="fas fa-check" style="display: none;"></i>
+                            </div>
+                        </div>
+                        <div class="option-icon">
+                            <i class="fas fa-${option.icon}"></i>
+                        </div>
+                        <div class="option-content">
+                            <div class="option-nom">
+                                ${option.nom}
+                                ${option.recommande ? '<span class="badge-recommande">Recommandé</span>' : ''}
+                            </div>
+                            <div class="option-description">${option.description}</div>
+                        </div>
+                        <div class="option-prix">
+                            <div class="prix-valeur">${option.prix.toLocaleString()} DT</div>
+                            <div class="prix-label">${option.prix_par_personne ? '/ personne' : '/ forfait'}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Mettre à jour le résumé
+                mettreAJourPrix();
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            fermerModalOptions();
+        }
+    }
+    
+    function toggleOption(optionId) {
+        const optionItem = document.querySelector(`.option-item[data-id="${optionId}"]`);
+        const index = selectedOptions.indexOf(optionId);
+        
+        if (index === -1) {
+            selectedOptions.push(optionId);
+            optionItem.classList.add('selected');
+            const checkIcon = optionItem.querySelector('.checkbox-custom i');
+            if (checkIcon) checkIcon.style.display = 'block';
+        } else {
+            selectedOptions.splice(index, 1);
+            optionItem.classList.remove('selected');
+            const checkIcon = optionItem.querySelector('.checkbox-custom i');
+            if (checkIcon) checkIcon.style.display = 'none';
+        }
+        
+        mettreAJourPrix();
+    }
+    
+    async function mettreAJourPrix() {
+        if (!currentOptionsData) return;
+        
+        const optionsData = currentOptionsData.options;
+        
+        try {
+            const response = await fetch('/api/options/calculer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prix_base: prixBase,
+                    options: selectedOptions,
+                    options_data: optionsData,
+                    nb_personnes: nbPersonnes
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('prixBase').textContent = data.prix_base.toLocaleString() + ' DT';
+                
+                const supplementsRow = document.getElementById('supplementsRow');
+                if (data.total_supplements > 0) {
+                    supplementsRow.style.display = 'flex';
+                    document.getElementById('totalSupplements').textContent = data.total_supplements.toLocaleString() + ' DT';
+                } else {
+                    supplementsRow.style.display = 'none';
+                }
+                
+                document.getElementById('prixTotal').textContent = data.prix_total.toLocaleString() + ' DT';
+                
+                const prixParPersonne = document.getElementById('prixParPersonne');
+                if (nbPersonnes > 1) {
+                    prixParPersonne.textContent = `Soit ${data.prix_par_personne.toLocaleString()} DT par personne`;
+                } else {
+                    prixParPersonne.textContent = '';
+                }
+            }
+        } catch (error) {
+            console.error('Erreur calcul prix:', error);
+        }
+    }
+    
+    function validerOptions() {
+    const prixTotal = document.getElementById('prixTotal').textContent;
+    const optionsCount = selectedOptions.length;
+    
+    // Mettre à jour le prix dans la carte informationnelle
+    mettreAJourPrixCarte(prixTotal);
+    
+    const message = `Votre voyage personnalisé\n\nPrix total : ${prixTotal}\nOptions sélectionnées : ${optionsCount}\n\nSouhaitez-vous continuer ?`;
+    
+    if (confirm(message)) {
+        fermerModalOptions();
+        showToast('Succès', 'Votre voyage a été personnalisé avec succès !');
+    }
+}
+
+
+    
+    function fermerModalOptions() {
+        const modal = document.getElementById('modalOptions');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+    
+    function showToast(title, msg) {
+        let toast = document.getElementById('favorite-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'favorite-toast';
+            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;background:#8B2C2C;color:white;padding:12px24px;border-radius:8px;z-index:99999;opacity:0;transform:translateX(100px);transition:all0.3s ease;';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100px)';
+        }, 3000);
+    }
+    
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            fermerModalOptions();
+        }
+    });
+</script>

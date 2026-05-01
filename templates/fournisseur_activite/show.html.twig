@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FournisseurActivite{% endblock %}
+
+{% block body %}
+    <h1>FournisseurActivite</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ fournisseur_activite.id }}</td>
+            </tr>
+            <tr>
+                <th>NomFournisseur</th>
+                <td>{{ fournisseur_activite.nomFournisseur }}</td>
+            </tr>
+            <tr>
+                <th>EmailFournisseur</th>
+                <td>{{ fournisseur_activite.emailFournisseur }}</td>
+            </tr>
+            <tr>
+                <th>TelephoneFournisseur</th>
+                <td>{{ fournisseur_activite.telephoneFournisseur }}</td>
+            </tr>
+            <tr>
+                <th>AdresseFournisseur</th>
+                <td>{{ fournisseur_activite.adresseFournisseur }}</td>
+            </tr>
+            <tr>
+                <th>SpecialiteFournisseur</th>
+                <td>{{ fournisseur_activite.specialiteFournisseur }}</td>
+            </tr>
+            <tr>
+                <th>WebsiteFournisseur</th>
+                <td>{{ fournisseur_activite.websiteFournisseur }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_fournisseur_activite_index') }}">back to list</a>
+
+    <a href="{{ path('app_fournisseur_activite_edit', {'id': fournisseur_activite.id}) }}">edit</a>
+
+    {{ include('fournisseur_activite/_delete_form.html.twig') }}
+{% endblock %}

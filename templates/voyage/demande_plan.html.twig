@@ -1,0 +1,236 @@
+{# templates/voyage/demande_plan.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle demande — Doura Mondo</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: #F5EFE0;
+            color: #1a1a2e;
+        }
+        .wrapper {
+            max-width: 680px;
+            margin: 32px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(139,44,44,0.12);
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #6B1F1F 0%, #8B2C2C 60%, #A0352D 100%);
+            padding: 40px 48px 36px;
+            text-align: center;
+        }
+        .header .brand      { font-size:26px; font-weight:bold; color:#F5EFE0; letter-spacing:4px; text-transform:uppercase; }
+        .header .brand-sub  { font-size:10px; color:rgba(245,239,224,0.65); letter-spacing:4px; text-transform:uppercase; margin-top:4px; }
+        .header .divider    { width:50px; height:2px; background:#C4A882; margin:18px auto; }
+        .header h1          { font-size:19px; color:#fff; font-weight:normal; font-style:italic; margin-bottom:14px; }
+        .dest-badge {
+            display:inline-block;
+            background:rgba(245,239,224,0.15);
+            border:1px solid rgba(245,239,224,0.4);
+            color:#F5EFE0;
+            font-size:12px; letter-spacing:2px; text-transform:uppercase;
+            padding:7px 22px; border-radius:30px;
+            font-family:Arial,sans-serif; font-weight:600;
+        }
+
+        /* ── Body ── */
+        .body { padding:40px 48px; }
+
+        .alert {
+            background:#FFF8F8;
+            border-left:4px solid #8B2C2C;
+            border-radius:0 8px 8px 0;
+            padding:16px 20px;
+            margin-bottom:32px;
+            font-family:Arial,sans-serif;
+            font-size:14px;
+            color:#4a4a5a;
+        }
+        .alert strong { color:#8B2C2C; }
+
+        .section-title {
+            font-size:11px; letter-spacing:3px; text-transform:uppercase;
+            color:#9B7240; font-family:Arial,sans-serif; font-weight:700;
+            margin-bottom:16px; padding-bottom:10px;
+            border-bottom:1px solid #EDE3D0;
+        }
+
+        /* Préférences table */
+        table.prefs { width:100%; border-collapse:collapse; margin-bottom:36px; }
+        table.prefs td { padding:10px 12px; font-family:Arial,sans-serif; font-size:14px; border-bottom:1px solid #F5EFE0; }
+        table.prefs td.lbl { color:#888899; font-size:11px; text-transform:uppercase; letter-spacing:1px; width:35%; }
+        table.prefs td.val { color:#1a1a2e; font-weight:600; }
+        table.prefs tr:nth-child(odd) td { background:#FDFBF7; }
+
+        /* Description */
+        .client-msg {
+            background:#F9F5ED; border:1px solid #EDE3D0; border-radius:10px;
+            padding:20px 24px; margin-bottom:36px;
+            font-family:Georgia,serif; font-size:14px; color:#4a4a5a;
+            font-style:italic; line-height:1.8;
+        }
+
+        /* Budget */
+        .budget-bar {
+            background:linear-gradient(135deg,#8B2C2C,#6B1F1F);
+            border-radius:10px; padding:20px 24px; margin-bottom:36px;
+            color:#fff; font-family:Arial,sans-serif;
+        }
+        .budget-bar .lbl { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.65); margin-bottom:4px; }
+        .budget-bar .amt { font-size:26px; font-weight:700; color:#F5EFE0; }
+        .budget-bar .sub { font-size:12px; color:rgba(255,255,255,0.55); margin-top:2px; }
+
+        /* Plan jours */
+        .plan-intro { font-family:Arial,sans-serif; font-size:14px; color:#4a4a5a; margin-bottom:24px; line-height:1.7; }
+
+        .jour-block { margin-bottom:24px; border:1px solid #EDE3D0; border-radius:12px; overflow:hidden; }
+        .jour-hdr {
+            background:linear-gradient(90deg,#8B2C2C,#A0352D);
+            padding:12px 20px;
+        }
+        .jour-hdr .num   { font-family:Arial,sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.65); font-weight:700; }
+        .jour-hdr .titre { font-family:Georgia,serif; font-size:15px; color:#fff; font-style:italic; margin-top:2px; }
+
+        .moment { padding:14px 20px; border-bottom:1px solid #F5EFE0; font-family:Arial,sans-serif; }
+        .moment:last-child { border-bottom:none; }
+        .moment .m-lbl  { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#9B7240; font-weight:700; margin-bottom:4px; }
+        .moment .m-act  { font-size:14px; color:#1a1a2e; font-weight:600; margin-bottom:3px; }
+        .moment .m-desc { font-size:13px; color:#888899; line-height:1.6; }
+        .moment .m-prix {
+            display:inline-block; margin-top:6px;
+            font-size:12px; color:#8B2C2C; font-weight:700;
+            background:rgba(139,44,44,0.07); padding:2px 10px; border-radius:12px;
+        }
+
+        /* Conseils */
+        .notes {
+            background:#F9F5ED; border:1px solid #EDE3D0; border-radius:10px;
+            padding:20px 24px; margin-bottom:36px;
+            font-family:Arial,sans-serif; font-size:13px; color:#4a4a5a; line-height:1.7;
+        }
+        .notes ul { padding-left:18px; }
+        .notes ul li { margin-bottom:6px; }
+
+        /* Footer */
+        .footer {
+            background:#1a1a2e; padding:28px 48px; text-align:center;
+        }
+        .footer .fb  { font-family:Arial,sans-serif; font-size:13px; color:rgba(255,255,255,0.65); font-weight:600; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+        .footer p    { font-family:Arial,sans-serif; font-size:12px; color:rgba(255,255,255,0.4); line-height:1.7; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    {# ── HEADER ── #}
+    <div class="header">
+        <div class="brand">Doura Mondo</div>
+        <div class="brand-sub">Voyages Sur Mesure</div>
+        <div class="divider"></div>
+        <h1>Nouvelle demande de personnalisation</h1>
+        <div class="dest-badge">✈ {{ preferences.destination }}</div>
+    </div>
+
+    {# ── BODY ── #}
+    <div class="body">
+
+        <div class="alert">
+            <strong>📬 Nouvelle demande reçue</strong> — Un client vient de soumettre son plan de voyage généré par IA.
+            Veuillez le contacter pour confirmer et personnaliser son séjour.
+        </div>
+
+        {# Préférences #}
+        <div class="section-title">📋 Préférences du client</div>
+        <table class="prefs">
+            <tr><td class="lbl">Destination</td><td class="val">{{ preferences.destination }}</td></tr>
+            <tr><td class="lbl">Budget</td><td class="val">{{ preferences.budget }} €</td></tr>
+            <tr><td class="lbl">Voyageurs</td><td class="val">{{ preferences.nb_personnes }} personne(s)</td></tr>
+            <tr><td class="lbl">Durée</td><td class="val">{{ preferences.duree }} jours</td></tr>
+            <tr><td class="lbl">Thème</td><td class="val">{{ preferences.theme }}</td></tr>
+            <tr><td class="lbl">Hébergement</td><td class="val">{{ preferences.hebergement }}</td></tr>
+            <tr><td class="lbl">Rythme</td><td class="val">{{ preferences.rythme }}</td></tr>
+        </table>
+
+        {# Message client #}
+        {% if preferences.description is not empty %}
+        <div class="section-title">💬 Message du client</div>
+        <div class="client-msg">« {{ preferences.description }} »</div>
+        {% endif %}
+
+        {# Budget total #}
+        {% if plan.budget_total is defined %}
+        <div class="budget-bar">
+            <div class="lbl">Budget estimé total</div>
+            <div class="amt">{{ plan.budget_total }}</div>
+            <div class="sub">pour {{ preferences.nb_personnes }} personne(s) · {{ preferences.duree }} jours</div>
+        </div>
+        {% endif %}
+
+        {# Plan journalier #}
+        <div class="section-title">🗓️ Plan journalier généré par IA</div>
+        <p class="plan-intro">
+            Voici le plan détaillé que l'IA a généré pour ce client. Utilisez-le comme base pour préparer votre offre.
+        </p>
+
+        {% if plan.jours is defined %}
+            {% for jour in plan.jours %}
+            <div class="jour-block">
+                <div class="jour-hdr">
+                    <div class="num">Jour {{ loop.index }}{% if jour.titre is defined %} —{% endif %}</div>
+                    {% if jour.titre is defined %}<div class="titre">{{ jour.titre }}</div>{% endif %}
+                </div>
+
+                {% for moment_key, moment_label in {'matin': '🌅 Matin', 'apres_midi': '☀️ Après-midi', 'soir': '🌙 Soir'} %}
+                    {% if jour[moment_key] is defined %}
+                    <div class="moment">
+                        <div class="m-lbl">{{ moment_label }}</div>
+                        {% if jour[moment_key].activite is defined %}
+                            <div class="m-act">{{ jour[moment_key].activite }}</div>
+                        {% endif %}
+                        {% if jour[moment_key].description is defined %}
+                            <div class="m-desc">{{ jour[moment_key].description }}</div>
+                        {% endif %}
+                        {% if jour[moment_key].prix is defined %}
+                            <span class="m-prix">{{ jour[moment_key].prix }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {# Conseils généraux #}
+        {% if plan.conseils_generaux is defined and plan.conseils_generaux %}
+        <div class="section-title" style="margin-top:28px;">💡 Conseils généraux</div>
+        <div class="notes">
+            <ul>
+                {% for conseil in plan.conseils_generaux %}
+                <li>{{ conseil }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {# ── FOOTER ── #}
+    <div class="footer">
+        <div class="fb">Doura Mondo</div>
+        <p>
+            Email généré automatiquement suite à une demande sur le site.<br>
+            © {{ "now"|date("Y") }} Doura Mondo — Tous droits réservés.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

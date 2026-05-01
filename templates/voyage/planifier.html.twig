@@ -1,0 +1,1009 @@
+{# templates/voyage/planifier.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Planifiez votre Voyage Sur Mesure — Doura Mondo{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ═══════════════════════════════════════════════════════
+   DOURA MONDO — PLANNER WIZARD
+   Charte : Rouge bordeaux · Beige crème · Blanc · Luxe
+═══════════════════════════════════════════════════════ */
+:root {
+    --bordeaux:       #8B2C2C;
+    --bordeaux-dark:  #6B1F1F;
+    --bordeaux-light: rgba(139,44,44,0.08);
+    --gold:           #9B7240;
+    --gold-light:     #C4A882;
+    --cream:          #F5EFE0;
+    --cream-2:        #EDE3D0;
+    --beige:          #F9F5ED;
+    --text-dark:      #1a1a2e;
+    --text-mid:       #4a4a5a;
+    --text-muted:     #888899;
+    --white:          #ffffff;
+    --border:         rgba(139,44,44,0.15);
+    --border-gold:    rgba(155,114,64,0.25);
+    --shadow:         0 8px 40px rgba(139,44,44,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.planner-page {
+    min-height: 100vh;
+    background: var(--beige);
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+}
+
+/* ── Hero banner ── */
+.planner-hero {
+    background: url('https://images.unsplash.com/photo-1498307833015-e7b400441eb8?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    position: relative;
+    overflow: hidden;
+    padding: 130px 40px 140px;
+    text-align: center;
+}
+.planner-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(26,10,10,0.88) 0%, rgba(107,31,31,0.72) 60%, rgba(160,53,45,0.45) 100%);
+    z-index: 1;
+}
+.planner-hero-texture {
+    position: absolute; inset: 0;
+    background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 40px);
+    z-index: 2;
+}
+.planner-hero-curve {
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 80px;
+    background: var(--beige);
+    clip-path: ellipse(55% 100% at 50% 100%);
+    z-index: 3;
+}
+.planner-hero-inner { position: relative; z-index: 4; }
+
+.hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(139,44,44,0.45);
+    border: 1px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(8px);
+    padding: 8px 24px;
+    border-radius: 30px;
+    font-size: .68rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.planner-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    color: #fff;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.planner-hero h1 em { font-style: italic; color: var(--cream); }
+.planner-hero p {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.85);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* ── Main wrapper ── */
+.planner-main {
+    max-width: 760px;
+    margin: -70px auto 0;
+    padding: 0 24px 100px;
+    position: relative;
+    z-index: 10;
+}
+
+/* ── Progress steps ── */
+.progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 48px;
+    animation: fadeUp .6s ease both;
+}
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.step-bubble {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--border-gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: .85rem;
+    color: var(--text-muted);
+    background: var(--white);
+    transition: all .4s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.step-bubble.active {
+    border-color: var(--bordeaux);
+    color: var(--bordeaux);
+    background: var(--white);
+    box-shadow: 0 0 0 5px rgba(139,44,44,0.08), 0 4px 16px rgba(139,44,44,0.15);
+}
+.step-bubble.done {
+    border-color: var(--bordeaux);
+    background: var(--bordeaux);
+    color: #fff;
+    font-size: 1rem;
+}
+.step-label-txt {
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: color .3s;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.step-item.active .step-label-txt { color: var(--bordeaux); }
+.step-line {
+    width: 100px; height: 2px;
+    background: var(--cream-2);
+    margin: 0 6px;
+    margin-bottom: 26px;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+.step-line::after {
+    content: '';
+    position: absolute; left: 0; top: 0;
+    height: 2px;
+    background: var(--bordeaux);
+    width: 0%;
+    transition: width .5s ease;
+    border-radius: 2px;
+}
+.step-line.filled::after { width: 100%; }
+
+/* ── Wizard card ── */
+.wizard-card {
+    background: var(--white);
+    border-radius: 24px;
+    border: 1px solid var(--border-gold);
+    box-shadow: 0 40px 90px rgba(0,0,0,0.15), 0 15px 35px rgba(139,44,44,0.12);
+    overflow: hidden;
+    animation: fadeUp .6s .1s ease both;
+}
+
+/* ── Step panels ── */
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+
+.step-body { padding: 40px 44px 32px; }
+
+.step-badge {
+    display: inline-block;
+    background: var(--bordeaux-light);
+    color: var(--bordeaux);
+    font-size: .62rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+.step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.85rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+.step-title em { font-style: italic; color: var(--bordeaux); }
+.step-sub {
+    font-size: .85rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--cream-2);
+}
+
+/* ── Fields ── */
+.fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.field-g { margin-bottom: 20px; }
+
+.field-lbl {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: .75rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+.field-lbl i { color: var(--bordeaux); font-size: .85rem; }
+
+.f-input, .f-select, .f-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(249, 245, 237, 0.4);
+    border: 1px solid var(--border-gold);
+    border-radius: 12px;
+    color: var(--bordeaux-dark);
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    transition: all .4s ease;
+    appearance: none;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.015);
+}
+.f-input:focus, .f-select:focus, .f-textarea:focus {
+    outline: none;
+    border-color: var(--bordeaux);
+    background: #fff;
+    box-shadow: 0 5px 25px rgba(139,44,44,0.1), inset 0 0 0 transparent;
+}
+.f-input::placeholder, .f-textarea::placeholder {
+    color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif;
+    font-size: .88rem;
+    font-style: normal;
+}
+.f-textarea { resize: vertical; min-height: 120px; line-height: 1.65; }
+
+/* ── AUTOCOMPLETE ── */
+.dest-wrapper {
+    position: relative;
+}
+.autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--white);
+    border: 1.5px solid var(--border-gold);
+    border-radius: 12px;
+    box-shadow: 0 16px 50px rgba(139,44,44,0.12), 0 4px 20px rgba(0,0,0,0.08);
+    z-index: 200;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+}
+.autocomplete-dropdown::-webkit-scrollbar { width: 4px; }
+.autocomplete-dropdown::-webkit-scrollbar-thumb { background: var(--cream-2); border-radius: 2px; }
+
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--cream-2);
+    transition: background .15s;
+}
+.autocomplete-item:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
+.autocomplete-item:first-child { border-radius: 12px 12px 0 0; }
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: var(--bordeaux-light);
+}
+.autocomplete-item i {
+    color: var(--bordeaux);
+    font-size: .8rem;
+    flex-shrink: 0;
+    width: 16px;
+}
+.autocomplete-item-text { flex: 1; min-width: 0; }
+.autocomplete-city {
+    font-family: 'Playfair Display', serif;
+    font-size: .9rem;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.autocomplete-country {
+    font-size: .72rem;
+    color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 1px;
+}
+.autocomplete-loading {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: .82rem; color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif;
+}
+.autocomplete-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--cream-2);
+    border-top-color: var(--bordeaux);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Budget slider ── */
+.budget-hero {
+    background: linear-gradient(135deg, var(--bordeaux-light), rgba(155,114,64,0.06));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 24px 16px;
+    margin-bottom: 20px;
+}
+.budget-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 16px;
+}
+.budget-val {
+    font-family: 'Cinzel', serif;
+    font-size: 2.1rem;
+    color: var(--bordeaux);
+    letter-spacing: -.02em;
+}
+.budget-unit { font-size: .75rem; color: var(--text-muted); }
+
+input[type="range"] {
+    width: 100%; height: 6px;
+    background: var(--cream-2);
+    border-radius: 3px;
+    appearance: none; cursor: pointer; outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--bordeaux);
+    box-shadow: 0 2px 10px rgba(139,44,44,0.35);
+    cursor: pointer;
+    transition: transform .2s;
+    border: 3px solid #fff;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+/* ── Choice cards ── */
+.choices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+}
+.choice-card {
+    background: var(--beige);
+    border: 1.5px solid var(--cream-2);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+.choice-card:hover {
+    border-color: var(--bordeaux);
+    background: var(--white);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(139,44,44,0.1);
+}
+.choice-card.selected {
+    border-color: var(--bordeaux);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(139,44,44,0.08), 0 8px 25px rgba(139,44,44,0.12);
+}
+.choice-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.choice-icon { font-size: 1.45rem; margin-bottom: 6px; display: block; }
+.choice-lbl {
+    font-size: .65rem;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    transition: color .25s;
+}
+.choice-card.selected .choice-lbl { color: var(--bordeaux); }
+
+/* ── Rythme cards ── */
+.rythme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.rythme-card {
+    background: var(--beige);
+    border: 1.5px solid var(--cream-2);
+    border-radius: 14px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+.rythme-card:hover {
+    border-color: var(--bordeaux);
+    background: var(--white);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(139,44,44,0.1);
+}
+.rythme-card.selected {
+    border-color: var(--bordeaux);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(139,44,44,0.08), 0 8px 25px rgba(139,44,44,0.12);
+}
+.rythme-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.rythme-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+.rythme-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+.rythme-card.selected .rythme-name { color: var(--bordeaux); }
+.rythme-desc { font-size: .7rem; color: var(--text-muted); line-height: 1.6; }
+
+/* ── Section label ── */
+.section-sep {
+    font-size: .62rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    display: flex; align-items: center; gap: 12px;
+    margin: 32px 0 16px;
+}
+.section-sep::after { content: ''; flex: 1; height: 1px; background: var(--cream-2); }
+
+/* ── Récap ── */
+.recap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.recap-item {
+    background: var(--white);
+    border: 1px solid var(--cream-2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    border-left: 4px solid var(--bordeaux);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+.recap-label {
+    font-size: .6rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--gold);
+    font-weight: 700; margin-bottom: 6px;
+}
+.recap-value { font-size: .95rem; color: var(--text-dark); font-weight: 500; }
+
+/* ── Navigation ── */
+.wizard-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px 44px 32px;
+    border-top: 1px solid var(--cream-2);
+    background: var(--white);
+}
+.btn-prev-w {
+    background: none;
+    border: 1.5px solid var(--cream-2);
+    color: var(--text-muted);
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: .85rem; cursor: pointer;
+    transition: all .25s;
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 600; letter-spacing: .06em;
+}
+.btn-prev-w:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+.btn-prev-w.hidden { visibility: hidden; }
+
+.btn-next-w {
+    background: var(--bordeaux);
+    border: none; color: #fff;
+    padding: 16px 40px;
+    border-radius: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: .88rem; font-weight: 700;
+    cursor: pointer; transition: all .25s;
+    letter-spacing: .08em;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 25px rgba(139,44,44,0.3);
+}
+.btn-next-w:hover { background: var(--bordeaux-dark); transform: translateY(-3px); box-shadow: 0 12px 30px rgba(139,44,44,0.4); }
+
+.btn-generate-w {
+    background: linear-gradient(135deg, var(--bordeaux-dark), var(--bordeaux));
+    border: none; color: #fff;
+    padding: 18px 46px;
+    border-radius: 12px;
+    font-family: 'Cinzel', serif;
+    font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: all .3s;
+    letter-spacing: .1em;
+    display: none; align-items: center; gap: 12px;
+    box-shadow: 0 10px 35px rgba(139,44,44,0.4);
+}
+.btn-generate-w:hover { transform: translateY(-3px); box-shadow: 0 16px 45px rgba(139,44,44,0.5); }
+.btn-generate-w i { font-size: 1.1rem; }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.wizard-step.active { animation: fadeUp .4s ease both; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .planner-hero { padding: 90px 24px 120px; }
+    .planner-hero h1 { font-size: 2.2rem; }
+    .planner-main { margin-top: -50px; padding: 0 16px 80px; }
+}
+@media (max-width: 600px) {
+    .step-body { padding: 32px 24px 28px; }
+    .wizard-nav { padding: 18px 24px 28px; }
+    .fields-row { grid-template-columns: 1fr; }
+    .choices-grid { grid-template-columns: repeat(2, 1fr); }
+    .rythme-grid { grid-template-columns: 1fr; }
+    .recap-grid { grid-template-columns: 1fr; }
+    .step-line { width: 50px; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="planner-page">
+
+    <!-- Hero -->
+    <div class="planner-hero">
+        <div class="planner-hero-texture"></div>
+        <div class="planner-hero-inner">
+            <div class="hero-eyebrow">
+                <i class="fas fa-magic"></i> Doura Mondo · Intelligence Artificielle
+            </div>
+            <h1>Planifiez votre voyage<br><em>sur mesure</em></h1>
+            <p>Décrivez vos rêves, notre IA crée votre itinéraire parfait en quelques secondes.</p>
+        </div>
+        <div class="planner-hero-curve"></div>
+    </div>
+
+    <div class="planner-main">
+
+        <!-- Progress -->
+        <div class="progress-bar-wrap" id="progressBar">
+            <div class="step-item active" id="stepItem1">
+                <div class="step-bubble active" id="stepBubble1">1</div>
+                <span class="step-label-txt">L'essentiel</span>
+            </div>
+            <div class="step-line" id="line1"></div>
+            <div class="step-item" id="stepItem2">
+                <div class="step-bubble" id="stepBubble2">2</div>
+                <span class="step-label-txt">Vos goûts</span>
+            </div>
+            <div class="step-line" id="line2"></div>
+            <div class="step-item" id="stepItem3">
+                <div class="step-bubble" id="stepBubble3">3</div>
+                <span class="step-label-txt">Finaliser</span>
+            </div>
+        </div>
+
+        <!-- Wizard -->
+        <div class="wizard-card">
+            <form method="POST" action="{{ path('app_planifier_generer') }}" id="plannerForm">
+
+                <!-- ══ ÉTAPE 1 ══ -->
+                <div class="wizard-step active" id="step1">
+                    <div class="step-body">
+                        <div class="step-badge">Étape 1 sur 3</div>
+                        <h2 class="step-title">Les bases de votre<br><em>séjour de rêve</em></h2>
+                        <p class="step-sub">Commençons par les informations fondamentales pour construire votre voyage parfait.</p>
+
+                        <!-- ✅ CHAMP DESTINATION AVEC AUTOCOMPLETE -->
+                        <div class="field-g">
+                            <label class="field-lbl"><i class="fas fa-globe"></i> Destination de vos rêves</label>
+                            <div class="dest-wrapper">
+                                <input type="text" name="destination" id="inputDest" class="f-input"
+                                       placeholder="Ex : Marrakech, Bali, Tokyo, Santorin…"
+                                       autocomplete="off" required>
+                                <div class="autocomplete-dropdown" id="autocompleteList"></div>
+                            </div>
+                        </div>
+
+                        <div class="budget-hero">
+                            <div class="budget-top">
+                                <div>
+                                    <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px;">Budget total du séjour</div>
+                                    <span class="budget-val" id="budgetDisplay">2 000</span>
+                                    <span class="budget-unit"> €</span>
+                                </div>
+                                <div style="font-size:.75rem;color:var(--text-muted);">500 € — 20 000 €</div>
+                            </div>
+                            <input type="range" id="budgetRange" min="500" max="20000" step="100" value="2000">
+                            <input type="hidden" name="budget" id="budgetHidden" value="2000">
+                        </div>
+
+                        <div class="fields-row">
+                            <div class="field-g" style="margin-bottom:0">
+                                <label class="field-lbl"><i class="fas fa-users"></i> Nombre de voyageurs</label>
+                                <select name="nb_personnes" class="f-select">
+                                    <option value="1">1 — Voyage solo</option>
+                                    <option value="2" selected>2 — En duo</option>
+                                    <option value="3">3 personnes</option>
+                                    <option value="4">4 — En groupe</option>
+                                    <option value="5">5 et plus — Famille</option>
+                                </select>
+                            </div>
+                            <div class="field-g" style="margin-bottom:0">
+                                <label class="field-lbl"><i class="fas fa-calendar-alt"></i> Durée du séjour</label>
+                                <select name="duree" class="f-select">
+                                    <option value="3">3 jours — Court séjour</option>
+                                    <option value="5">5 jours</option>
+                                    <option value="7" selected>7 jours — Une semaine</option>
+                                    <option value="10">10 jours</option>
+                                    <option value="14">14 jours — Deux semaines</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ ÉTAPE 2 ══ -->
+                <div class="wizard-step" id="step2">
+                    <div class="step-body">
+                        <div class="step-badge">Étape 2 sur 3</div>
+                        <h2 class="step-title">Vos envies &<br><em>préférences</em></h2>
+                        <p class="step-sub">Personnalisez votre expérience selon vos passions et votre style de voyage préféré.</p>
+
+                        <div class="section-sep"><i class="fas fa-compass"></i> Thème du voyage</div>
+                        <div class="choices-grid">
+                            <label class="choice-card selected" data-group="theme">
+                                <input type="radio" name="theme" value="Culture & Histoire" checked>
+                                <span class="choice-icon">🏛️</span>
+                                <span class="choice-lbl">Culture</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Aventure & Nature">
+                                <span class="choice-icon">🏔️</span>
+                                <span class="choice-lbl">Aventure</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Détente & Plage">
+                                <span class="choice-icon">🏖️</span>
+                                <span class="choice-lbl">Détente</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Gastronomie & Art de vivre">
+                                <span class="choice-icon">🍽️</span>
+                                <span class="choice-lbl">Gastro</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Romance & Luxe">
+                                <span class="choice-icon">💎</span>
+                                <span class="choice-lbl">Romance</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Famille & Découverte">
+                                <span class="choice-icon">👨‍👩‍👧</span>
+                                <span class="choice-lbl">Famille</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Sport & Randonnée">
+                                <span class="choice-icon">🧗</span>
+                                <span class="choice-lbl">Sport</span>
+                            </label>
+                            <label class="choice-card" data-group="theme">
+                                <input type="radio" name="theme" value="Bien-être & Spa">
+                                <span class="choice-icon">🧘</span>
+                                <span class="choice-lbl">Bien-être</span>
+                            </label>
+                        </div>
+
+                        <div class="section-sep" style="margin-top:28px;"><i class="fas fa-hotel"></i> Hébergement</div>
+                        <div class="choices-grid">
+                            <label class="choice-card" data-group="hebergement">
+                                <input type="radio" name="hebergement" value="Hôtel 5 étoiles">
+                                <span class="choice-icon">⭐</span>
+                                <span class="choice-lbl">5 Étoiles</span>
+                            </label>
+                            <label class="choice-card selected" data-group="hebergement">
+                                <input type="radio" name="hebergement" value="Boutique Hôtel" checked>
+                                <span class="choice-icon">🏨</span>
+                                <span class="choice-lbl">Boutique</span>
+                            </label>
+                            <label class="choice-card" data-group="hebergement">
+                                <input type="radio" name="hebergement" value="Riad & Maison d'hôtes">
+                                <span class="choice-icon">🕌</span>
+                                <span class="choice-lbl">Riad</span>
+                            </label>
+                            <label class="choice-card" data-group="hebergement">
+                                <input type="radio" name="hebergement" value="Villa privée">
+                                <span class="choice-icon">🏡</span>
+                                <span class="choice-lbl">Villa</span>
+                            </label>
+                        </div>
+
+                        <div class="section-sep" style="margin-top:28px;"><i class="fas fa-tachometer-alt"></i> Rythme du voyage</div>
+                        <div class="rythme-grid">
+                            <label class="rythme-card" data-group="rythme">
+                                <input type="radio" name="rythme" value="Intensif">
+                                <span class="rythme-icon">⚡</span>
+                                <div class="rythme-name">Intensif</div>
+                                <div class="rythme-desc">Voir un maximum, chaque heure compte</div>
+                            </label>
+                            <label class="rythme-card selected" data-group="rythme">
+                                <input type="radio" name="rythme" value="Modéré" checked>
+                                <span class="rythme-icon">🌿</span>
+                                <div class="rythme-name">Modéré</div>
+                                <div class="rythme-desc">Équilibre parfait entre activités et repos</div>
+                            </label>
+                            <label class="rythme-card" data-group="rythme">
+                                <input type="radio" name="rythme" value="Tranquille">
+                                <span class="rythme-icon">🌅</span>
+                                <div class="rythme-name">Tranquille</div>
+                                <div class="rythme-desc">Flâner, s'imprégner, prendre le temps</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ ÉTAPE 3 ══ -->
+                <div class="wizard-step" id="step3">
+                    <div class="step-body">
+                        <div class="step-badge">Étape 3 sur 3</div>
+                        <h2 class="step-title">Votre vision<br><em>du voyage parfait</em></h2>
+                        <p class="step-sub">Récapitulatif de vos choix et description libre. Plus vous êtes précis, plus l'IA sera pertinente.</p>
+
+                        <div class="recap-grid" id="recapGrid">
+                            <div class="recap-item">
+                                <div class="recap-label">Destination</div>
+                                <div class="recap-value" id="recapDest">—</div>
+                            </div>
+                            <div class="recap-item">
+                                <div class="recap-label">Budget</div>
+                                <div class="recap-value" id="recapBudget">—</div>
+                            </div>
+                            <div class="recap-item">
+                                <div class="recap-label">Voyageurs · Durée</div>
+                                <div class="recap-value" id="recapPax">—</div>
+                            </div>
+                            <div class="recap-item">
+                                <div class="recap-label">Thème · Rythme</div>
+                                <div class="recap-value" id="recapTheme">—</div>
+                            </div>
+                        </div>
+
+                        <div class="field-g">
+                            <label class="field-lbl"><i class="fas fa-pen-fancy"></i> Décrivez votre voyage idéal</label>
+                            <textarea name="description" class="f-textarea"
+                                placeholder="Ex : Je rêve de me perdre dans les ruelles de la médina, goûter la cuisine locale dans des endroits secrets, voir un coucher de soleil depuis un rooftop... J'aime l'authenticité et j'évite les endroits trop touristiques."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="wizard-nav">
+                    <button type="button" class="btn-prev-w hidden" id="btnPrev">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                    <button type="button" class="btn-next-w" id="btnNext">
+                        Continuer <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="btn-generate-w" id="btnGenerate">
+                        <i class="fas fa-magic"></i> Générer mon plan
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ══════════════════════════════════════════════
+    // AUTOCOMPLETE DESTINATION (Nominatim OSM)
+    // ══════════════════════════════════════════════
+    const destInput  = document.getElementById('inputDest');
+    const autoList   = document.getElementById('autocompleteList');
+    let debounce     = null;
+    let selectedIdx  = -1;
+
+    destInput.addEventListener('input', () => {
+        clearTimeout(debounce);
+        const q = destInput.value.trim();
+        if (q.length < 2) { closeAuto(); return; }
+        // Afficher spinner pendant le chargement
+        autoList.style.display = 'block';
+        autoList.innerHTML = `<div class="autocomplete-loading"><div class="autocomplete-spinner"></div> Recherche en cours…</div>`;
+        debounce = setTimeout(() => fetchPlaces(q), 350);
+    });
+
+    async function fetchPlaces(query) {
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&accept-language=fr&featuretype=city,country,state`;
+            const res  = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+            const data = await res.json();
+            renderAuto(data);
+        } catch {
+            closeAuto();
+        }
+    }
+
+    function renderAuto(items) {
+        autoList.innerHTML = '';
+        selectedIdx = -1;
+        if (!items.length) { closeAuto(); return; }
+
+        items.forEach(item => {
+            const parts   = item.display_name.split(',');
+            const city    = parts[0].trim();
+            const country = parts[parts.length - 1].trim();
+            const region  = parts.length > 2 ? parts.slice(1, -1).join(',').trim() : '';
+
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.innerHTML = `
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="autocomplete-item-text">
+                    <div class="autocomplete-city">${city}</div>
+                    <div class="autocomplete-country">${region ? region + ' · ' : ''}${country}</div>
+                </div>`;
+
+            // Sélection au clic (mousedown pour éviter le blur)
+            div.addEventListener('mousedown', e => {
+                e.preventDefault();
+                destInput.value = city + (country ? ', ' + country : '');
+                closeAuto();
+                destInput.style.borderColor = 'var(--bordeaux)';
+                destInput.style.boxShadow   = '0 5px 25px rgba(139,44,44,0.1)';
+                setTimeout(() => {
+                    destInput.style.borderColor = '';
+                    destInput.style.boxShadow   = '';
+                }, 1200);
+            });
+
+            autoList.appendChild(div);
+        });
+
+        autoList.style.display = 'block';
+    }
+
+    // Navigation clavier ↑ ↓ Entrée Échap
+    destInput.addEventListener('keydown', e => {
+        const items = autoList.querySelectorAll('.autocomplete-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIdx = Math.min(selectedIdx + 1, items.length - 1);
+            highlightAuto(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIdx = Math.max(selectedIdx - 1, 0);
+            highlightAuto(items);
+        } else if (e.key === 'Enter' && selectedIdx >= 0) {
+            e.preventDefault();
+            items[selectedIdx].dispatchEvent(new Event('mousedown'));
+        } else if (e.key === 'Escape') {
+            closeAuto();
+        }
+    });
+
+    function highlightAuto(items) {
+        items.forEach((item, i) => item.classList.toggle('active', i === selectedIdx));
+        if (selectedIdx >= 0) items[selectedIdx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function closeAuto() {
+        autoList.style.display = 'none';
+        autoList.innerHTML = '';
+        selectedIdx = -1;
+    }
+
+    // Fermer en cliquant ailleurs
+    document.addEventListener('click', e => {
+        if (!destInput.contains(e.target) && !autoList.contains(e.target)) closeAuto();
+    });
+
+    // ══════════════════════════════════════════════
+    // BUDGET SLIDER
+    // ══════════════════════════════════════════════
+    const range   = document.getElementById('budgetRange');
+    const display = document.getElementById('budgetDisplay');
+    const hidden  = document.getElementById('budgetHidden');
+    range.removeAttribute('name');
+    range.addEventListener('input', e => {
+        display.textContent = parseInt(e.target.value).toLocaleString('fr-FR');
+        hidden.value = e.target.value;
+    });
+
+    // ══════════════════════════════════════════════
+    // CHOICE CARDS
+    // ══════════════════════════════════════════════
+    document.querySelectorAll('.choice-card, .rythme-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const g = card.dataset.group;
+            document.querySelectorAll(`[data-group="${g}"]`).forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            card.querySelector('input').checked = true;
+        });
+    });
+
+    // ══════════════════════════════════════════════
+    // NAVIGATION WIZARD
+    // ══════════════════════════════════════════════
+    let current = 1;
+    const total = 3;
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnGen  = document.getElementById('btnGenerate');
+
+    function goTo(step) {
+        document.getElementById(`step${current}`).classList.remove('active');
+        document.getElementById(`step${step}`).classList.add('active');
+
+        for (let i = 1; i <= total; i++) {
+            const b  = document.getElementById(`stepBubble${i}`);
+            const it = document.getElementById(`stepItem${i}`);
+            b.className = 'step-bubble';
+            it.className = 'step-item';
+            if (i < step)        { b.classList.add('done'); b.innerHTML = '✓'; }
+            else if (i === step) { b.classList.add('active'); b.textContent = i; it.classList.add('active'); }
+            else                 { b.textContent = i; }
+        }
+        for (let i = 1; i < total; i++) {
+            document.getElementById(`line${i}`).classList.toggle('filled', i < step);
+        }
+
+        btnPrev.classList.toggle('hidden', step === 1);
+        if (step === total) {
+            btnNext.style.display = 'none';
+            btnGen.style.display  = 'flex';
+            updateRecap();
+        } else {
+            btnNext.style.display = 'flex';
+            btnGen.style.display  = 'none';
+        }
+        current = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateRecap() {
+        const dest  = destInput.value || '—';
+        const b     = parseInt(range.value).toLocaleString('fr-FR') + ' €';
+        const pax   = document.querySelector('[name="nb_personnes"]').value;
+        const dur   = document.querySelector('[name="duree"]').value;
+        const theme = document.querySelector('[name="theme"]:checked')?.value || '—';
+        const rythm = document.querySelector('[name="rythme"]:checked')?.value || '—';
+        document.getElementById('recapDest').textContent   = dest;
+        document.getElementById('recapBudget').textContent = b;
+        document.getElementById('recapPax').textContent    = `${pax} pers. · ${dur} jours`;
+        document.getElementById('recapTheme').textContent  = `${theme} · ${rythm}`;
+    }
+
+    btnNext.addEventListener('click', () => {
+        if (current === 1) {
+            if (!destInput.value.trim()) {
+                destInput.focus();
+                destInput.style.borderColor = 'var(--bordeaux)';
+                destInput.style.boxShadow   = '0 0 0 3px rgba(139,44,44,0.15)';
+                return;
+            }
+            destInput.style.borderColor = '';
+            destInput.style.boxShadow   = '';
+        }
+        if (current < total) goTo(current + 1);
+    });
+
+    btnPrev.addEventListener('click', () => { if (current > 1) goTo(current - 1); });
+});
+</script>
+{% endblock %}
