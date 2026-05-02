@@ -1,0 +1,1219 @@
+{% extends 'admin/base-admin.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{# ── Ajoute la classe page-dashboard sur <body> ──────────── #}
+{# Option A : si base-admin expose un block body_class        #}
+{% block body_class %}page-dashboard{% endblock %}
+
+{# Option B : si base-admin expose un block body_attr         #}
+{# {% block body_attr %}class="page-dashboard"{% endblock %}  #}
+
+{% block stylesheets %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+    /* ── OVERRIDE main-content ─────────────────────────────── */
+   
+    /* UNIQUEMENT sur la page dashboard — sans risque global     */
+    main.main-content {
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ── RESET & BASE ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    .dash-wrapper {
+        padding: 2rem 2.5rem;
+        font-family: 'Montserrat', sans-serif;
+        background: #f9f4f4;
+        min-height: 100vh;
+    }
+
+    /* ── PAGE HEADER ────────────────────────────────────────── */
+    .dash-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid rgba(139,0,0,0.12);
+    }
+    .dash-header-left { display: flex; flex-direction: column; gap: 0.1rem; }
+    .dash-brand-row   { display: flex; align-items: baseline; gap: 0.6rem; }
+    .dash-brand-doura {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3rem;
+        font-weight: 400;
+        color: #8B0000;
+        line-height: 1;
+        letter-spacing: 0.02em;
+    }
+    .dash-brand-mondo {
+        font-family: 'Great Vibes', cursive;
+        font-size: 2.6rem;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        color: #8B0000;
+        line-height: 1;
+    }
+    .dash-brand-sep {
+        width: 55px; height: 1px;
+        background: linear-gradient(90deg, #8B0000, transparent);
+        margin: 0.25rem 0;
+    }
+    .dash-header-left p {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+        font-size: 0.82rem;
+        color: #aaa;
+        margin: 0;
+        letter-spacing: 0.06em;
+    }
+    .dash-date {
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #bbb;
+        font-weight: 500;
+    }
+
+    /* ── SECTION DIVIDER ────────────────────────────────────── */
+    .section-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin: 1.8rem 0 1rem;
+    }
+    .section-divider-label {
+        font-family: 'Cinzel', serif;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8B0000;
+        white-space: nowrap;
+    }
+    .section-divider-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(139,0,0,0.2), transparent);
+    }
+
+    /* ── KPI CARDS ──────────────────────────────────────────── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+        background: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 1.2rem 1.4rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(139,0,0,0.13), 0 1px 4px rgba(139,0,0,0.07);
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .kpi-card:hover { box-shadow: 0 10px 32px rgba(139,0,0,0.22), 0 2px 8px rgba(139,0,0,0.10); transform: translateY(-2px); }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #8B0000, #c0392b);
+    }
+    .kpi-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 0.3rem;
+    }
+    .kpi-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .kpi-badge-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        color: #8B0000;
+        letter-spacing: 0.04em;
+    }
+    .kpi-bottom-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    .kpi-value {
+        font-family: 'Cinzel', serif;
+        font-size: 1.7rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        line-height: 1;
+    }
+    .kpi-sparkline { flex-shrink: 0; opacity: 0.85; }
+
+    /* ── CHART CARDS ────────────────────────────────────────── */
+    .chart-card {
+        background: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 1.4rem 1.6rem;
+        box-shadow: 0 4px 18px rgba(139,0,0,0.11), 0 1px 4px rgba(139,0,0,0.06);
+    }
+    .chart-card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8B0000;
+        margin-bottom: 1rem;
+    }
+    .chart-card-title span {
+        font-style: italic;
+        font-weight: 400;
+        font-size: 0.65rem;
+        color: #c0a0a0;
+        margin-left: 6px;
+    }
+
+    /* ── GRIDS ──────────────────────────────────────────────── */
+    .charts-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .charts-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .charts-row-wide { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+    /* ── WORLD MAP ──────────────────────────────────────────── */
+    .map-container { display: flex; gap: 0; align-items: stretch; height: 420px; }
+    .map-country-list {
+        width: 172px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        gap: 0;
+        padding-right: 1rem;
+        border-right: 1px solid rgba(139,0,0,0.10);
+        margin-right: 1rem;
+        overflow-y: auto;
+    }
+    .map-country-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        padding: 5px 7px;
+        border-radius: 7px;
+        transition: background 0.15s;
+        position: relative;
+    }
+    .map-country-item:hover, .map-country-item.active { background: rgba(139,0,0,0.06); }
+    .map-country-rank {
+        font-family: 'Cinzel', serif;
+        font-size: 0.58rem;
+        font-weight: 700;
+        color: #fff;
+        background: #8B0000;
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        letter-spacing: 0;
+    }
+    .map-country-info { flex: 1; min-width: 0; }
+    .map-country-name {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #2a1a1a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .map-country-bar-wrap {
+        height: 3px;
+        background: rgba(139,0,0,0.10);
+        border-radius: 2px;
+        margin-top: 3px;
+        overflow: hidden;
+    }
+    .map-country-bar { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #8B0000, #c0392b); transition: width 0.6s ease; }
+    .map-country-pct { font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 700; color: #8B0000; flex-shrink: 0; }
+    #worldMapSvg { flex: 1; height: 100%; min-width: 0; border-radius: 10px; overflow: hidden; }
+
+    /* ── MAP WHITE BG (original) ────────────────────────────── */
+    #worldMapSvg, #worldMapSvg svg,
+    #worldMapSvg > *, .map-container, .map-country-list {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+    }
+    .map-country-name { color: #444 !important; }
+    .map-country-pct  { color: #8B0000 !important; }
+
+    /* ── MAP BUBBLE indicateur ──────────────────────────────── */
+    .map-bubble {
+        fill: #8B0000;
+        stroke: #fff;
+        stroke-width: 1.5;
+        cursor: pointer;
+        transition: fill 0.2s;
+    }
+    .map-bubble:hover { fill: #c0392b; }
+    .map-bubble-label {
+        fill: #fff;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+    }
+
+    /* ── MAP TOOLTIP ────────────────────────────────────────── */
+    .map-tooltip {
+        position: fixed;
+        background: #fff;
+        color: #2a1a1a;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.7rem;
+        font-family: 'Montserrat', sans-serif;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 9999;
+        white-space: nowrap;
+        box-shadow: 0 6px 24px rgba(139,0,0,0.18);
+        border: 1px solid rgba(139,0,0,0.12);
+        min-width: 140px;
+    }
+    .map-tooltip.visible { opacity: 1; }
+    .map-tooltip-flag { font-size: 1.1rem; margin-bottom: 4px; display: block; }
+    .map-tooltip-country { font-weight: 700; font-size: 0.78rem; margin-bottom: 2px; color: #2a1a1a; }
+    .map-tooltip-count { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700; color: #8B0000; }
+    .map-tooltip-pct { font-size: 0.65rem; color: #888; margin-top: 1px; }
+
+    /* ── DURÉE AVG BOX ──────────────────────────────────────── */
+    .avg-stat-box {
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; height: 100%; text-align: center; padding: 1rem 0;
+    }
+    .avg-big {
+        font-family: 'Cinzel', serif; font-size: 4.5rem; font-weight: 500;
+        color: #1a1a1a; line-height: 1;
+    }
+    .avg-big .avg-unit {
+        font-size: 1.2rem; color: #c0392b; font-family: 'Montserrat', sans-serif;
+        font-weight: 600; letter-spacing: 0.08em; vertical-align: super; margin-left: 4px;
+    }
+    .avg-label {
+        font-family: 'Cormorant Garamond', serif; font-style: italic;
+        font-size: 1.1rem; color: #999; margin-top: 0.5rem; letter-spacing: 0.04em;
+    }
+    .avg-divider {
+        width: 40px; height: 2px;
+        background: linear-gradient(90deg, #c0392b, #e74c3c);
+        border-radius: 2px; margin: 0.8rem auto;
+    }
+    .avg-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 1.2rem; width: 100%; }
+    .avg-sub-card {
+        background: #fafafa; border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 10px; padding: 0.7rem 0.9rem; text-align: left;
+    }
+    .avg-sub-label {
+        font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #bbb; margin-bottom: 3px;
+    }
+    .avg-sub-val { font-family: 'Cinzel', serif; font-size: 1.1rem; color: #1a1a1a; }
+
+    /* ── MINI KPI STRIP ─────────────────────────────────────── */
+    .mini-kpi-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .mini-kpi {
+        background: #fdf5f5; border-radius: 8px; padding: 0.6rem 0.8rem;
+        border-left: 3px solid #8B0000;
+    }
+    .mini-kpi-label {
+        font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #bbb; margin-bottom: 2px;
+    }
+    .mini-kpi-val { font-family: 'Cinzel', serif; font-size: 1.05rem; color: #8B0000; }
+    .mini-kpi-val span { font-size: 0.65rem; font-family: 'Montserrat', sans-serif; margin-left: 2px; }
+
+    /* ── ACTIVITE KPI GRID ──────────────────────────────────── */
+    .act-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
+    .act-kpi {
+        background: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(139,0,0,0.11), 0 1px 4px rgba(139,0,0,0.06);
+    }
+    .act-kpi::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #8B0000, #e88080);
+    }
+    .act-kpi-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #bbb; margin-bottom: 4px; }
+    .act-kpi-val { font-family: 'Cinzel', serif; font-size: 1.5rem; color: #1a1a1a; line-height: 1; }
+    .act-kpi-sub { font-size: 0.62rem; color: #c0a0a0; margin-top: 3px; }
+
+    /* ── RESERVATION KPI ────────────────────────────────────── */
+    .res-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
+    .res-kpi {
+        background: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(139,0,0,0.11), 0 1px 4px rgba(139,0,0,0.06);
+    }
+    .res-kpi::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 3px; height: 100%;
+        background: linear-gradient(180deg, #8B0000, #e88080);
+    }
+    .res-kpi-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #bbb; margin-bottom: 4px; }
+    .res-kpi-val { font-family: 'Cinzel', serif; font-size: 1.5rem; color: #1a1a1a; line-height: 1; }
+    .res-kpi-sub { font-size: 0.62rem; color: #c0a0a0; margin-top: 3px; }
+
+    /* ── LEGEND PILLS ───────────────────────────────────────── */
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+    .chart-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.65rem; color: #888; }
+    .chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="dash-wrapper">
+
+    {# ── PAGE HEADER ─────────────────────────────────────────── #}
+    <div class="dash-header">
+        <div class="dash-header-left">
+            <div class="dash-brand-row">
+                <span class="dash-brand-doura">Envie d'explorer</span>
+                <span class="dash-brand-mondo">vos nouveautés ?</span>
+            </div>
+            <div class="dash-brand-sep"></div>
+            <p>Tableau de bord &mdash; Voyages d'Exception</p>
+        </div>
+        <div class="dash-date">{{ "now"|date("d/m/Y") }}</div>
+    </div>
+
+    {# ══════════════════════════════════════════════════════════ #}
+    {# SECTION 1 — VOYAGES                                        #}
+    {# ══════════════════════════════════════════════════════════ #}
+    <div class="section-divider">
+        <span class="section-divider-label">Voyages</span>
+        <div class="section-divider-line"></div>
+    </div>
+
+    {# KPI VOYAGES #}
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-top-row">
+                <div class="kpi-label">Total Voyages</div>
+                <div class="kpi-badge-inline">▲ 18.4% vs PY</div>
+            </div>
+            <div class="kpi-bottom-row">
+                <div class="kpi-value">{{ stats.totalVoyages }}</div>
+                <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+                    <polyline points="0,28 13,22 26,30 39,14 52,18 65,8 80,4" fill="none" stroke="#8B0000" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top-row">
+                <div class="kpi-label">Destinations</div>
+                <div class="kpi-badge-inline">▲ 12.1% vs PY</div>
+            </div>
+            <div class="kpi-bottom-row">
+                <div class="kpi-value">{{ stats.totalDestinations }}</div>
+                <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+                    <polyline points="0,32 13,20 26,26 39,30 52,16 65,22 80,10" fill="none" stroke="#8B0000" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top-row">
+                <div class="kpi-label">Continents</div>
+                <div class="kpi-badge-inline">▲ 5.0% vs PY</div>
+            </div>
+            <div class="kpi-bottom-row">
+                <div class="kpi-value">{{ stats.totalContinents }}</div>
+                <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+                    <polyline points="0,24 13,28 26,18 39,22 52,12 65,16 80,6" fill="none" stroke="#8B0000" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top-row">
+                <div class="kpi-label">Places Totales</div>
+                <div class="kpi-badge-inline">▲ 9.3% vs PY</div>
+            </div>
+            <div class="kpi-bottom-row">
+                <div class="kpi-value">{{ stats.totalPersonnes }}</div>
+                <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+                    <polyline points="0,30 13,26 26,32 39,20 52,24 65,14 80,8" fill="none" stroke="#8B0000" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {# MAP + DURÉE #}
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-card-title">Voyages par Destination <span>| pourcentage mondial</span></div>
+            <div class="map-container">
+                <div class="map-country-list" id="countryList"></div>
+                <div id="worldMapSvg"></div>
+            </div>
+            <div class="map-tooltip" id="mapTooltip">
+                <span class="map-tooltip-flag" id="tooltipFlag"></span>
+                <div class="map-tooltip-country" id="tooltipCountry"></div>
+                <div class="map-tooltip-count" id="tooltipCount"></div>
+                <div class="map-tooltip-pct" id="tooltipPct"></div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card-title">Durée Moyenne par Destination <span>| jours</span></div>
+            <div class="mini-kpi-strip">
+                <div class="mini-kpi">
+                    <div class="mini-kpi-label">Moyenne</div>
+                    <div class="mini-kpi-val">{{ stats.avgDuree }}<span>j</span></div>
+                </div>
+                <div class="mini-kpi">
+                    <div class="mini-kpi-label">Min</div>
+                    <div class="mini-kpi-val">{{ stats.minDuree }}<span>j</span></div>
+                </div>
+                <div class="mini-kpi">
+                    <div class="mini-kpi-label">Max</div>
+                    <div class="mini-kpi-val">{{ stats.maxDuree }}<span>j</span></div>
+                </div>
+            </div>
+            <div style="position:relative; width:100%; height:185px;">
+                <canvas id="dureeChart" role="img" aria-label="Durée moyenne par destination.">Durée moy. : {{ stats.avgDuree }}j</canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════════════════════ #}
+    {# SECTION 2 — ACTIVITÉS                                      #}
+    {# ══════════════════════════════════════════════════════════ #}
+    <div class="section-divider">
+        <span class="section-divider-label">Activités</span>
+        <div class="section-divider-line"></div>
+    </div>
+
+    {# KPI ACTIVITÉS supprimés #}
+
+    {# ROW 1 ACTIVITÉS : Radar catégories + Coût Moyen #}
+    <div class="charts-row-half">
+        <div class="chart-card">
+            <div class="chart-card-title">Répartition par Catégorie <span>| radar</span></div>
+            <div style="position:relative; height:240px;">
+                <canvas id="radarChart" role="img" aria-label="Répartition activités par catégorie."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Coût Moyen par Catégorie <span>| barres horizontales</span></div>
+            <div style="position:relative; height:240px;">
+                <canvas id="coutHorizChart" role="img" aria-label="Coût moyen par catégorie."></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 2 ACTIVITÉS : Scatter coût/durée + Statuts donut #}
+    <div class="charts-row-wide">
+        <div class="chart-card">
+            <div class="chart-card-title">Coût vs Durée <span>| par catégorie</span></div>
+            <div style="position:relative; height:240px;">
+                <canvas id="scatterChart" role="img" aria-label="Nuage de points coût vs durée."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Statuts des Activités <span>| donut</span></div>
+            <div style="position:relative; height:240px;">
+                <canvas id="statutDonut" role="img" aria-label="Répartition des statuts."></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 3 supprimé #}
+
+    {# ══════════════════════════════════════════════════════════ #}
+    {# SECTION 3 — RÉSERVATIONS                                   #}
+    {# ══════════════════════════════════════════════════════════ #}
+    <div class="section-divider">
+        <span class="section-divider-label">Réservations</span>
+        <div class="section-divider-line"></div>
+    </div>
+
+    {# KPI RÉSERVATIONS — 6 cartes #}
+    <div class="res-kpi-grid" style="grid-template-columns: repeat(6,1fr);">
+        <div class="res-kpi">
+            <div class="res-kpi-label">Total</div>
+            <div class="res-kpi-val">{{ stats.totalReservations }}</div>
+            <div class="res-kpi-sub">réservations</div>
+        </div>
+        <div class="res-kpi">
+            <div class="res-kpi-label">Revenu total</div>
+            <div class="res-kpi-val">{{ stats.revenuTotal|number_format(0, '.', ' ') }}€</div>
+            <div class="res-kpi-sub">montants cumulés</div>
+        </div>
+        <div class="res-kpi">
+            <div class="res-kpi-label">Panier moyen</div>
+            <div class="res-kpi-val">{{ stats.panierMoyen }}€</div>
+            <div class="res-kpi-sub">par réservation</div>
+        </div>
+        <div class="res-kpi">
+            <div class="res-kpi-label">Durée moy. séjour</div>
+            <div class="res-kpi-val">{{ stats.dureeMoyenneSejour }}j</div>
+            <div class="res-kpi-sub">départ → retour</div>
+        </div>
+        <div class="res-kpi">
+            <div class="res-kpi-label">Taux confirmation</div>
+            <div class="res-kpi-val">{{ stats.tauxConfirmation }}%</div>
+            <div class="res-kpi-sub">confirmées / total</div>
+        </div>
+        <div class="res-kpi">
+            <div class="res-kpi-label">Personnes moy.</div>
+            <div class="res-kpi-val">{{ stats.moyPersonnesParRes }}</div>
+            <div class="res-kpi-sub">par réservation</div>
+        </div>
+    </div>
+
+    {# ROW 1 : Line évolution + Donut statuts #}
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-card-title">Réservations & Revenus <span>| évolution mensuelle</span></div>
+            <div class="chart-legend">
+                <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#8B0000;"></span>Réservations</span>
+                <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#c84040;border-style:dashed;border-width:2px 0 0 0;background:transparent;width:14px;height:0;border-radius:0;"></span>Revenu (k€)</span>
+            </div>
+            <div style="position:relative; height:210px;">
+                <canvas id="resLineChart" role="img" aria-label="Évolution réservations et revenus."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Statuts des Réservations <span>| donut</span></div>
+            <div style="position:relative; height:240px;">
+                <canvas id="resStatutDonut" role="img" aria-label="Statuts des réservations."></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 2 : Montant par statut (bar) + Durée séjour distribution #}
+    <div class="charts-row-half">
+        <div class="chart-card">
+            <div class="chart-card-title">Revenu par Statut <span>| comparatif</span></div>
+            <div style="position:relative; height:220px;">
+                <canvas id="revParStatutChart" role="img" aria-label="Revenu par statut."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Distribution Durée Séjour <span>| tranches de jours</span></div>
+            <div style="position:relative; height:220px;">
+                <canvas id="dureeSejDistChart" role="img" aria-label="Distribution durées séjour."></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 3 : Scatter montant/personnes + Réservations par mois bar #}
+    <div class="charts-row-wide">
+        <div class="chart-card">
+            <div class="chart-card-title">Montant vs Nombre de Personnes <span>| nuage de points</span></div>
+            <div style="position:relative; height:220px;">
+                <canvas id="resBubble" role="img" aria-label="Montant vs personnes."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Volume par Mois <span>| réservations</span></div>
+            <div style="position:relative; height:220px;">
+                <canvas id="resMoisBar" role="img" aria-label="Réservations par mois."></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 4 : Heatmap jours de réservation + Top agents #}
+    <div class="charts-row-half">
+        <div class="chart-card">
+            <div class="chart-card-title">Réservations par Jour de Semaine <span>| activité hebdo</span></div>
+            <div style="position:relative; height:200px;">
+                <canvas id="jourSemaineChart" role="img" aria-label="Réservations par jour de semaine."></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Panier Moyen par Statut <span>| analyse revenus</span></div>
+            <div style="position:relative; height:200px;">
+                <canvas id="panierStatutChart" role="img" aria-label="Panier moyen par statut."></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>{# end dash-wrapper #}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+/* ── SIDEBAR : forcer le lien dashboard actif ─────── */
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.nav-link').forEach(function(link) {
+        link.classList.remove('active');
+    });
+    const dashLink = document.querySelector('.nav-link[href="/dashboard"]');
+    if (dashLink) {
+        dashLink.classList.add('active');
+        /* Déclencher l'indicateur si la fonction moveIndicator existe */
+        const ind = document.querySelector('.nav-indicator');
+        if (ind) {
+            ind.style.top    = dashLink.offsetTop + 'px';
+            ind.style.height = dashLink.offsetHeight + 'px';
+        }
+    }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════ */
+const RED_PALETTE = ['#5a0000','#6e0000','#8B0000','#a82020','#c84040','#d86060','#e28080','#eda0a0'];
+const chartDefaults = {
+    font: { family: 'Montserrat', size: 10 },
+    color: '#bbb'
+};
+Chart.defaults.font.family = 'Montserrat';
+Chart.defaults.font.size   = 10;
+Chart.defaults.color       = '#aaa';
+
+/* ══════════════════════════════════════════════════════════════
+   1. WORLD MAP
+══════════════════════════════════════════════════════════════ */
+(function () {
+    const voyageData = {{ stats.voyagesByDestination | json_encode | raw }};
+    const destinationToId = {
+        "Maroc":"504","Marrakech":"504","Turquie":"792","Istanbul":"792",
+        "Indonésie":"360","Bali":"360","Grèce":"300","Santorini":"300","Athènes":"300",
+        "Japon":"392","Kyoto":"392","Tokyo":"392","France":"250","Paris":"250",
+        "Italie":"380","Rome":"380","Allemagne":"276","Espagne":"724","Tunisie":"788",
+        "Égypte":"818","Thaïlande":"764","Singapour":"702","Jordanie":"400",
+        "Émirats":"784","Algérie":"012","Portugal":"620","Pays-Bas":"528",
+        "Belgique":"056","Suisse":"756","Autriche":"040","Croatie":"191",
+        "Maldives":"462","Kenya":"404","Tanzanie":"834","Afrique du Sud":"710",
+        "Mexique":"484","Pérou":"604","Brésil":"076","États-Unis":"840",
+        "Canada":"124","Australie":"036","Nouvelle-Zélande":"554"
+    };
+
+    /* centroïdes approximatifs [lon, lat] par id pays */
+    const centroids = {
+        "504":[-5.0,31.8],"792":[35.2,39.0],"360":[117.0,-2.0],"300":[22.0,39.0],
+        "392":[138.0,36.5],"250":[2.5,46.5],"380":[12.5,42.5],"276":[10.4,51.2],
+        "724":[-3.7,40.4],"788":[9.1,34.0],"818":[30.0,26.5],"764":[100.5,15.5],
+        "702":[103.8,1.35],"400":[36.2,31.2],"784":[54.0,24.0],"012":[2.6,28.0],
+        "620":[-8.2,39.5],"528":[5.3,52.1],"056":[4.5,50.5],"756":[8.2,46.8],
+        "040":[14.5,47.5],"191":[15.2,45.1],"462":[73.5,3.2],"404":[37.9,-1.0],
+        "834":[34.9,-6.4],"710":[25.0,-29.0],"484":[-102.5,23.6],"604":[-76.0,-9.0],
+        "076":[-53.0,-10.0],"840":[-98.5,38.5],"124":[-96.8,56.0],"036":[133.5,-25.5],
+        "554":[172.5,-41.5]
+    };
+
+    const countById = {}, labelById = {};
+    for (const [dest, count] of Object.entries(voyageData)) {
+        const id = destinationToId[dest];
+        if (id) { countById[id] = (countById[id] || 0) + count; labelById[id] = dest; }
+    }
+    const total  = Object.values(countById).reduce((a, b) => a + b, 0) || 1;
+    const maxCount = Math.max(...Object.values(countById), 1);
+    const sorted = Object.entries(countById).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    /* ── Liste pays (version améliorée) ── */
+    const listEl = document.getElementById('countryList');
+    sorted.forEach(([id, count], i) => {
+        const pct = Math.round((count / total) * 100);
+        const el  = document.createElement('div');
+        el.className = 'map-country-item';
+        el.dataset.id = id;
+        el.innerHTML = `
+            <div class="map-country-rank">${i + 1}</div>
+            <div class="map-country-info">
+                <div class="map-country-name">${labelById[id]}</div>
+                <div class="map-country-bar-wrap">
+                    <div class="map-country-bar" style="width:${pct}%"></div>
+                </div>
+            </div>
+            <span class="map-country-pct">${pct}%</span>`;
+        listEl.appendChild(el);
+    });
+
+    /* ── Choroplèthe + bulles ── */
+    const container = document.getElementById('worldMapSvg');
+    const w = container.clientWidth || 600;
+    const h = container.clientHeight || 420;
+
+    const svg = d3.select('#worldMapSvg').append('svg')
+        .attr('viewBox', `0 0 ${w} ${h}`)
+        .attr('width', '100%').attr('height', '100%');
+
+    const projection = d3.geoNaturalEarth1()
+        .scale(w / 5.0).translate([w / 2, h / 2]);
+    const path = d3.geoPath(projection);
+
+    const tooltip    = document.getElementById('mapTooltip');
+    const ttFlag     = document.getElementById('tooltipFlag');
+    const ttCountry  = document.getElementById('tooltipCountry');
+    const ttCount    = document.getElementById('tooltipCount');
+    const ttPct      = document.getElementById('tooltipPct');
+
+    /* intensité choroplèthe rouge original */
+    const choropleth = d3.scaleThreshold()
+        .domain([1, 2, 5, 10])
+        .range(['#d4a0a0','#b83030','#8B0000','#6e0000','#4a0000']);
+
+    d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
+
+        /* fond blanc original */
+        svg.append('rect').attr('width', w).attr('height', h).attr('fill', '#ffffff');
+
+        /* pays — couleurs originales */
+        svg.selectAll('path')
+            .data(topojson.feature(world, world.objects.countries).features)
+            .join('path')
+            .attr('d', path)
+            .attr('fill', d => {
+                const count = countById[String(d.id)] || 0;
+                return count === 0 ? '#e8c4c4' : choropleth(count);
+            })
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 0.5)
+            .on('mousemove', function(event, d) {
+                const id    = String(d.id);
+                const count = countById[id] || 0;
+                if (!count) { tooltip.classList.remove('visible'); return; }
+                ttFlag.textContent    = '';
+                ttCountry.textContent = labelById[id] || '—';
+                ttCount.textContent   = count + ' voyage' + (count > 1 ? 's' : '');
+                ttPct.textContent     = Math.round((count / total) * 100) + '% du total';
+                tooltip.style.left = (event.clientX + 16) + 'px';
+                tooltip.style.top  = (event.clientY - 48) + 'px';
+                tooltip.classList.add('visible');
+                document.querySelectorAll('.map-country-item').forEach(el =>
+                    el.classList.toggle('active', el.dataset.id === id));
+            })
+            .on('mouseleave', () => {
+                tooltip.classList.remove('visible');
+                document.querySelectorAll('.map-country-item').forEach(el => el.classList.remove('active'));
+            });
+
+        /* petits cercles indicateurs fixes */
+        const bubbleGroup = svg.append('g');
+        sorted.forEach(([id, count]) => {
+            const c = centroids[id];
+            if (!c) return;
+            const [px, py] = projection(c);
+            if (!px || !py || isNaN(px) || isNaN(py)) return;
+            const r = 13;
+            const g = bubbleGroup.append('g')
+                .style('cursor', 'pointer')
+                .on('mousemove', function(event) {
+                    ttFlag.textContent    = '';
+                    ttCountry.textContent = labelById[id] || '—';
+                    ttCount.textContent   = count + ' voyage' + (count > 1 ? 's' : '');
+                    ttPct.textContent     = Math.round((count / total) * 100) + '% du total';
+                    tooltip.style.left = (event.clientX + 16) + 'px';
+                    tooltip.style.top  = (event.clientY - 48) + 'px';
+                    tooltip.classList.add('visible');
+                    document.querySelectorAll('.map-country-item').forEach(el =>
+                        el.classList.toggle('active', el.dataset.id === id));
+                })
+                .on('mouseleave', () => {
+                    tooltip.classList.remove('visible');
+                    document.querySelectorAll('.map-country-item').forEach(el => el.classList.remove('active'));
+                });
+
+            g.append('circle')
+                .attr('cx', px).attr('cy', py).attr('r', r)
+                .attr('class', 'map-bubble');
+
+            g.append('text')
+                .attr('x', px).attr('y', py)
+                .attr('class', 'map-bubble-label')
+                .text(count);
+        });
+    });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   2. DURÉE PAR DESTINATION — ligne
+══════════════════════════════════════════════════════════════ */
+(function () {
+    const data   = {{ stats.dureeByDestination | json_encode | raw }};
+    new Chart(document.getElementById('dureeChart'), {
+        type: 'line',
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data),
+                borderColor: '#c0392b',
+                backgroundColor: 'rgba(192,57,43,0.07)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#c0392b',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 35, autoSkip: true, maxTicksLimit: 8 } },
+                y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + 'j' }, beginAtZero: false }
+            }
+        }
+    });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   ACTIVITÉS DATA (from controller)
+══════════════════════════════════════════════════════════════ */
+const actCats     = {{ stats.activiteParCategorie | json_encode | raw }};
+const actOccup    = {{ stats.tauxOccupParCategorie | json_encode | raw }};
+const actStatuts  = {{ stats.activiteParStatut | json_encode | raw }};
+const actCoutMoy  = {{ stats.coutMoyParCategorie | json_encode | raw }};
+const actCapData  = {{ stats.capaciteParCategorie | json_encode | raw }};
+const actScatter  = {{ stats.scatterData | json_encode | raw }};
+
+/* ══════════════════════════════════════════════════════════════
+   3. RADAR — catégories
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: Object.keys(actCats),
+        datasets: [{
+            label: 'Activités',
+            data: Object.values(actCats),
+            borderColor: '#8B0000',
+            backgroundColor: 'rgba(139,0,0,0.12)',
+            borderWidth: 2,
+            pointBackgroundColor: '#8B0000',
+            pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            r: {
+                ticks: { display: false },
+                grid: { color: 'rgba(139,0,0,0.12)' },
+                angleLines: { color: 'rgba(139,0,0,0.15)' },
+                pointLabels: { font: { size: 10 }, color: '#8a3a3a' },
+                suggestedMin: 0
+            }
+        }
+    }
+});
+
+/* occupChart supprimé */
+
+/* ══════════════════════════════════════════════════════════════
+   5. SCATTER — coût vs durée
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: { datasets: actScatter.map((ds, i) => ({
+        label: ds.label,
+        data: ds.data,
+        backgroundColor: RED_PALETTE[i] || '#8B0000',
+        pointRadius: 6,
+        pointHoverRadius: 8
+    })) },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'right', labels: { boxWidth: 8, boxHeight: 8, padding: 8 } }
+        },
+        scales: {
+            x: { title: { display: true, text: 'Coût (€)', font: { size: 10 }, color: '#bbb' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } },
+            y: { title: { display: true, text: 'Durée (h)', font: { size: 10 }, color: '#bbb' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   6. DONUT — statuts activité
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('statutDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(actStatuts),
+        datasets: [{ data: Object.values(actStatuts), backgroundColor: ['#5a0000','#8B0000','#c84040','#eda0a0'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '66%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, padding: 10 } } }
+    }
+});
+
+/* capGrouped supprimé */
+
+/* ══════════════════════════════════════════════════════════════
+   8. COÛT MOYEN HORIZONTAL
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('coutHorizChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(actCoutMoy),
+        datasets: [{
+            data: Object.values(actCoutMoy),
+            backgroundColor: RED_PALETTE,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { callback: v => v + '€' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } },
+            y: { grid: { display: false }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   RÉSERVATIONS DATA
+══════════════════════════════════════════════════════════════ */
+const resParMois        = {{ stats.reservationsParMois | json_encode | raw }};
+const revParMois        = {{ stats.revenuParMois | json_encode | raw }};
+const resStatuts        = {{ stats.reservationsParStatut | json_encode | raw }};
+const resBubbleData     = {{ stats.reservationsBubble | json_encode | raw }};
+const revParStatut      = {{ stats.revenuParStatut | json_encode | raw }};
+const dureeSejDist      = {{ stats.dureeSejDistribution | json_encode | raw }};
+const jourSemaine       = {{ stats.reservationsParJourSemaine | json_encode | raw }};
+const panierParStatut   = {{ stats.panierMoyenParStatut | json_encode | raw }};
+
+/* ══════════════════════════════════════════════════════════════
+   9. LINE — réservations + revenus
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('resLineChart'), {
+    type: 'line',
+    data: {
+        labels: Object.keys(resParMois),
+        datasets: [
+            {
+                label: 'Réservations',
+                data: Object.values(resParMois),
+                borderColor: '#8B0000',
+                backgroundColor: 'rgba(139,0,0,0.07)',
+                fill: true, tension: 0.4, borderWidth: 2,
+                pointBackgroundColor: '#8B0000', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5
+            },
+            {
+                label: 'Revenu (k€)',
+                data: Object.values(revParMois).map(v => Math.round(v / 1000)),
+                borderColor: '#c84040',
+                borderDash: [5, 4],
+                backgroundColor: 'transparent',
+                fill: false, tension: 0.4, borderWidth: 1.5,
+                pointBackgroundColor: '#c84040', pointRadius: 4, yAxisID: 'y2'
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, border: { display: false } },
+            y:  { grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false }, position: 'left' },
+            y2: { grid: { display: false }, border: { display: false }, position: 'right', ticks: { callback: v => v + 'k€' } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   10. DONUT — statuts réservation
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('resStatutDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(resStatuts),
+        datasets: [{ data: Object.values(resStatuts), backgroundColor: ['#5a0000','#8B0000','#c84040','#d86060','#eda0a0','#f5c8c8'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '66%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, padding: 10 } } }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   11. SCATTER — montant vs personnes
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('resBubble'), {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'Réservations',
+            data: resBubbleData,
+            backgroundColor: 'rgba(139,0,0,0.5)',
+            pointRadius: 5, pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { title: { display: true, text: 'Personnes', font: { size: 10 }, color: '#bbb' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } },
+            y: { title: { display: true, text: 'Montant (€)', font: { size: 10 }, color: '#bbb' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   12. BAR — réservations par mois
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('resMoisBar'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(resParMois),
+        datasets: [{ data: Object.values(resParMois), backgroundColor: RED_PALETTE, borderRadius: 5 }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 30 } },
+            y: { grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   13. BAR — revenu par statut
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('revParStatutChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(revParStatut),
+        datasets: [{
+            label: 'Revenu (€)',
+            data: Object.values(revParStatut),
+            backgroundColor: RED_PALETTE,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, border: { display: false } },
+            y: { ticks: { callback: v => v + '€' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   14. BAR — distribution durée séjour
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('dureeSejDistChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(dureeSejDist),
+        datasets: [{
+            label: 'Réservations',
+            data: Object.values(dureeSejDist),
+            backgroundColor: 'rgba(139,0,0,0.18)',
+            borderColor: '#8B0000',
+            borderWidth: 1.5,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, border: { display: false }, title: { display: true, text: 'Durée (jours)', font: { size: 9 }, color: '#bbb' } },
+            y: { grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   15. BAR — réservations par jour de semaine
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('jourSemaineChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(jourSemaine),
+        datasets: [{
+            data: Object.values(jourSemaine),
+            backgroundColor: RED_PALETTE,
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, border: { display: false } },
+            y: { grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } }
+        }
+    }
+});
+
+/* ══════════════════════════════════════════════════════════════
+   16. BAR HORIZONTAL — panier moyen par statut
+══════════════════════════════════════════════════════════════ */
+new Chart(document.getElementById('panierStatutChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(panierParStatut),
+        datasets: [{
+            data: Object.values(panierParStatut),
+            backgroundColor: RED_PALETTE,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { callback: v => v + '€' }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } },
+            y: { grid: { display: false }, border: { display: false } }
+        }
+    }
+});
+</script>
+{% endblock %}
