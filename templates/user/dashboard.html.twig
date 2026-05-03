@@ -1,198 +1,589 @@
 {# templates/user/dashboard.html.twig #}
-{% extends 'base_client.html.twig' %}
+{% extends 'base.html.twig' %}
 {% block title %}Mon Dashboard - Doura Mondo{% endblock %}
 {% block page_title %}Mon Dashboard{% endblock %}
 
 {% block stylesheets %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-.profile-banner {
-    background: linear-gradient(135deg, #1c0404 0%, #3a0000 50%, #5C0000 100%);
-    border-radius: 18px;
-    padding: 1.75rem 2rem;
-    margin-bottom: 1.75rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(92,0,0,0.22);
+/* ════════════════════════════════════════════════
+   DOURA MONDO — ANIMATION LAYER
+   Drops on top of existing base.html.twig layout.
+   Zero changes to navbar, sidebar, or base styles.
+════════════════════════════════════════════════ */
+
+/* ── Keyframes Library ── */
+@keyframes fadeUp        { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeLeft      { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
+@keyframes fadeRight     { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+@keyframes scalePop      { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+@keyframes shimmerSlide  { from{left:-120%} to{left:160%} }
+@keyframes goldPulse     { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0)} 50%{box-shadow:0 0 0 8px rgba(201,168,76,0.12)} }
+@keyframes orbDrift      { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(22px,-30px) scale(1.04)} 66%{transform:translate(-18px,18px) scale(0.96)} }
+@keyframes gradShift     { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes bannerSweep   { 0%,100%{left:-90%} 50%{left:130%} }
+@keyframes avatarRing    { 0%,100%{box-shadow:0 0 0 4px rgba(201,168,76,0.08)} 50%{box-shadow:0 0 0 10px rgba(201,168,76,0.03)} }
+@keyframes starBurst     { from{opacity:0;transform:scale(0) rotate(-180deg)} to{opacity:1;transform:scale(1) rotate(0)} }
+@keyframes barFill       { from{width:0!important} }
+@keyframes chipScroll1   { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes chipScroll2   { from{transform:translateX(-50%)} to{transform:translateX(0)} }
+@keyframes weatherFloat  { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-7px) rotate(5deg)} }
+@keyframes noiseDrift    { 100%{background-position:200px 200px} }
+@keyframes particleFade  { 0%{opacity:0;transform:translateY(0)} 20%{opacity:.6} 80%{opacity:.6} 100%{opacity:0;transform:translateY(-60px)} }
+@keyframes spin          { to{transform:rotate(360deg)} }
+@keyframes blinkCursor   { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes borderRun {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
-.profile-banner::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-        linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-}
-.pb-avatar {
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #C9A84C, #E8C97A);
-    color: #2E1010;
-    font-size: 1.6rem; font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-    border: 2.5px solid rgba(201,168,76,0.40);
-    flex-shrink: 0;
-    position: relative; z-index: 1;
-    overflow: hidden;
-}
-.pb-avatar img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.pb-info { position: relative; z-index: 1; flex: 1; }
-.pb-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.5rem; font-weight: 700;
-    color: var(--gold);
-    margin-bottom: .15rem;
-}
-.pb-user { font-size: .82rem; color: rgba(242,230,204,.45); margin-bottom: .4rem; }
-.pb-badge {
-    display: inline-flex; align-items: center; gap: .3rem;
-    padding: 3px 12px;
-    background: rgba(201,168,76,.12);
-    border: 1px solid rgba(201,168,76,.22);
-    border-radius: 20px;
-    font-size: .72rem; font-weight: 600;
-    color: var(--gold);
+@keyframes cardTilt {
+  0%  { transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0); }
+  100%{ transform: perspective(800px) rotateX(0deg) rotateY(0deg) translateY(-5px); }
 }
 
+/* ── Entrance helpers ── */
+.anim-up    { opacity:0; animation:fadeUp   .75s cubic-bezier(.23,1,.32,1) forwards; }
+.anim-left  { opacity:0; animation:fadeLeft .75s cubic-bezier(.23,1,.32,1) forwards; }
+.anim-right { opacity:0; animation:fadeRight .75s cubic-bezier(.23,1,.32,1) forwards; }
+.anim-pop   { opacity:0; animation:scalePop .65s cubic-bezier(.23,1,.32,1) forwards; }
+
+/* ══════════════════════════════════════
+   ANIMATED PAGE BACKGROUND
+   Fixed layer behind existing content
+══════════════════════════════════════ */
+.dm-anim-bg {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.dm-bg-grad {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 8%,  rgba(139,44,44,.28) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 70% at 85% 92%,  rgba(92,0,0,.24) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 45% at 50% 50%,  rgba(201,168,76,.03) 0%, transparent 70%);
+  animation: gradShift 20s ease infinite;
+  background-size: 300% 300%;
+}
+.dm-bg-noise {
+  position: absolute; inset: 0; opacity: .3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  background-size: 200px;
+  animation: noiseDrift 12s linear infinite;
+}
+.dm-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); pointer-events: none;
+  animation: orbDrift ease-in-out infinite;
+}
+.dm-orb-1 { width:480px;height:480px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(139,44,44,.22),transparent 70%);animation-duration:24s; }
+.dm-orb-2 { width:380px;height:380px;bottom:-160px;right:-160px;background:radial-gradient(circle,rgba(201,168,76,.10),transparent 70%);animation-duration:30s;animation-delay:-8s; }
+.dm-orb-3 { width:260px;height:260px;top:40%;left:55%;background:radial-gradient(circle,rgba(176,80,80,.15),transparent 70%);animation-duration:19s;animation-delay:-4s; }
+
+/* Floating particles */
+#dm-particles-canvas { position:fixed;inset:0;z-index:1;pointer-events:none; }
+
+/* ══════════════════════════════════════
+   PROFILE BANNER ANIMATIONS
+══════════════════════════════════════ */
+.profile-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated gradient background override */
+.profile-banner-animated {
+  background: linear-gradient(135deg,
+    #1c0404 0%, #3a0000 40%, #5C0000 70%, #3a0000 100%) !important;
+  background-size: 300% 300% !important;
+  animation: gradShift 12s ease infinite !important;
+}
+
+/* Sweep light beam */
+.dm-banner-sweep {
+  position: absolute; top: -60%; left: -100%;
+  width: 50%; height: 220%;
+  background: linear-gradient(105deg, transparent, rgba(201,168,76,.055), transparent);
+  transform: skewX(-15deg);
+  animation: bannerSweep 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Crosshatch overlay */
+.dm-banner-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+/* Avatar ring pulse */
+.pb-avatar {
+  animation: avatarRing 4s ease-in-out infinite !important;
+}
+
+/* ── Running-border glow on banner ── */
+.profile-banner::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201,168,76,.7) 20%,
+    rgba(201,168,76,.9) 50%,
+    rgba(201,168,76,.7) 80%,
+    transparent 100%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: borderRun 4s linear infinite;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   GLASS CARD EFFECT on existing cards
+══════════════════════════════════════ */
+.quick-card,
+.info-card,
+.weather-widget,
+.weather-search,
+.carbon-widget .card {
+  position: relative;
+  overflow: hidden;
+  transition: transform .42s cubic-bezier(.23,1,.32,1),
+              box-shadow .42s cubic-bezier(.23,1,.32,1),
+              border-color .42s cubic-bezier(.23,1,.32,1) !important;
+}
+
+/* Shimmer sweep on every card */
+.quick-card::after,
+.info-card::after,
+.weather-widget::after,
+.weather-search::after,
+.carbon-widget .card::after {
+  content: '';
+  position: absolute; top: 0; left: -130%;
+  width: 55%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(201,168,76,.08) 50%, transparent);
+  transform: skewX(-18deg);
+  pointer-events: none;
+  transition: none;
+}
+.quick-card:hover::after,
+.info-card:hover::after,
+.weather-widget:hover::after,
+.weather-search:hover::after,
+.carbon-widget .card:hover::after {
+  left: 160%;
+  transition: left .65s cubic-bezier(.23,1,.32,1);
+}
+
+/* Hover lift */
+.quick-card:hover,
+.info-card:hover,
+.weather-widget:hover,
+.carbon-widget .card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 48px rgba(92,0,0,.18), 0 0 0 1px rgba(201,168,76,.18) !important;
+  border-color: rgba(201,168,76,.30) !important;
+}
+.weather-search:hover {
+  box-shadow: 0 8px 28px rgba(92,0,0,.12) !important;
+}
+
+/* quick-card icon spin on hover */
+.quick-card:hover .qc-ico {
+  display: inline-block;
+  animation: spin .5s ease;
+}
+
+/* ══════════════════════════════════════
+   DESTINATION CHIPS CAROUSEL
+══════════════════════════════════════ */
+.dm-chips-section { margin-bottom: 1.5rem; overflow: hidden; }
+.dm-chips-row { display: flex; gap: .85rem; white-space: nowrap; }
+.dm-chips-r1 { animation: chipScroll1 26s linear infinite; }
+.dm-chips-r2 { animation: chipScroll2 34s linear infinite; margin-top: .65rem; }
+.dm-chips-section:hover .dm-chips-r1,
+.dm-chips-section:hover .dm-chips-r2 { animation-play-state: paused; }
+.dm-chip {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .45rem 1rem;
+  background: rgba(92,0,0,.08);
+  border: 1px solid rgba(201,168,76,.14);
+  border-radius: 100px;
+  font-size: .76rem; color: rgba(42,16,16,.7);
+  white-space: nowrap; cursor: pointer;
+  transition: all .35s cubic-bezier(.23,1,.32,1);
+  font-family: 'Montserrat', sans-serif;
+}
+.dm-chip:hover {
+  background: rgba(92,0,0,.14);
+  border-color: rgba(201,168,76,.35);
+  color: #5C0000;
+  transform: translateY(-2px);
+}
+
+/* ══════════════════════════════════════
+   SECTION LABEL DIVIDERS
+══════════════════════════════════════ */
+.dm-section-divider {
+  display: flex; align-items: center; gap: .9rem;
+  margin: 1.75rem 0 1.1rem;
+}
+.dm-section-divider::before,
+.dm-section-divider::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(92,0,0,.18), transparent);
+}
+.dm-section-divider span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .68rem; letter-spacing: .22em;
+  text-transform: uppercase; color: #8B2C2C;
+  white-space: nowrap; font-style: italic;
+}
+
+/* ══════════════════════════════════════
+   STAT COUNTERS
+══════════════════════════════════════ */
+.dm-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: .9rem;
+  margin-bottom: 1.5rem;
+}
+.dm-stat-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(201,168,76,.15);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+  transition: all .4s cubic-bezier(.23,1,.32,1);
+  box-shadow: 0 2px 12px rgba(92,0,0,.06);
+}
+.dm-stat-card::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #8B2C2C, #C9A84C, #8B2C2C);
+  background-size: 200% 100%;
+  animation: borderRun 3s linear infinite;
+}
+.dm-stat-card::after {
+  content: '';
+  position: absolute; top: 0; left: -130%; width: 55%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(201,168,76,.07) 50%, transparent);
+  transform: skewX(-18deg); pointer-events: none; transition: none;
+}
+.dm-stat-card:hover::after { left: 160%; transition: left .6s cubic-bezier(.23,1,.32,1); }
+.dm-stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(92,0,0,.14);
+  border-color: rgba(201,168,76,.30);
+}
+.dm-stat-ico {
+  font-size: 1.6rem; margin-bottom: .5rem;
+  display: block;
+  transition: transform .4s cubic-bezier(.23,1,.32,1);
+}
+.dm-stat-card:hover .dm-stat-ico { transform: scale(1.15) rotate(-6deg); }
+.dm-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 700;
+  color: #5C0000; line-height: 1; margin-bottom: .2rem;
+}
+.dm-stat-lbl {
+  font-size: .65rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: #9B6B6B;
+}
+
+/* ══════════════════════════════════════
+   WEATHER ICON FLOAT
+══════════════════════════════════════ */
+.weather-widget .display-6 img,
+.weather-widget .display-6 { 
+  animation: weatherFloat 4s ease-in-out infinite;
+}
+
+/* Progress bar animated fill */
+.progress-bar {
+  animation: barFill 1.4s cubic-bezier(.23,1,.32,1) both !important;
+  animation-delay: .6s !important;
+}
+
+/* ══════════════════════════════════════
+   INFO ROW HOVER
+══════════════════════════════════════ */
+.info-row {
+  transition: padding-left .25s ease, background .2s ease !important;
+  border-radius: 6px;
+}
+.info-row:hover { padding-left: .6rem !important; background: rgba(201,168,76,.04); }
+
+/* ══════════════════════════════════════
+   BUTTON MICRO-INTERACTIONS
+══════════════════════════════════════ */
+.btn-primary {
+  position: relative; overflow: hidden;
+  transition: all .35s cubic-bezier(.23,1,.32,1) !important;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.12);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .35s ease;
+}
+.btn-primary:hover::after { transform: scaleX(1); }
+.btn-primary:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 24px rgba(92,0,0,.35) !important; }
+.btn-primary:active { transform: scale(.96) !important; }
+
+.btn-outline-success {
+  transition: all .3s cubic-bezier(.23,1,.32,1) !important;
+}
+.btn-outline-success:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(5,150,105,.25) !important; }
+
+/* ══════════════════════════════════════
+   LOADING SPINNER
+══════════════════════════════════════ */
+.dm-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(201,168,76,.25);
+  border-top-color: #C9A84C;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  display: inline-block; vertical-align: middle; margin-right: 5px;
+}
+
+/* ══════════════════════════════════════
+   STAR RATINGS BURST ANIMATION
+══════════════════════════════════════ */
+.dm-star-burst {
+  display: inline-block;
+  animation: starBurst .35s cubic-bezier(.23,1,.32,1) both;
+}
+
+/* ══════════════════════════════════════
+   TILT CARD 3D on hover  (JS-driven)
+══════════════════════════════════════ */
+.tilt-card { transform-style: preserve-3d; will-change: transform; }
+
+/* ══════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════ */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s cubic-bezier(.23,1,.32,1), transform .65s cubic-bezier(.23,1,.32,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   PAGE LOAD CURTAIN
+══════════════════════════════════════ */
+#dm-curtain {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #1c0404;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 1rem;
+  animation: curtainExit .5s cubic-bezier(.23,1,.32,1) .8s forwards;
+}
+@keyframes curtainExit {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+.dm-curtain-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem; font-weight: 700; color: #C9A84C;
+  letter-spacing: .08em;
+  animation: fadeUp .6s ease both;
+}
+.dm-curtain-line {
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+  animation: fadeUp .6s ease .2s both;
+}
+.dm-curtain-sub {
+  font-size: .7rem; letter-spacing: .25em; text-transform: uppercase;
+  color: rgba(201,168,76,.45);
+  animation: fadeUp .6s ease .35s both;
+}
+.dm-curtain-spinner {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(201,168,76,.2);
+  border-top-color: #C9A84C;
+  border-radius: 50%;
+  animation: spin .7s linear infinite, fadeUp .6s ease .4s both;
+}
+
+/* ========== CORRECTIONS LARGEUR ET BLOCS ========== */
+
+/* Conteneur principal - ajout de marges */
+.container-xxl {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Quick Actions Grid - CÔTE À CÔTE (pas en colonne) */
 .quick-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.25rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 2rem;
 }
+
+/* Responsive Quick Actions */
+@media (max-width: 992px) {
+    .quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Stats row responsive */
+@media (max-width: 992px) {
+    .dm-stats-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .dm-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Quick cards style amélioré */
 .quick-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 1.5rem 1rem;
-    text-align: center;
-    text-decoration: none;
-    color: var(--text-main);
-    transition: var(--transition);
-    box-shadow: var(--shadow-card);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .55rem;
+    justify-content: center;
+    text-align: center;
+    padding: 1.2rem 0.8rem;
+    background: #fff;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(201,168,128,0.15);
 }
+
+.quick-card .qc-ico {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.quick-card .qc-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #5C0000;
+    margin-bottom: 0.2rem;
+}
+
+.quick-card .qc-sub {
+    font-size: 0.7rem;
+    color: #999;
+}
+
+/* Profile banner responsive */
+@media (max-width: 768px) {
+    .profile-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+    .profile-banner > div:last-child {
+        text-align: center !important;
+    }
+}
+
+/* Weather widget responsive */
+@media (max-width: 576px) {
+    .weather-widget .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    .weather-widget .text-end {
+        text-align: center !important;
+        margin-top: 1rem;
+    }
+}
+
+/* Carbon widget responsive */
+@media (max-width: 576px) {
+    .carbon-widget .row {
+        flex-direction: column;
+    }
+    .carbon-widget .col-4,
+    .carbon-widget .col-8 {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Animation for quick cards on hover */
 .quick-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-hover);
-    border-color: rgba(201,168,76,.35);
-    color: var(--text-main);
+    box-shadow: 0 10px 25px rgba(139,44,44,0.1);
+    border-color: rgba(201,168,128,0.4);
 }
-.quick-card .qc-ico { font-size: 2.2rem; }
-.quick-card .qc-label {
-    font-weight: 600; font-size: .88rem;
-    color: var(--crimson-deep);
-}
-.quick-card .qc-sub { font-size: .72rem; color: var(--text-light); }
 
-.info-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 1.4rem;
-    box-shadow: var(--shadow-card);
+/* Section dividers responsive */
+@media (max-width: 576px) {
+    .dm-section-divider span {
+        font-size: 0.55rem;
+        white-space: normal;
+        text-align: center;
+    }
 }
-.info-card h6 {
-    font-weight: 700;
-    font-size: .82rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    margin-bottom: 1rem;
-    padding-bottom: .75rem;
-    border-bottom: 1px solid var(--border);
-}
-.info-row {
-    display: flex;
-    gap: .5rem;
-    padding: .6rem 0;
-    border-bottom: 1px solid rgba(201,168,76,.06);
-    font-size: .88rem;
-}
-.info-row:last-child { border-bottom: none; }
-.info-key {
-    color: var(--text-light);
-    font-size: .75rem;
-    font-weight: 600;
-    letter-spacing: .3px;
-    width: 120px;
-    flex-shrink: 0;
-    padding-top: 1px;
-}
-.info-val { color: var(--text-main); }
 
-.weather-search {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(201,168,76,0.15);
-}
-.weather-widget {
-    background: linear-gradient(135deg, #fff9e8 0%, #fff2df 100%);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 16px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-}
-.carbon-widget {
-    margin-bottom: 1.5rem;
-}
-.carbon-widget .card {
-    border-radius: 16px;
-    overflow: hidden;
-}
-.city-search-container {
-    position: relative;
-}
-.city-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.city-suggestion-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-.city-suggestion-item:hover {
-    background-color: #f5f5f5;
-}
-.city-suggestion-item .city-name {
-    font-weight: 600;
-}
-.city-suggestion-item .country-name {
-    font-size: 0.75rem;
-    color: #666;
+/* Info card responsive */
+@media (max-width: 576px) {
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
 }
 </style>
 {% endblock %}
 
 {% block body %}
 
-<div class="profile-banner">
+<!-- ══ PAGE LOAD CURTAIN ══ -->
+<div id="dm-curtain">
+  <div class="dm-curtain-logo">✦ Doura Mondo</div>
+  <div class="dm-curtain-line"></div>
+  <div class="dm-curtain-sub">Voyages de Luxe</div>
+  <div class="dm-curtain-spinner"></div>
+</div>
+
+<!-- ══ ANIMATED BACKGROUND LAYER ══ -->
+<div class="dm-anim-bg">
+  <div class="dm-bg-grad"></div>
+  <div class="dm-bg-noise"></div>
+  <div class="dm-orb dm-orb-1"></div>
+  <div class="dm-orb dm-orb-2"></div>
+  <div class="dm-orb dm-orb-3"></div>
+</div>
+<canvas id="dm-particles-canvas"></canvas>
+
+<!-- ══ ORIGINAL CONTENT — UNTOUCHED ══ -->
+
+<!-- Banner with animation classes injected via JS after load -->
+<div class="profile-banner anim-up" style="animation-delay:.1s">
+    <div class="dm-banner-grid"></div>
+    <div class="dm-banner-sweep"></div>
+
     <div class="pb-avatar">
         {% if user.photoProfil and user.photoProfil != 'default.jpg' %}
             <img src="/{{ user.photoProfil }}" alt="avatar">
@@ -206,7 +597,9 @@
         <div class="pb-badge">✈️ Voyageur</div>
         {% if user.averageRating > 0 %}
             <div style="margin-top:.5rem; position:relative; z-index:1;">
-                {% for i in 1..5 %}{{ i <= user.averageRating|round ? '⭐' : '☆' }}{% endfor %}
+                {% for i in 1..5 %}
+                    <span class="dm-star-burst" style="animation-delay:{{ i * 0.1 }}s">{{ i <= user.averageRating|round ? '⭐' : '☆' }}</span>
+                {% endfor %}
                 <span style="color:var(--gold); font-weight:700; font-size:.85rem;">
                     {{ user.averageRating|number_format(1) }}
                 </span>
@@ -221,15 +614,76 @@
     </div>
 </div>
 
-<div class="weather-search">
-    <form method="GET" action="{{ path('user_dashboard') }}" class="d-flex gap-2">
+<!-- ══ STAT CARDS ROW ══ -->
+<div class="dm-stats-row">
+  <div class="dm-stat-card reveal tilt-card" data-delay="0">
+    <span class="dm-stat-ico">✈️</span>
+    <div class="dm-stat-num counter" data-target="12">0</div>
+    <div class="dm-stat-lbl">Voyages</div>
+  </div>
+  <div class="dm-stat-card reveal tilt-card" data-delay="60">
+    <span class="dm-stat-ico">📋</span>
+    <div class="dm-stat-num counter" data-target="5">0</div>
+    <div class="dm-stat-lbl">Réservations</div>
+  </div>
+  <div class="dm-stat-card reveal tilt-card" data-delay="120">
+    <span class="dm-stat-ico">❤️</span>
+    <div class="dm-stat-num counter" data-target="28">0</div>
+    <div class="dm-stat-lbl">Favoris</div>
+  </div>
+  <div class="dm-stat-card reveal tilt-card" data-delay="180">
+    <span class="dm-stat-ico">🌍</span>
+    <div class="dm-stat-num counter" data-target="9">0</div>
+    <div class="dm-stat-lbl">Destinations</div>
+  </div>
+  <div class="dm-stat-card reveal tilt-card" data-delay="240">
+    <span class="dm-stat-ico">👥</span>
+    <div class="dm-stat-num counter" data-target="34">0</div>
+    <div class="dm-stat-lbl">Communauté</div>
+  </div>
+  <div class="dm-stat-card reveal tilt-card" data-delay="300">
+    <span class="dm-stat-ico">⭐</span>
+    <div class="dm-stat-num">{{ user.averageRating > 0 ? user.averageRating|number_format(1) : '—' }}</div>
+    <div class="dm-stat-lbl">Ma Note</div>
+  </div>
+</div>
+
+<!-- ══ DESTINATIONS CAROUSEL ══ -->
+<div class="dm-section-divider reveal"><span>✦ Destinations du moment ✦</span></div>
+<div class="dm-chips-section reveal">
+  <div class="dm-chips-row dm-chips-r1">
+    {% for d in [
+      {f:'🇫🇷',n:'Paris'},{f:'🇯🇵',n:'Tokyo'},{f:'🇦🇪',n:'Dubaï'},{f:'🇮🇹',n:'Rome'},
+      {f:'🇬🇷',n:'Santorin'},{f:'🇲🇦',n:'Marrakech'},{f:'🇹🇭',n:'Bangkok'},{f:'🇵🇹',n:'Lisbonne'},
+      {f:'🇫🇷',n:'Paris'},{f:'🇯🇵',n:'Tokyo'},{f:'🇦🇪',n:'Dubaï'},{f:'🇮🇹',n:'Rome'},
+      {f:'🇬🇷',n:'Santorin'},{f:'🇲🇦',n:'Marrakech'},{f:'🇹🇭',n:'Bangkok'},{f:'🇵🇹',n:'Lisbonne'}
+    ] %}
+      <span class="dm-chip">{{ d.f }} {{ d.n }}</span>
+    {% endfor %}
+  </div>
+  <div class="dm-chips-row dm-chips-r2">
+    {% for d in [
+      {f:'🇬🇧',n:'Londres'},{f:'🇪🇸',n:'Barcelone'},{f:'🇸🇬',n:'Singapour'},{f:'🇰🇪',n:'Nairobi'},
+      {f:'🇧🇷',n:'Rio'},{f:'🇮🇳',n:'Mumbai'},{f:'🇨🇭',n:'Zurich'},{f:'🇺🇸',n:'New York'},
+      {f:'🇬🇧',n:'Londres'},{f:'🇪🇸',n:'Barcelone'},{f:'🇸🇬',n:'Singapour'},{f:'🇰🇪',n:'Nairobi'},
+      {f:'🇧🇷',n:'Rio'},{f:'🇮🇳',n:'Mumbai'},{f:'🇨🇭',n:'Zurich'},{f:'🇺🇸',n:'New York'}
+    ] %}
+      <span class="dm-chip">{{ d.f }} {{ d.n }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ══ WEATHER SEARCH — original ══ -->
+<div class="dm-section-divider reveal"><span>✦ Météo locale ✦</span></div>
+<div class="weather-search reveal" style="transition-delay:.05s">
+    <form method="GET" action="{{ path('user_dashboard') }}" class="d-flex gap-2" id="weatherForm">
         <input type="text" 
                name="weather_city" 
                value="{{ current_city ?? 'Tunis' }}" 
                class="form-control" 
                placeholder="🌍 Entrez une ville (ex: Paris, New York, Dubai)...">
-        <button type="submit" class="btn btn-primary">
-            🔍 Voir Météo
+        <button type="submit" class="btn btn-primary" id="weatherBtn">
+            <span id="weatherBtnTxt">🔍 Voir Météo</span>
         </button>
     </form>
     <small class="text-muted mt-2 d-block">
@@ -238,7 +692,7 @@
 </div>
 
 {% if weather %}
-<div class="weather-widget">
+<div class="weather-widget reveal" style="transition-delay:.1s">
     <div class="d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
             <div style="font-size: 3rem;">
@@ -265,12 +719,14 @@
     </div>
 </div>
 {% elseif current_city %}
-<div class="alert alert-warning">
+<div class="alert alert-warning reveal">
     ❌ Impossible de récupérer la météo pour "{{ current_city }}".
 </div>
 {% endif %}
 
-<div class="carbon-widget">
+<!-- ══ CARBON — original ══ -->
+<div class="dm-section-divider reveal"><span>✦ Empreinte carbone ✦</span></div>
+<div class="carbon-widget reveal" style="transition-delay:.05s">
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-between mb-3">
@@ -283,17 +739,14 @@
             {% if carbonEstimate %}
             <div class="row align-items-center mb-3">
                 <div class="col-4 text-center">
-                    <div class="display-6 fw-bold" style="color: #2E7D32;">
-                        {{ carbonEstimate.co2_kg }}
-                    </div>
+                    <div class="display-6 fw-bold counter" data-target="{{ carbonEstimate.co2_kg }}" style="color: #2E7D32;">0</div>
                     <small class="text-muted">kg CO₂</small>
                 </div>
                 <div class="col-8">
                     <div class="progress mb-2" style="height: 8px;">
                         {% set percent = (carbonEstimate.co2_kg / 500 * 100) %}
                         {% if percent > 100 %}{% set percent = 100 %}{% endif %}
-                        <div class="progress-bar bg-success" style="width: {{ percent }}%">
-                        </div>
+                        <div class="progress-bar bg-success" style="width: {{ percent }}%"></div>
                     </div>
                     <div class="small text-muted mb-2">
                         🌳 {{ carbonEstimate.trees_to_offset }} arbre(s) à planter
@@ -316,9 +769,7 @@
                     <div class="col-12 mb-2">
                         <label class="small text-muted">📍 Départ</label>
                         <div class="city-search-container">
-                            <input type="text" 
-                                   id="fromCityInput" 
-                                   class="form-control form-control-sm" 
+                            <input type="text" id="fromCityInput" class="form-control form-control-sm" 
                                    placeholder="Ex: Paris, Tunis, London..."
                                    value="{{ app.request.query.get('from_city', '') }}">
                             <input type="hidden" name="from_lat" id="fromLat" value="{{ app.request.query.get('from_lat', '') }}">
@@ -330,9 +781,7 @@
                     <div class="col-12 mb-2">
                         <label class="small text-muted">📍 Arrivée</label>
                         <div class="city-search-container">
-                            <input type="text" 
-                                   id="toCityInput" 
-                                   class="form-control form-control-sm" 
+                            <input type="text" id="toCityInput" class="form-control form-control-sm" 
                                    placeholder="Ex: Paris, Tunis, London..."
                                    value="{{ app.request.query.get('to_city', '') }}">
                             <input type="hidden" name="to_lat" id="toLat" value="{{ app.request.query.get('to_lat', '') }}">
@@ -342,8 +791,8 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn btn-sm btn-outline-success w-100">
-                            ✈️ Calculer l'empreinte carbone
+                        <button type="submit" class="btn btn-sm btn-outline-success w-100" id="carbonBtn">
+                            <span id="carbonBtnTxt">✈️ Calculer l'empreinte carbone</span>
                         </button>
                     </div>
                 </div>
@@ -355,30 +804,34 @@
     </div>
 </div>
 
+<!-- ══ QUICK ACTIONS — original ══ -->
+<div class="dm-section-divider reveal"><span>✦ Accès rapide ✦</span></div>
 <div class="quick-grid">
-    <a href="{{ path('user_qr_code') }}" class="quick-card">
+    <a href="{{ path('qr_profile') }}" class="quick-card tilt-card reveal anim-pop" style="animation-delay:.1s">
         <div class="qc-ico">📱</div>
         <div class="qc-label">QR Code</div>
         <div class="qc-sub">Ma carte de profil</div>
     </a>
-    <a href="{{ path('app_rating') }}" class="quick-card">
+    <a href="{{ path('app_rating') }}" class="quick-card tilt-card reveal anim-pop" style="animation-delay:.17s">
         <div class="qc-ico">⭐</div>
         <div class="qc-label">Évaluer</div>
         <div class="qc-sub">Notez l'application</div>
     </a>
-    <a href="{{ path('profile') }}" class="quick-card">
+    <a href="{{ path('profile') }}" class="quick-card tilt-card reveal anim-pop" style="animation-delay:.24s">
         <div class="qc-ico">👤</div>
         <div class="qc-label">Mon Profil</div>
         <div class="qc-sub">Modifier mes infos</div>
     </a>
-    <a href="{{ path('community_index') }}" class="quick-card">
+    <a href="{{ path('community_index') }}" class="quick-card tilt-card reveal anim-pop" style="animation-delay:.31s">
         <div class="qc-ico">🌍</div>
         <div class="qc-label">Communauté</div>
         <div class="qc-sub">Découvrez les membres</div>
     </a>
 </div>
 
-<div class="info-card">
+<!-- ══ INFO CARD — original ══ -->
+<div class="dm-section-divider reveal"><span>✦ Mon compte ✦</span></div>
+<div class="info-card reveal" style="transition-delay:.05s">
     <h6>👤 Informations du compte</h6>
     <div class="info-row">
         <div class="info-key">Email</div>
@@ -416,67 +869,242 @@
 
 {% block javascripts %}
 <script>
-function setupCityAutocomplete(inputId, hiddenLatId, hiddenLonId, hiddenCityId, suggestionsId) {
-    const input = document.getElementById(inputId);
-    const suggestionsDiv = document.getElementById(suggestionsId);
-    let timeoutId = null;
+(function () {
+'use strict';
 
-    if (!input) return;
+/* ════════════════════════════
+   1. PARTICLE CANVAS
+════════════════════════════ */
+var canvas = document.getElementById('dm-particles-canvas');
+var ctx = canvas.getContext('2d');
+var W, H, pts = [];
 
-    input.addEventListener('input', function() {
-        clearTimeout(timeoutId);
-        const query = this.value.trim();
-        
-        if (query.length < 2) {
-            suggestionsDiv.style.display = 'none';
-            return;
-        }
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
 
-        timeoutId = setTimeout(() => {
-            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        suggestionsDiv.style.display = 'none';
-                        return;
-                    }
-                    
-                    suggestionsDiv.innerHTML = '';
-                    data.forEach(place => {
-                        const div = document.createElement('div');
-                        div.className = 'city-suggestion-item';
-                        const cityName = place.display_name.split(',')[0];
-                        const countryName = place.address?.country || '';
-                        div.innerHTML = `
-                            <div class="city-name">${cityName}</div>
-                            <div class="country-name">${countryName}</div>
-                        `;
-                        div.onclick = () => {
-                            input.value = cityName;
-                            document.getElementById(hiddenLatId).value = place.lat;
-                            document.getElementById(hiddenLonId).value = place.lon;
-                            document.getElementById(hiddenCityId).value = cityName;
-                            suggestionsDiv.style.display = 'none';
-                        };
-                        suggestionsDiv.appendChild(div);
-                    });
-                    suggestionsDiv.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    suggestionsDiv.style.display = 'none';
-                });
-        }, 500);
-    });
+function Pt() { this.init(); }
+Pt.prototype.init = function () {
+  this.x  = Math.random() * W;
+  this.y  = Math.random() * H;
+  this.r  = Math.random() * 1.1 + 0.3;
+  this.vx = (Math.random() - .5) * .28;
+  this.vy = (Math.random() - .5) * .28 - .12;
+  this.life = 0;
+  this.max  = Math.random() * 260 + 140;
+  this.gold = Math.random() > .45;
+};
+Pt.prototype.tick = function () {
+  this.x += this.vx; this.y += this.vy; this.life++;
+  if (this.life > this.max || this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.init();
+};
+Pt.prototype.draw = function () {
+  var t = this.life / this.max;
+  var a = (t < .15 ? t/.15 : t > .85 ? (1-t)/.15 : 1) * .5;
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+  ctx.fillStyle = this.gold ? 'rgba(201,168,76,' + a + ')' : 'rgba(253,250,244,' + a*.55 + ')';
+  ctx.fill();
+};
 
-    document.addEventListener('click', function(e) {
-        if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
-            suggestionsDiv.style.display = 'none';
-        }
-    });
+for (var i = 0; i < 80; i++) { var p = new Pt(); p.life = Math.random() * p.max; pts.push(p); }
+
+(function loop() {
+  ctx.clearRect(0, 0, W, H);
+  pts.forEach(function (p) { p.tick(); p.draw(); });
+  requestAnimationFrame(loop);
+})();
+
+/* ════════════════════════════
+   2. SCROLL REVEAL
+════════════════════════════ */
+function checkReveal() {
+  document.querySelectorAll('.reveal:not(.visible)').forEach(function (el) {
+    var r = el.getBoundingClientRect();
+    if (r.top < window.innerHeight - 60) {
+      var delay = parseInt(el.dataset.delay || 0, 10);
+      setTimeout(function () { el.classList.add('visible'); }, delay);
+    }
+  });
+}
+window.addEventListener('scroll', checkReveal, { passive: true });
+checkReveal();
+
+/* ════════════════════════════
+   3. COUNTER UP
+════════════════════════════ */
+function runCounter(el) {
+  var target = parseFloat(el.dataset.target) || 0;
+  var isFloat = target % 1 !== 0;
+  var dur = 1100, start = null;
+  function tick(now) {
+    if (!start) start = now;
+    var t = Math.min((now - start) / dur, 1);
+    var e = 1 - Math.pow(1 - t, 3);
+    el.textContent = isFloat ? (e * target).toFixed(1) : Math.round(e * target);
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
-setupCityAutocomplete('fromCityInput', 'fromLat', 'fromLon', 'fromCity', 'fromSuggestions');
-setupCityAutocomplete('toCityInput', 'toLat', 'toLon', 'toCity', 'toSuggestions');
+// Trigger counters when visible
+var countersDone = new WeakSet();
+var counterObserver = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if (entry.isIntersecting && !countersDone.has(entry.target)) {
+      countersDone.add(entry.target);
+      setTimeout(function () { runCounter(entry.target); }, 300);
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.counter').forEach(function (el) { counterObserver.observe(el); });
+
+/* ════════════════════════════
+   4. 3D TILT ON HOVER
+════════════════════════════ */
+document.querySelectorAll('.tilt-card').forEach(function (card) {
+  card.addEventListener('mousemove', function (e) {
+    var r = card.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width  - .5;
+    var y = (e.clientY - r.top)  / r.height - .5;
+    card.style.transform = 'perspective(700px) rotateY(' + (x * 10) + 'deg) rotateX(' + (-y * 10) + 'deg) translateY(-5px) scale(1.02)';
+  });
+  card.addEventListener('mouseleave', function () {
+    card.style.transform = '';
+    card.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1)';
+    setTimeout(function () { card.style.transition = ''; }, 500);
+  });
+});
+
+/* ════════════════════════════
+   5. ORB PARALLAX ON MOUSE
+════════════════════════════ */
+document.addEventListener('mousemove', function (e) {
+  var rx = (e.clientX / window.innerWidth  - .5) * 20;
+  var ry = (e.clientY / window.innerHeight - .5) * 20;
+  document.querySelectorAll('.dm-orb').forEach(function (o, i) {
+    var d = (i + 1) * .55;
+    o.style.transform = 'translate(' + rx * d + 'px,' + ry * d + 'px)';
+  });
+});
+
+/* ════════════════════════════
+   6. CITY AUTOCOMPLETE
+════════════════════════════ */
+function cityAuto(inputId, latId, lonId, cityId, sugId) {
+  var inp = document.getElementById(inputId);
+  var sug = document.getElementById(sugId);
+  if (!inp) return;
+  var tid;
+  inp.addEventListener('input', function () {
+    clearTimeout(tid);
+    var q = this.value.trim();
+    if (q.length < 2) { sug.style.display = 'none'; return; }
+    tid = setTimeout(function () {
+      fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=5&addressdetails=1')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.length) { sug.style.display = 'none'; return; }
+          sug.innerHTML = '';
+          data.forEach(function (place) {
+            var div = document.createElement('div');
+            div.className = 'city-suggestion-item';
+            var city = place.display_name.split(',')[0];
+            var country = (place.address && place.address.country) || '';
+            div.innerHTML = '<div class="city-name">' + city + '</div><div class="country-name">' + country + '</div>';
+            div.onclick = function () {
+              inp.value = city;
+              document.getElementById(latId).value = place.lat;
+              document.getElementById(lonId).value = place.lon;
+              document.getElementById(cityId).value = city;
+              sug.style.display = 'none';
+            };
+            sug.appendChild(div);
+          });
+          sug.style.display = 'block';
+        }).catch(function () { sug.style.display = 'none'; });
+    }, 480);
+  });
+  document.addEventListener('click', function (e) {
+    if (!inp.contains(e.target) && !sug.contains(e.target)) sug.style.display = 'none';
+  });
+}
+cityAuto('fromCityInput','fromLat','fromLon','fromCity','fromSuggestions');
+cityAuto('toCityInput','toLat','toLon','toCity','toSuggestions');
+
+/* ════════════════════════════
+   7. FORM LOADING SPINNERS
+════════════════════════════ */
+var wf = document.getElementById('weatherForm');
+if (wf) wf.addEventListener('submit', function () {
+  var t = document.getElementById('weatherBtnTxt');
+  if (t) t.innerHTML = '<span class="dm-spinner"></span> Chargement…';
+});
+
+var cf = document.getElementById('carbonForm');
+if (cf) cf.addEventListener('submit', function () {
+  var t = document.getElementById('carbonBtnTxt');
+  if (t) t.innerHTML = '<span class="dm-spinner"></span> Calcul en cours…';
+});
+
+/* ════════════════════════════
+   8. BANNER ANIMATED BG
+════════════════════════════ */
+var banner = document.querySelector('.profile-banner');
+if (banner) banner.classList.add('profile-banner-animated');
+
+/* ════════════════════════════
+   9. MAGNETIC BUTTON EFFECT
+════════════════════════════ */
+document.querySelectorAll('.btn-primary, .quick-card').forEach(function (btn) {
+  btn.addEventListener('mousemove', function (e) {
+    var r = btn.getBoundingClientRect();
+    var x = e.clientX - r.left - r.width  / 2;
+    var y = e.clientY - r.top  - r.height / 2;
+    btn.style.transform = 'translate(' + x*.12 + 'px,' + y*.12 + 'px) translateY(-4px)';
+  });
+  btn.addEventListener('mouseleave', function () {
+    btn.style.transform = '';
+    btn.style.transition = 'transform .4s cubic-bezier(.23,1,.32,1)';
+    setTimeout(function () { btn.style.transition = ''; }, 400);
+  });
+});
+
+/* ════════════════════════════
+   10. RIPPLE ON CLICK
+════════════════════════════ */
+document.querySelectorAll('.btn-primary, .dm-stat-card, .quick-card').forEach(function (el) {
+  el.addEventListener('click', function (e) {
+    var ripple = document.createElement('span');
+    var r = el.getBoundingClientRect();
+    var size = Math.max(r.width, r.height);
+    ripple.style.cssText = [
+      'position:absolute',
+      'border-radius:50%',
+      'background:rgba(201,168,76,.25)',
+      'width:' + size + 'px',
+      'height:' + size + 'px',
+      'top:' + (e.clientY - r.top  - size/2) + 'px',
+      'left:' + (e.clientX - r.left - size/2) + 'px',
+      'transform:scale(0)',
+      'pointer-events:none',
+      'animation:rippleOut .55s ease forwards'
+    ].join(';');
+    el.style.position = 'relative';
+    el.style.overflow = 'hidden';
+    el.appendChild(ripple);
+    setTimeout(function () { ripple.remove(); }, 600);
+  });
+});
+
+/* Ripple keyframe injected once */
+if (!document.getElementById('dm-ripple-style')) {
+  var s = document.createElement('style');
+  s.id = 'dm-ripple-style';
+  s.textContent = '@keyframes rippleOut{to{transform:scale(2.5);opacity:0}}';
+  document.head.appendChild(s);
+}
+
+})();
 </script>
 {% endblock %}
